@@ -189,25 +189,10 @@
                         </div>
                     </div>
 
-                    <!-- HỒ SƠ PHÉP NĂM LƯU TỪ SQLITE -->
-                    <div class="stat-card">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="small text-secondary fw-semibold"><i class="fa-solid fa-calendar-check text-primary me-1"></i> Hồ sơ phép năm:</span>
-                            <span class="badge bg-primary bg-opacity-10 text-primary" id="badgeDept">Phòng Ban</span>
-                        </div>
-                        <div class="d-flex justify-content-between mt-2 pt-2 border-top border-light-subtle text-center">
-                            <div>
-                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Tiêu chuẩn</div>
-                                <div class="fw-bold text-dark" id="statTotal">-- ngày</div>
-                            </div>
-                            <div>
-                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Đã nghỉ</div>
-                                <div class="fw-bold text-warning text-dark" id="statUsed">-- ngày</div>
-                            </div>
-                            <div>
-                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Còn lại</div>
-                                <div class="fw-bold text-success fs-6" id="statRemain">-- ngày</div>
-                            </div>
+                    <!-- HỒ SƠ ĐỊNH DANH & CHỈ SỐ THÍCH ỨNG THEO SCHEMA -->
+                    <div id="dynamicProfileCardContainer" class="stat-card">
+                        <div class="text-center py-2 text-secondary small">
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải thông tin hồ sơ...
                         </div>
                     </div>
 
@@ -300,6 +285,44 @@
             `;
         }
 
+        let tenantUiSchema = null;
+
+        function safeEvalFormulaJs(formula, values) {
+            if (!formula || typeof formula !== 'string') return 0;
+            const clean = formula.trim();
+            if (!/^[a-zA-Z0-9_+\-/*().\s]+$/.test(clean)) return 0;
+            const tokens = clean.match(/[a-zA-Z_][a-zA-Z0-9_]*|[0-9]+(?:\.[0-9]+)?|[+\-/*()]/g) || [];
+            let expr = '';
+            for (const tok of tokens) {
+                if ('+-/*()'.includes(tok) || /^[0-9]+(?:\.[0-9]+)?$/.test(tok)) {
+                    expr += tok;
+                } else {
+                    const val = parseFloat(values[tok]) || 0;
+                    expr += val;
+                }
+            }
+            try {
+                const fn = new Function('"use strict"; return (' + expr + ');');
+                const res = fn();
+                return Number.isFinite(res) ? (res === Math.floor(res) ? res : Math.round(res * 100) / 100) : 0;
+            } catch (e) {
+                return 0;
+            }
+        }
+
+        async function loadTenantUiSchema() {
+            try {
+                const tid = currentUser.tenant_id || 'VF';
+                const res = await fetch(`/api/tenants/ui_schema?tenant_id=${tid}`);
+                if (res.ok) {
+                    tenantUiSchema = await res.json();
+                }
+            } catch (err) {
+                console.error("Lỗi nạp UI Schema:", err);
+            }
+            updateProfileUI();
+        }
+
         async function fetchUserData() {
             try {
                 const res = await fetch(`/api/users/${currentUser.id}`);
@@ -311,21 +334,112 @@
             } catch (e) {
                 console.error("Không thể kết nối API users:", e);
             }
-            updateProfileUI();
+            if (!tenantUiSchema) {
+                await loadTenantUiSchema();
+            } else {
+                updateProfileUI();
+            }
+        }
+
+        function getUserResolvedAttributes() {
+            const attrs = {};
+            if (currentUser.attributes) {
+                if (typeof currentUser.attributes === 'string') {
+                    try { Object.assign(attrs, JSON.parse(currentUser.attributes)); } catch(e) {}
+                } else if (typeof currentUser.attributes === 'object') {
+                    Object.assign(attrs, currentUser.attributes);
+                }
+            }
+            attrs.total_leave_days = currentUser.total_leave_days || 12;
+            attrs.used_leave_days = currentUser.used_leave_days || 0;
+            attrs.tenure_months = currentUser.tenure_months || 12;
+            attrs.credits_total = attrs.credits_total || currentUser.total_leave_days || 120;
+            attrs.credits_done = attrs.credits_done || currentUser.used_leave_days || 45;
+            attrs.coverage_limit = attrs.coverage_limit || 100;
+            attrs.used_coverage = attrs.used_coverage || 20;
+            return attrs;
         }
 
         function updateProfileUI() {
-            const remain = (currentUser.total_leave_days || 0) - (currentUser.used_leave_days || 0);
-            document.getElementById('statTotal').innerText = `${currentUser.total_leave_days || 0} ngày`;
-            document.getElementById('statUsed').innerText = `${currentUser.used_leave_days || 0} ngày`;
-            document.getElementById('statRemain').innerText = `${remain} ngày`;
+            const schema = tenantUiSchema || {
+                profile_card: {
+                    title: 'Hồ sơ nhân sự & Chế độ',
+                    scope_label: 'Phòng ban',
+                    metrics: [
+                        { key: 'total_leave_days', label: 'Tiêu chuẩn', unit: 'ngày' },
+                        { key: 'used_leave_days', label: 'Đã nghỉ', unit: 'ngày' },
+                        { key: 'leave_remain', label: 'Khả dụng', unit: 'ngày', formula: 'total_leave_days - used_leave_days' }
+                    ]
+                },
+                terms: { user: 'Nhân viên', request: 'Đơn xin nghỉ phép', admin: 'Quản lý nhân sự' }
+            };
 
-            document.getElementById('empName').innerText = currentUser.full_name;
-            document.getElementById('welcomeEmpName').innerText = currentUser.full_name;
-            document.getElementById('empDept').innerText = `Phòng: ${currentUser.department} (${currentUser.role})`;
-            document.getElementById('badgeDept').innerText = currentUser.department;
-            document.getElementById('portalTenantBadge').innerText = `Doanh nghiệp: ${currentUser.tenant_id || 'FPT'}`;
-            document.getElementById('portalHeaderTitle').innerText = `${currentUser.tenant_id || 'Enterprise'} Employee Portal`;
+            const userAttrs = getUserResolvedAttributes();
+            const pcard = schema.profile_card || {};
+            const terms = schema.terms || {};
+
+            // Dynamic header texts
+            const tenantTitle = currentUser.tenant_id || 'Enterprise';
+            document.getElementById('portalHeaderTitle').textContent = `${tenantTitle} ${terms.user || 'User'} Portal`;
+            document.getElementById('portalTenantBadge').textContent = `Tổ chức: ${tenantTitle}`;
+            document.getElementById('empName').textContent = currentUser.full_name || 'Người dùng';
+            document.getElementById('welcomeEmpName').textContent = currentUser.full_name || 'Người dùng';
+            document.getElementById('empDept').textContent = `${pcard.scope_label || 'Phòng'}: ${currentUser.department || 'All'} (${currentUser.role || 'EMPLOYEE'})`;
+
+            // Dynamic Profile Card rendering safely
+            const cardContainer = document.getElementById('dynamicProfileCardContainer');
+            if (cardContainer) {
+                cardContainer.innerHTML = '';
+
+                // Header row
+                const headDiv = document.createElement('div');
+                headDiv.className = 'd-flex justify-content-between align-items-center mb-2';
+
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'small text-secondary fw-semibold';
+                titleSpan.innerHTML = '<i class="fa-solid fa-id-card text-primary me-1"></i> ';
+                titleSpan.appendChild(document.createTextNode(pcard.title || 'Hồ sơ người dùng'));
+
+                const badgeSpan = document.createElement('span');
+                badgeSpan.className = 'badge bg-primary bg-opacity-10 text-primary';
+                badgeSpan.textContent = currentUser.department || 'General';
+
+                headDiv.appendChild(titleSpan);
+                headDiv.appendChild(badgeSpan);
+                cardContainer.appendChild(headDiv);
+
+                // Metrics row
+                const metricsRow = document.createElement('div');
+                metricsRow.className = 'd-flex justify-content-between mt-2 pt-2 border-top border-light-subtle text-center';
+
+                const metrics = pcard.metrics || [];
+                metrics.slice(0, 3).forEach((m, idx) => {
+                    const col = document.createElement('div');
+                    
+                    const labelDiv = document.createElement('div');
+                    labelDiv.className = 'text-secondary';
+                    labelDiv.style.fontSize = '0.7rem';
+                    labelDiv.style.fontWeight = '600';
+                    labelDiv.textContent = m.label || `Chỉ số ${idx+1}`;
+
+                    let val = 0;
+                    if (m.formula) {
+                        val = safeEvalFormulaJs(m.formula, userAttrs);
+                    } else if (m.key in userAttrs) {
+                        val = userAttrs[m.key];
+                    }
+
+                    const valDiv = document.createElement('div');
+                    valDiv.className = (idx === 2) ? 'fw-bold text-success fs-6' : ((idx === 1) ? 'fw-bold text-warning text-dark' : 'fw-bold text-dark');
+                    valDiv.textContent = `${val} ${m.unit || ''}`.trim();
+
+                    col.appendChild(labelDiv);
+                    col.appendChild(valDiv);
+                    metricsRow.appendChild(col);
+                });
+
+                cardContainer.appendChild(metricsRow);
+            }
         }
 
         // 2. Định kỳ kiểm tra thông báo Quản lý duyệt đơn
@@ -346,7 +460,9 @@
         function showNotificationToast(notif) {
             const isApproved = notif.status === 'APPROVED';
             const icon = isApproved ? 'fa-circle-check text-success' : 'fa-circle-xmark text-danger';
-            const title = isApproved ? 'ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT!' : 'ĐƠN NGHỈ PHÉP BỊ TỪ CHỐI!';
+            const terms = (tenantUiSchema && tenantUiSchema.terms) || { request: 'Đơn đề nghị', admin: 'Quản lý' };
+            const reqNameUpper = (terms.request || 'ĐƠN ĐỀ NGHỊ').toUpperCase();
+            const title = isApproved ? `${reqNameUpper} ĐÃ ĐƯỢC DUYỆT!` : `${reqNameUpper} BỊ TỪ CHỐI!`;
             const borderColor = isApproved ? '#10b981' : '#ef4444';
 
             const area = document.getElementById('notificationArea');
@@ -359,10 +475,10 @@
                     <button class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
                 </div>
                 <div class="small text-secondary">
-                    • <b>Mã đơn:</b> #${notif.id}<br>
-                    • <b>Số ngày:</b> ${notif.days_requested} ngày (${notif.date_details})<br>
-                    • <b>Trạng thái:</b> ${isApproved ? '<span class="badge bg-success bg-opacity-10 text-success">Đã được Quản lý duyệt</span>' : '<span class="badge bg-danger bg-opacity-10 text-danger">Bị từ chối</span>'}<br>
-                    ${isApproved ? '<b class="text-success">👉 Quỹ ngày phép của bạn đã được cập nhật tự động!</b>' : ''}
+                    • <b>Mã yêu cầu:</b> #${notif.id}<br>
+                    • <b>Chi tiết:</b> ${notif.days_requested} đơn vị (${notif.date_details})<br>
+                    • <b>Trạng thái:</b> ${isApproved ? `<span class="badge bg-success bg-opacity-10 text-success">Đã được ${terms.admin} duyệt</span>` : '<span class="badge bg-danger bg-opacity-10 text-danger">Bị từ chối</span>'}<br>
+                    ${isApproved ? '<b class="text-success">👉 Hồ sơ và chỉ số của bạn đã được cập nhật tự động!</b>' : ''}
                 </div>
             `;
             area.appendChild(toast);
@@ -373,9 +489,9 @@
 
             appendMessage(`
                 <div style="border-left: 3px solid ${isApproved ? '#10b981' : '#ef4444'}; padding-left: 10px;">
-                    🔔 <b>THÔNG BÁO TỪ QUẢN LÝ DOANH NGHIỆP:</b><br>
-                    • Đơn xin nghỉ phép <b>#${notif.id}</b> (${notif.days_requested} ngày) của anh/chị vừa được Quản lý <b>${isApproved ? 'PHÊ DUYỆT THÀNH CÔNG' : 'TỪ CHỐI'}</b>.<br>
-                    ${isApproved ? '• Hệ thống đã tự động cộng số ngày này vào mục <i>"Đã nghỉ"</i> và trừ số ngày phép còn lại trong hồ sơ nhân sự của anh/chị!' : '• Số ngày phép của anh/chị được giữ nguyên.'}
+                    🔔 <b>THÔNG BÁO TỪ ${terms.admin.toUpperCase()} (${currentUser.tenant_id}):</b><br>
+                    • ${terms.request} <b>#${notif.id}</b> của bạn vừa được <b>${isApproved ? 'PHÊ DUYỆT THÀNH CÔNG' : 'TỪ CHỐI'}</b>.<br>
+                    ${isApproved ? '• Hệ thống đã ghi nhận cập nhật vào hồ sơ của bạn!' : '• Các chỉ số của bạn được giữ nguyên.'}
                 </div>
             `);
         }
@@ -463,21 +579,23 @@
                 agentState.leaveData.date = text;
                 agentState.step = 'ready_to_confirm';
 
-                const remain = currentUser.total_leave_days - currentUser.used_leave_days;
+                const terms = (tenantUiSchema && tenantUiSchema.terms) || { user: 'Người dùng', request: 'Đơn đề nghị', admin: 'Cấp thẩm quyền' };
+                const actions = (tenantUiSchema && tenantUiSchema.actions) || [{ label: 'Tạo yêu cầu' }];
+                const actLabel = actions[0] ? actions[0].label : 'Gửi yêu cầu';
+
                 const hitlHtml = `
-                    ⚙️ <i>[Agent đã kiểm tra hồ sơ và tự động điền đơn trình ký]</i><br>
+                    ⚙️ <i>[Agent đã kiểm tra hồ sơ và tự động lập ${terms.request} trình ký]</i><br>
                     <div class="hitl-box">
                         <h6 class="text-danger fw-bold mb-2"><i class="fa-solid fa-shield-halved me-1"></i> XÁC NHẬN BẢO MẬT (Human-In-The-Loop)</h6>
                         <p class="small mb-2">
-                            📋 <b>Chi tiết đơn đề nghị:</b><br>
-                            • Doanh nghiệp: <b>${currentUser.tenant_id}</b><br>
-                            • Nhân viên: <b>${currentUser.full_name}</b> (Phòng: ${currentUser.department})<br>
-                            • Số ngày xin nghỉ: <b>${agentState.leaveData.days} ngày</b><br>
+                            📋 <b>Chi tiết ${terms.request}:</b><br>
+                            • Tổ chức: <b>${currentUser.tenant_id}</b><br>
+                            • ${terms.user}: <b>${currentUser.full_name}</b> (${currentUser.department})<br>
+                            • Số lượng / Định mức: <b>${agentState.leaveData.days} đơn vị</b><br>
                             • Thời gian & Lý do: <b>${agentState.leaveData.date}</b><br>
-                            • Quỹ phép hiện còn: <b>${remain} ngày</b><br>
-                            Anh/chị có xác nhận gửi đơn này tới Quản lý (${currentUser.tenant_id}) phê duyệt không?
+                            Bạn có xác nhận gửi ${terms.request} này tới <b>${terms.admin} (${currentUser.tenant_id})</b> phê duyệt không?
                         </p>
-                        <button class="btn btn-sm btn-success fw-bold me-2" onclick="confirmLeave(true)"><i class="fa-solid fa-check me-1"></i> Xác nhận gửi đơn</button>
+                        <button class="btn btn-sm btn-success fw-bold me-2" onclick="confirmLeave(true)"><i class="fa-solid fa-check me-1"></i> Xác nhận: ${actLabel}</button>
                         <button class="btn btn-sm btn-outline-secondary" onclick="confirmLeave(false)"><i class="fa-solid fa-xmark me-1"></i> Hủy thao tác</button>
                     </div>
                 `;

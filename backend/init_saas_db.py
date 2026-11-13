@@ -16,7 +16,9 @@ def init_clean_saas_db():
             id TEXT PRIMARY KEY,               -- 'VINFAST', 'FPT', 'VIETTEL'
             name TEXT NOT NULL,                -- 'Tập đoàn VinFast'
             contact_email TEXT NOT NULL,
-            plan_type TEXT DEFAULT 'ENTERPRISE', -- 'TRIAL', 'PROFESSIONAL', 'ENTERPRISE'
+            plan_type TEXT DEFAULT 'ENTERPRISE',
+            domain_type TEXT DEFAULT 'ENTERPRISE',
+            ui_schema TEXT DEFAULT NULL
             max_agents INTEGER DEFAULT 10,
             max_employees INTEGER DEFAULT 500,
             is_active INTEGER DEFAULT 1,
@@ -37,6 +39,7 @@ def init_clean_saas_db():
             tenure_months INTEGER DEFAULT 12,
             total_leave_days INTEGER DEFAULT 12,
             used_leave_days INTEGER DEFAULT 0,
+            attributes TEXT DEFAULT '{}',
             is_active INTEGER DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (tenant_id) REFERENCES tenants(id)
