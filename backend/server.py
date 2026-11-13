@@ -13,6 +13,14 @@ if BACKEND_DIR not in sys.path:
 
 from agent_engine import LangGraphAgent
 from mailer import generate_secure_password, send_welcome_credentials_email, EMAIL_LOG_FILE
+from schema_engine import (
+    get_tenant_schema_preset,
+    validate_schema,
+    generate_schema_from_llm,
+    resolve_user_attributes,
+    safe_eval_formula,
+    PRESET_SCHEMAS
+)
 
 PORT = 8000
 FRONTEND_DIR = os.path.abspath(os.path.join(BACKEND_DIR, "..", "frontend"))
@@ -196,11 +204,40 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
                     return self.send_json(lines[-25:])
             return self.send_json([])
 
+        elif path == "/api/tenants/presets":
+            return self.send_json(PRESET_SCHEMAS)
+
+        elif path == "/api/tenants/ui_schema":
+            tenant_id = query.get("tenant_id", [None])[0]
+            if not tenant_id:
+                return self.send_json({"error": "Thiếu tenant_id"}, 400)
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT domain_type, ui_schema FROM tenants WHERE id = ?", (tenant_id,))
+            row = cursor.fetchone()
+            conn.close()
+            if not row:
+                # Trả về preset mặc định nếu chưa lưu trong DB
+                return self.send_json(get_tenant_schema_preset("ENTERPRISE"))
+            
+            domain_type = row["domain_type"] or "ENTERPRISE"
+            raw_schema = row["ui_schema"]
+            if raw_schema:
+                try:
+                    parsed = json.loads(raw_schema)
+                    valid = validate_schema(parsed)
+                    if valid:
+                        return self.send_json(valid)
+                except Exception:
+                    pass
+            preset = get_tenant_schema_preset(domain_type)
+            return self.send_json(preset)
+
         elif path == "/api/tenants":
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT t.id, t.name, t.contact_email, t.plan_type, t.is_active, t.created_at,
+                SELECT t.id, t.name, t.contact_email, t.plan_type, t.domain_type, t.is_active, t.created_at,
                        (SELECT COUNT(*) FROM users u WHERE u.tenant_id = t.id AND u.role = 'EMPLOYEE') as employee_count,
                        (SELECT COUNT(*) FROM agents a WHERE a.tenant_id = t.id) as agent_count
                 FROM tenants t
@@ -218,12 +255,12 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             cursor = conn.cursor()
             if tenant_id and tenant_id != "PLATFORM":
                 cursor.execute("""
-                    SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, is_active 
+                    SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, attributes, is_active 
                     FROM users WHERE tenant_id = ? ORDER BY id ASC
                 """, (tenant_id,))
             else:
                 cursor.execute("""
-                    SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, is_active 
+                    SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, attributes, is_active 
                     FROM users ORDER BY id ASC
                 """)
             rows = [dict(r) for r in cursor.fetchall()]
@@ -236,7 +273,7 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, is_active 
+                SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, attributes, is_active 
                 FROM users WHERE id = ?
             """, (user_id,))
             row = cursor.fetchone()
@@ -385,6 +422,8 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             admin_name = data.get("admin_name", "").strip()
             admin_email = data.get("admin_email", "").strip()
             plan_type = data.get("plan_type", "ENTERPRISE").strip()
+            domain_type = data.get("domain_type", "ENTERPRISE").strip().upper() or "ENTERPRISE"
+            initial_schema = json.dumps(get_tenant_schema_preset(domain_type), ensure_ascii=False)
 
             if not tenant_id or not tenant_name or not admin_email:
                 return self.send_json({"error": "Vui lòng nhập đầy đủ Mã Tenant, Tên công ty và Email Admin"}, 400)
@@ -406,20 +445,26 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
             # 1. Ghi dữ liệu vào CSDL SQLite và COMMIT ĐÓNG KẾT NỐI NGAY LẬP TỨC
             cursor.execute("""
-                INSERT INTO tenants (id, name, contact_email, plan_type)
-                VALUES (?, ?, ?, ?)
-            """, (tenant_id, tenant_name, admin_email, plan_type))
+                INSERT INTO tenants (id, name, contact_email, plan_type, domain_type, ui_schema)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (tenant_id, tenant_name, admin_email, plan_type, domain_type, initial_schema))
 
             admin_display_name = admin_name or f"Admin {tenant_name}"
+            admin_attrs = json.dumps({
+                "total_leave_days": 15,
+                "used_leave_days": 0,
+                "tenure_months": 24
+            }, ensure_ascii=False)
+
             cursor.execute("""
-                INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months)
-                VALUES (?, ?, ?, ?, 'Executive', 'TENANT_ADMIN', 15, 0, 24)
-            """, (tenant_id, admin_email, auto_password, admin_display_name))
+                INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months, attributes)
+                VALUES (?, ?, ?, ?, 'Executive', 'TENANT_ADMIN', 15, 0, 24, ?)
+            """, (tenant_id, admin_email, auto_password, admin_display_name, admin_attrs))
 
             cursor.execute("""
                 INSERT INTO agents (tenant_id, name, description, instruction, department_access)
                 VALUES (?, ?, ?, ?, 'ALL')
-            """, (tenant_id, f"{tenant_name} Assistant", f"Trợ lý AI nội bộ của {tenant_name}", f"Bạn là trợ lý thông minh hỗ trợ nhân viên {tenant_name}."))
+            """, (tenant_id, f"{tenant_name} Assistant", f"Trợ lý AI nội bộ của {tenant_name}", f"Bạn là trợ lý thông minh hỗ trợ {tenant_name}."))
 
             conn.commit()
             conn.close()
@@ -434,9 +479,55 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
             return self.send_json({
                 "success": True, 
-                "message": f"Đã cấp phép bản quyền cho {tenant_name}! Mật khẩu ngẫu nhiên an toàn đã được mã hóa trên Keycloak và gửi tới hòm thư '{admin_email}'.",
+                "message": f"Đã cấp phép bản quyền cho {tenant_name} (Lĩnh vực: {domain_type})! Mật khẩu ngẫu nhiên an toàn đã được mã hóa trên Keycloak và gửi tới hòm thư '{admin_email}'.",
                 "generated_password": auto_password
             })
+
+        # 2b. SCHEMA API: LƯU & CẬP NHẬT UI PROFILE SCHEMA CHO TENANT
+        elif path == "/api/tenants/ui_schema":
+            tenant_id = data.get("tenant_id", "").strip().upper()
+            schema_data = data.get("schema")
+            if not tenant_id:
+                return self.send_json({"error": "Thiếu tenant_id"}, 400)
+            if not schema_data or not isinstance(schema_data, dict):
+                return self.send_json({"error": "Dữ liệu schema không hợp lệ"}, 400)
+            
+            # Giới hạn kích thước (tối đa 50KB)
+            if len(json.dumps(schema_data)) > 50000:
+                return self.send_json({"error": "Kích thước schema vượt quá giới hạn 50KB"}, 400)
+                
+            validated = validate_schema(schema_data)
+            if not validated:
+                return self.send_json({"error": "Cấu trúc UI Profile Schema không hợp lệ hoặc thiếu trường bắt buộc"}, 400)
+                
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM tenants WHERE id = ?", (tenant_id,))
+            if not cursor.fetchone():
+                conn.close()
+                return self.send_json({"error": f"Không tìm thấy tenant '{tenant_id}'"}, 404)
+                
+            cursor.execute("UPDATE tenants SET ui_schema = ?, domain_type = ? WHERE id = ?", (
+                json.dumps(validated, ensure_ascii=False),
+                validated.get("domain_type", "CUSTOM"),
+                tenant_id
+            ))
+            conn.commit()
+            conn.close()
+            return self.send_json({"success": True, "message": "Đã lưu cấu hình giao diện thích ứng thành công!", "schema": validated})
+
+        # 2c. SCHEMA API: AI TỰ ĐỘNG SINH UI PROFILE SCHEMA BẰNG LLM
+        elif path == "/api/tenants/generate_schema":
+            tenant_id = data.get("tenant_id", "").strip().upper()
+            description = data.get("description", "").strip()
+            sample_text = data.get("sample_text", "").strip()
+            domain_type = data.get("domain_type", "CUSTOM").strip()
+            
+            if not description and not sample_text:
+                return self.send_json({"error": "Vui lòng nhập mô tả nghiệp vụ hoặc nạp văn bản mẫu"}, 400)
+                
+            generated = generate_schema_from_llm(description, sample_text, domain_type)
+            return self.send_json({"success": True, "schema": generated})
 
         # 3. CẤP 2: ADMIN TẠO NHÂN VIÊN HÀNG LOẠT (BULK IMPORT EMPLOYEES)
         elif path == "/api/users/bulk":
@@ -458,16 +549,37 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
                 if len(parts) >= 2:
                     full_name = parts[0]
                     email = parts[1]
-                    dept = parts[2] if len(parts) >= 3 else "Production"
+                    dept = parts[2] if len(parts) >= 3 else "General"
                     total_leave = int(parts[3]) if len(parts) >= 4 and parts[3].isdigit() else 12
                     tenure = int(parts[4]) if len(parts) >= 5 and parts[4].isdigit() else 12
+
+                    # Phân giải thuộc tính linh hoạt (tương thích cả Enterprise, Education, Healthcare)
+                    attrs = {
+                        "total_leave_days": total_leave,
+                        "used_leave_days": 0,
+                        "tenure_months": tenure,
+                        "credits_total": total_leave,
+                        "credits_done": tenure,
+                        "coverage_limit": total_leave,
+                        "used_coverage": tenure
+                    }
+                    if len(parts) >= 6:
+                        for extra in parts[5:]:
+                            if "=" in extra:
+                                k, v = extra.split("=", 1)
+                                k, v = k.strip(), v.strip()
+                                try:
+                                    attrs[k] = float(v) if "." in v else int(v)
+                                except ValueError:
+                                    attrs[k] = v
+                    attrs_json = json.dumps(attrs, ensure_ascii=False)
 
                     try:
                         auto_pass = generate_secure_password(10)
                         cursor.execute("""
-                            INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months)
-                            VALUES (?, ?, ?, ?, ?, 'EMPLOYEE', ?, 0, ?)
-                        """, (tenant_id, email, auto_pass, full_name, dept, total_leave, tenure))
+                            INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months, attributes)
+                            VALUES (?, ?, ?, ?, ?, 'EMPLOYEE', ?, 0, ?, ?)
+                        """, (tenant_id, email, auto_pass, full_name, dept, total_leave, tenure, attrs_json))
                         created_count += 1
                         users_to_sync.append((email, auto_pass, full_name, dept))
                     except sqlite3.IntegrityError:
@@ -512,10 +624,25 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             conn = get_db()
             cursor = conn.cursor()
             try:
+                attrs_data = data.get("attributes", {})
+                if isinstance(attrs_data, str):
+                    try:
+                        attrs_data = json.loads(attrs_data)
+                    except Exception:
+                        attrs_data = {}
+                if not isinstance(attrs_data, dict):
+                    attrs_data = {}
+                attrs_data.setdefault("total_leave_days", total_leave_days)
+                attrs_data.setdefault("used_leave_days", 0)
+                attrs_data.setdefault("tenure_months", tenure_months)
+                attrs_data.setdefault("credits_total", total_leave_days)
+                attrs_data.setdefault("credits_done", tenure_months)
+                attrs_json = json.dumps(attrs_data, ensure_ascii=False)
+
                 cursor.execute("""
-                    INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)
-                """, (tenant_id, email, auto_pass, full_name, department, role, total_leave_days, tenure_months))
+                    INSERT INTO users (tenant_id, email, hashed_password, full_name, department, role, total_leave_days, used_leave_days, tenure_months, attributes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+                """, (tenant_id, email, auto_pass, full_name, department, role, total_leave_days, tenure_months, attrs_json))
                 new_id = cursor.lastrowid
                 conn.commit()
                 conn.close()

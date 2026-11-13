@@ -307,6 +307,15 @@
                             <option value="TRIAL">Trial (30 Ngày)</option>
                         </select>
                     </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Lĩnh Vực</label>
+                        <select id="newDomainType" class="form-select">
+                            <option value="ENTERPRISE">🏢 Doanh Nghiệp</option>
+                            <option value="EDUCATION">🎓 Giáo Dục (Đại học)</option>
+                            <option value="HEALTHCARE">🏥 Y Tế (Bệnh viện)</option>
+                            <option value="CUSTOM">⚡ Tùy Biến (AI Auto)</option>
+                        </select>
+                    </div>
                     <div class="col-md-4">
                         <label class="form-label">Email Admin Bàn Giao (Nhận Mật Khẩu)</label>
                         <input type="email" id="newAdminEmail" class="form-control" placeholder="admin@viettel.vn" required>
@@ -468,10 +477,12 @@
 
                     const deleteBtn = `<button class="btn-shadcn btn-shadcn-danger" onclick="deleteTenant('${t.id}', '${t.name}')" title="Xóa toàn bộ doanh nghiệp này"><i class="fa-regular fa-trash-can me-1"></i>Xóa</button>`;
 
+                    const domainBadge = t.domain_type === 'EDUCATION' ? '🎓 Giáo Dục' : (t.domain_type === 'HEALTHCARE' ? '🏥 Y Tế' : '🏢 Doanh Nghiệp');
+
                     tbody.innerHTML += `
                         <tr>
                             <td><span class="badge-mono">${t.id}</span></td>
-                            <td class="fw-semibold">${t.name}</td>
+                            <td class="fw-semibold">${t.name} <span class="badge bg-light text-dark border ms-1" style="font-size: 11px;">${domainBadge}</span></td>
                             <td class="text-secondary">${t.contact_email}</td>
                             <td><span class="badge-mono">${t.plan_type}</span></td>
                             <td>${t.employee_count}</td>
@@ -492,6 +503,7 @@
             const tid = document.getElementById('newTenantId').value.trim().toUpperCase();
             const tname = document.getElementById('newTenantName').value.trim();
             const plan = document.getElementById('newPlan').value;
+            const domain = document.getElementById('newDomainType').value;
             const aemail = document.getElementById('newAdminEmail').value.trim();
 
             try {
@@ -502,6 +514,7 @@
                         tenant_id: tid,
                         tenant_name: tname,
                         plan_type: plan,
+                        domain_type: domain,
                         admin_email: aemail
                     })
                 });
