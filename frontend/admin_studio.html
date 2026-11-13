@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenDesign Studio — Multi-Tenant AI Agent Workspace</title>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF.js Library for Client-side PDF Parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <script>
+        // ROUTE GUARD: Chỉ TENANT_ADMIN hoặc SUPER_ADMIN mới được vào
+        (function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) {
+                window.location.replace('login.html');
+                return;
+            }
+            if (user.role === 'EMPLOYEE') {
+                alert('⛔ TỪ CHỐI TRUY CẬP: Nhân viên không được vào trang quản trị Studio!');
+                window.location.replace('employee_portal.html');
+            }
+        })();
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg-canvas: #f8fafc;
+            --bg-surface: #ffffff;
+            --border-subtle: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-subtle: #eff6ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* 1. TOP STUDIO APP BAR (OpenDesign Header) */
+        .od-topbar {
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+        }
+
+        .od-brand-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .od-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+
+        /* SEGMENTED TAB NAVIGATION */
+        .od-nav-segmented {
+            display: flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 10px;
+            gap: 2px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .od-nav-item {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            background: transparent;
+            user-select: none;
+        }
+
+        .od-nav-item:hover {
+            color: var(--text-primary);
+        }
+
+        .od-nav-item.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            font-weight: 700;
+        }
+
+        .od-viewport-switch {
+            display: flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 8px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .od-viewport-btn {
+            border: none;
+            background: transparent;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .od-viewport-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 2. MAIN WORKSPACE CONTAINER */
+        .od-workspace {
+            padding: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* CARDS & CONTAINERS */
+        .od-card {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            margin-bottom: 20px;
+            transition: border-color 0.15s;
+        }
+
+        .od-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .od-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .od-card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        /* FORM INPUTS */
+        .form-control, .form-select {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.875rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            color: var(--text-primary);
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        /* 3. VISUAL WORKFLOW CANVAS (LangGraph HyperFrames) */
+        .od-flow-canvas {
+            background: #fafcff;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .od-node {
+            background: #ffffff;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.825rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.04);
+            margin: 6px auto;
+            min-width: 260px;
+            justify-content: center;
+        }
+
+        .od-node-start { border-color: #93c5fd; background: #eff6ff; color: #1e40af; }
+        .od-node-intent { border-color: #a5b4fc; background: #eef2ff; color: #3730a3; }
+        .od-node-rag { border-color: #fed7aa; background: #fff7ed; color: #9a3412; }
+        .od-node-hitl { border-color: #fecdd3; background: #fff1f2; color: #9f1239; }
+        .od-node-end { border-color: #a7f3d0; background: #ecfdf5; color: #065f46; }
+
+        .od-flow-arrow {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin: 2px 0;
+            display: block;
+            text-align: center;
+        }
+
+        /* 4. RIGHT PANEL: LIVE AGENT PLAYGROUND & TRACE LOG */
+        .od-playground {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 108px);
+            position: sticky;
+            top: 84px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .od-playground-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: #fafbfc;
+            border-top-left-radius: 14px;
+            border-top-right-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .od-playground-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+
+        .od-playground-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-subtle);
+            background: #ffffff;
+            border-bottom-left-radius: 14px;
+            border-bottom-right-radius: 14px;
+        }
+
+        .od-trace-log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: #475569;
+            margin-top: 6px;
+        }
+
+        .od-trace-node {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+
+        .od-bubble-bot {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            max-width: 90%;
+            align-self: flex-start;
+        }
+
+        .od-bubble-user {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            max-width: 85%;
+            align-self: flex-end;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        /* TABLES */
+        .table { color: var(--text-primary); }
+        .table thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-subtle);
+            padding: 10px 12px;
+        }
+        .table tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 0.85rem;
+        }
+
+        /* BADGES */
+        .badge-pill-soft {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. TOP STUDIO APP BAR (OpenDesign Architecture) -->
+    <header class="od-topbar">
+        <div class="od-brand-badge">
+            <div class="od-logo"><i class="fa-solid fa-shapes"></i></div>
+            <div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-dark" style="font-size: 0.925rem;" id="tenantTitle">Studio</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle" style="font-size: 0.68rem;" id="tenantPlanBadge">ENTERPRISE</span>
+                </div>
+                <div class="text-secondary" style="font-size: 0.72rem;" id="tenantCode">TENANT: VNG</div>
+            </div>
+        </div>
+
+        <!-- CENTER: SEGMENTED NAVIGATION -->
+        <nav class="od-nav-segmented">
+            <button class="od-nav-item active" onclick="switchOdTab('tab-builder', this)">
+                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Studio Builder
+            </button>
+            <button class="od-nav-item" onclick="switchOdTab('tab-agents', this)">
+                <i class="fa-solid fa-robot"></i> Danh sách Agent
+            </button>
+            <button class="od-nav-item" onclick="switchOdTab('tab-approvals', this)">
+                <i class="fa-solid fa-envelope-open-text text-warning"></i> Duyệt Đơn HITL
+                <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.65rem;" id="pendingCountBadge">0</span>
+            </button>
+            <button class="od-nav-item" onclick="switchOdTab('tab-employees', this)">
+                <i class="fa-solid fa-users text-info"></i> Quản lý Nhân sự
+            </button>
+            <button class="od-nav-item" onclick="switchOdTab('tab-analytics', this)">
+                <i class="fa-solid fa-chart-line text-success"></i> Langfuse Tracing
+            </button>
+        </nav>
+
+        <!-- RIGHT: VIEWPORT & ACTIONS -->
+        <div class="d-flex align-items-center gap-3">
+            <div class="od-viewport-switch d-none d-md-flex">
+                <button class="od-viewport-btn active" title="Desktop Viewport"><i class="fa-solid fa-desktop"></i></button>
+                <button class="od-viewport-btn" title="Tablet Viewport"><i class="fa-solid fa-tablet-screen-button"></i></button>
+                <button class="od-viewport-btn" title="Mobile Viewport"><i class="fa-solid fa-mobile-screen"></i></button>
+            </div>
+            <a href="database_viewer.html" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
+                <i class="fa-solid fa-database text-primary me-1"></i> Database Explorer
+            </a>
+            <div class="d-flex align-items-center gap-2 ps-2 border-start border-light-subtle">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-1 text-center" style="width: 32px; height: 32px; font-size: 0.8rem; line-height: 24px;">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <div class="d-none d-lg-block" style="line-height: 1.1;">
+                    <div class="fw-bold text-dark" style="font-size: 0.8rem;" id="adminName">Admin</div>
+                    <small class="text-secondary" style="font-size: 0.68rem;" id="adminRole">TENANT_ADMIN</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger ms-1 py-1 px-2" onclick="logout()" title="Đăng xuất">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. MAIN WORKSPACE -->
+    <main class="od-workspace">
+        <!-- TAB A: STUDIO BUILDER (CANVAS + LIVE PLAYGROUND COPILOT) -->
+        <div id="tab-builder">
+            <div class="row g-4">
+                <!-- CỘT TRÁI & GIỮA: DESIGN & LOGIC CANVAS (7 COLS) -->
+                <div class="col-xl-8 col-lg-7">
+                    <!-- SECTION 1: SPECIFICATIONS & ACL SECURITY -->
+                    <div class="od-card">
+                        <div class="od-card-header">
+                            <h6 class="od-card-title"><i class="fa-solid fa-sliders text-primary"></i>1. Định Danh & Phân Quyền Truy Cập (ACL Matrix)</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary badge-pill-soft">No-Code Agent Config</span>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-7">
+                                <label class="form-label">Tên Trợ Lý AI (Agent Name)</label>
+                                <input type="text" id="newAgentName" class="form-control" placeholder="Ví dụ: Live-Ops Technical Assistant...">
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">Phòng Ban Truy Cập (ACL Role Guard)</label>
+                                <select id="newAgentDept" class="form-select">
+                                    <option value="ALL">Toàn công ty (Mọi phòng ban)</option>
+                                    <option value="Marketing">Phòng Marketing</option>
+                                    <option value="Accounting">Phòng Kế Toán</option>
+                                    <option value="Production">Phòng Kỹ thuật / Sản xuất</option>
+                                    <option value="Engineering">Phòng Công nghệ (Dev/Ops)</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Mô tả vai trò nghiệp vụ</label>
+                                <input type="text" id="newAgentDesc" class="form-control" placeholder="Mô tả chức năng chính để nhân viên dễ nhận diện...">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">System Instruction (Chỉ dẫn hệ thống chuyên sâu)</label>
+                                <textarea id="newAgentPrompt" class="form-control" rows="3" placeholder="Bạn là trợ lý AI chuyên nghiệp thuộc doanh nghiệp. Nhiệm vụ của bạn là tra cứu quy chế, giải đáp thắc mắc và hỗ trợ nhân viên tuân thủ đúng nội quy..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: VECTOR RAG KNOWLEDGE REPOSITORY -->
+                    <div class="od-card">
+                        <div class="od-card-header">
+                            <h6 class="od-card-title"><i class="fa-solid fa-book-bookmark text-warning"></i>2. Nạp Tri Thức & Tài Liệu Quy Chế (Vector DB 3072-dim)</h6>
+                            <span class="badge bg-warning bg-opacity-15 text-dark badge-pill-soft" id="tenantDocBadge">Độc quyền doanh nghiệp</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Chọn tài liệu đưa vào Vector Search ngữ nghĩa:</label>
+                            <select class="form-select mb-2" id="docSelect">
+                                <option value="">Đang tải danh sách tài liệu...</option>
+                            </select>
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="toggleUploadDocBox()">
+                                <i class="fa-solid fa-file-circle-plus me-1"></i> Nạp thêm văn bản / quy chế nội bộ mới
+                            </button>
+                        </div>
+
+                        <!-- KHUNG THÊM TÀI LIỆU MỚI -->
+                        <!-- KHUNG THÊM TÀI LIỆU MỚI (HỖ TRỢ UPLOAD FILE PDF TRỰC TIẾP) -->
+                        <div id="uploadDocBox" class="p-3 rounded-3 mb-3" style="display: none; background: #ffffff; border: 1.5px dashed #cbd5e1;">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <h6 class="fw-bold text-dark mb-0" style="font-size: 0.9rem;">
+                                    <i class="fa-solid fa-file-pdf text-danger me-1"></i> Tải Lên & Vector Hóa Văn Bản Doanh Nghiệp (PDF, TXT, DOCX)
+                                </h6>
+                                <span class="badge bg-light text-secondary border">Hỗ trợ trích xuất tự động</span>
+                            </div>
+
+                            <!-- VÙNG KÉO THẢ / CHỌN FILE PDF -->
+                            <div id="dropZone" class="text-center p-3 mb-2 rounded-2" 
+                                 style="background: #f8fafc; border: 1px dashed #cbd5e1; cursor: pointer; transition: all 150ms ease;"
+                                 onclick="document.getElementById('pdfFileInput').click()"
+                                 ondragover="event.preventDefault(); this.style.borderColor='#000'; this.style.background='#f1f5f9';"
+                                 ondragleave="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';"
+                                 ondrop="handleFileDrop(event)">
+                                <i class="fa-solid fa-file-arrow-up fs-3 text-secondary mb-1"></i>
+                                <div class="fw-semibold small text-dark">Kéo thả file PDF vào đây hoặc bấm để chọn từ máy tính</div>
+                                <div class="text-muted" style="font-size: 11px;">Hỗ trợ .pdf, .txt, .docx, .md (Tự động trích xuất nội dung toàn bộ các trang)</div>
+                                <input type="file" id="pdfFileInput" accept=".pdf,.txt,.docx,.md" style="display: none;" onchange="handleFileSelect(event)">
+                            </div>
+
+                            <!-- THÔNG BÁO FILE ĐÃ CHỌN -->
+                            <div id="fileUploadStatus" class="alert alert-info py-2 px-3 small d-none align-items-center justify-content-between mb-2">
+                                <div><i class="fa-solid fa-file-pdf text-danger me-2"></i><span id="fileUploadName" class="fw-bold"></span> <span id="fileUploadDetails" class="text-muted ms-2"></span></div>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="clearSelectedFile()"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+
+                            <input type="text" id="newDocName" class="form-control form-control-sm mb-2" placeholder="Tên file hiển thị (ví dụ: Quy_che_Nhan_su_VinFast_2026.pdf)">
+                            <textarea id="newDocContent" class="form-control form-control-sm mb-2" rows="4" placeholder="Nội dung trích xuất từ file PDF sẽ tự động hiển thị ở đây (bạn cũng có thể sửa hoặc bổ sung thêm)..."></textarea>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted" style="font-size: 11px;">
+                                    <i class="fa-solid fa-bolt text-warning me-1"></i>Tự động phân mảnh & Vector hóa 3072 chiều vào RAG Engine
+                                </small>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1" onclick="toggleUploadDocBox()">Hủy</button>
+                                    <button type="button" class="btn btn-sm btn-dark fw-bold" id="btnUploadDoc" onclick="handleSaveNewDoc()">
+                                        <i class="fa-solid fa-upload me-1"></i> Nạp & Vector Hóa Ngay
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOOL TOGGLES -->
+                        <label class="form-label mb-2">Bộ Công Cụ Nghiệp Vụ Tự Động (Agent Tools):</label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2 border rounded bg-light">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" checked id="toolRag">
+                                    <label class="form-check-label small fw-semibold" for="toolRag">Semantic Vector RAG</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2 border rounded bg-light">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" checked id="toolCalc">
+                                    <label class="form-check-label small fw-semibold" for="toolCalc">SQLite Quota Tool</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2 border rounded bg-light">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" checked id="toolHitl">
+                                    <label class="form-check-label small fw-semibold" for="toolHitl">HITL Interrupt Gate</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: VISUAL FLOW GRAPH (HYPERFRAMES) -->
+                    <div class="od-card">
+                        <div class="od-card-header">
+                            <h6 class="od-card-title"><i class="fa-solid fa-diagram-project text-info"></i>3. Sơ Đồ Điều Phối Thực Thi (LangGraph State Flow)</h6>
+                            <button class="btn btn-primary btn-sm fw-bold px-3 shadow-sm" onclick="saveNewAgent()">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Xuất Bản Agent
+                            </button>
+                        </div>
+                        <div class="od-flow-canvas text-center">
+                            <div class="od-node od-node-start"><i class="fa-solid fa-play"></i> Start Node: Nhận Message từ Nhân viên</div>
+                            <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
+                            <div class="od-node od-node-intent"><i class="fa-solid fa-filter"></i> Intent Classifier: Phân Loại Ý Định (Phép / RAG)</div>
+                            <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
+                            <div class="od-node od-node-rag"><i class="fa-solid fa-database"></i> Context Engine: SQLite DB / Vector RAG Search</div>
+                            <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
+                            <div class="od-node od-node-hitl"><i class="fa-solid fa-shield-halved"></i> HITL Gate: Tạm Dừng Chờ Quản Lý Duyệt (Nếu xin nghỉ)</div>
+                            <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
+                            <div class="od-node od-node-end"><i class="fa-solid fa-check-double"></i> Gemini Generator: Trả Lời Trích Dẫn Ngữ Nghĩa</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CỘT PHẢI: OPENDESIGN LIVE COPILOT & TRACE LOG (5 COLS) -->
+                <div class="col-xl-4 col-lg-5">
+                    <div class="od-playground">
+                        <div class="od-playground-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-success bg-opacity-15 text-success p-1" style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size: 0.85rem;">Agent Live Playground</div>
+                                    <small class="text-secondary" style="font-size: 0.7rem;">Kiểm thử & Quan sát Trace thời gian thực</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle" style="font-size: 0.68rem;">
+                                <i class="fa-solid fa-circle fa-2xs me-1"></i>Active Engine
+                            </span>
+                        </div>
+
+                        <div class="od-playground-body" id="playgroundMessages">
+                            <div class="od-bubble-bot">
+                                🤖 <b>OpenDesign Simulator:</b> Xin chào! Tôi đang sẵn sàng chạy thử nghiệm với tài liệu và quy trình nội bộ của doanh nghiệp. Bạn có thể gõ câu hỏi mẫu dưới đây để xem Trace Log hoạt động!
+                            </div>
+                        </div>
+
+                        <!-- TRACE STREAM LOG PREVIEW -->
+                        <div class="px-3 pt-2 pb-0" id="traceContainer" style="display: none;">
+                            <div class="od-trace-log" id="traceLogContent">
+                                <div class="od-trace-node"><i class="fa-solid fa-circle-notch fa-spin text-primary"></i> Đang thực thi LangGraph...</div>
+                            </div>
+                        </div>
+
+                        <div class="od-playground-footer">
+                            <div class="d-flex gap-1 mb-2 overflow-auto pb-1">
+                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi còn bao nhiêu ngày nghỉ?')">Tra cứu phép</button>
+                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Quy định làm việc và trực ca thế nào?')">Quy chế nội bộ</button>
+                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi muốn xin nghỉ 2 ngày')">Lập đơn HITL</button>
+                            </div>
+                            <div class="input-group">
+                                <input type="text" id="playgroundInput" class="form-control" placeholder="Gõ thử nghiệm prompt..." onkeypress="if(event.key === 'Enter') sendPlaygroundMessage()">
+                                <button class="btn btn-primary px-3 fw-bold" onclick="sendPlaygroundMessage()"><i class="fa-solid fa-play"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB B: DANH SÁCH AGENT -->
+        <div id="tab-agents" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark">Danh Sách Trợ Lý AI Doanh Nghiệp</h4>
+                    <p class="text-secondary small mb-0">Các bot chuyên trách đã được lưu vào CSDL và cấp phát cho nhân viên</p>
+                </div>
+                <button class="btn btn-primary fw-bold" onclick="switchOdTab('tab-builder')"><i class="fa-solid fa-plus me-1"></i> Tạo Agent Mới</button>
+            </div>
+            <div class="row g-4" id="agentListContainer"></div>
+        </div>
+
+        <!-- TAB C: DUYỆT ĐƠN NGHỈ PHÉP HITL -->
+        <div id="tab-approvals" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-envelope-open-text text-warning me-2"></i>Hộp Thư Phê Duyệt Đơn Nghỉ Phép</h4>
+                    <p class="text-secondary small mb-0">Các đơn do Bot trình ký từ luồng bảo mật Human-In-The-Loop</p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadApprovals()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
+            </div>
+            <div class="od-card">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>MÃ ĐƠN</th>
+                                <th>NHÂN VIÊN</th>
+                                <th>PHÒNG BAN</th>
+                                <th>SỐ NGÀY</th>
+                                <th>CHI TIẾT LÝ DO</th>
+                                <th>TRẠNG THÁI</th>
+                                <th>THAO TÁC DUYỆT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="approvalTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB D: QUẢN LÝ NHÂN SỰ & BULK PROVISIONING -->
+        <div id="tab-employees" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-users text-primary me-2"></i>Quản Lý Nhân Sự & Cấp Quyền</h4>
+                    <p class="text-secondary small mb-0">Thêm nhân viên hàng loạt, phân quyền phòng ban, sửa hồ sơ hoặc xóa tài khoản</p>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
+            </div>
+
+            <!-- BULK IMPORT BOX -->
+            <div class="od-card border-primary border-opacity-25" style="background-color: #fafcff;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-file-csv me-1"></i>Thêm Nhân Viên Hàng Loạt (Bulk Provisioning)</h6>
+                    <div>
+                        <input type="file" id="bulkCsvInput" accept=".csv,.txt" style="display: none;" onchange="handleBulkFileSelect(event)">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="document.getElementById('bulkCsvInput').click()">
+                            <i class="fa-solid fa-folder-open me-1"></i> Chọn File CSV / TXT
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillSampleBulkUser()">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Điền 1 nhân viên mẫu
+                        </button>
+                    </div>
+                </div>
+                <p class="text-secondary small mb-2">Dán hoặc tải file danh sách nhân viên (Mỗi dòng một người: <code>Họ và Tên, Email, Phòng ban, Ngày phép, Thâm niên</code>)</p>
+                <textarea id="bulkUserText" class="form-control mb-3" rows="3" placeholder="Đỗ Lý Hoàng Nam, dolyhoangnam13072005@gmail.com, Production, 12, 12"></textarea>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-secondary small" style="font-size: 11px;">
+                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Mỗi nhân viên sẽ được sinh mật khẩu ngẫu nhiên riêng biệt, mã hóa trên Keycloak và gửi email bàn giao.
+                    </span>
+                    <button class="btn btn-dark fw-bold" onclick="handleBulkImport()"><i class="fa-solid fa-bolt me-1"></i> Tạo Toàn Bộ Nhân Viên Hàng Loạt</button>
+                </div>
+            </div>
+
+            <!-- TẠO ĐƠN LẺ -->
+            <div class="od-card">
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-plus text-success me-2"></i>Thêm Từng Nhân Viên Đơn Lẻ:</h6>
+                <form id="createSingleUserForm" onsubmit="handleCreateSingleUser(event)">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Họ và Tên</label>
+                            <input type="text" id="singleName" class="form-control" placeholder="Trần Đức Nam" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="singleEmail" class="form-control" placeholder="nam.td@company.vn" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Phòng Ban</label>
+                            <select id="singleDept" class="form-select">
+                                <option value="Marketing">Marketing</option>
+                                <option value="Production">Production (Sản xuất)</option>
+                                <option value="Accounting">Accounting (Kế toán)</option>
+                                <option value="HR">HR (Nhân sự)</option>
+                                <option value="Engineering">Engineering (Kỹ thuật)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Phép Tiêu Chuẩn</label>
+                            <input type="number" id="singleLeave" class="form-control" value="12" min="1">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu User</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- DANH SÁCH NHÂN VIÊN -->
+            <div class="od-card">
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i>Danh Sách Nhân Viên Thuộc Công Ty</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>MÃ NV</th>
+                                <th>HỌ VÀ TÊN</th>
+                                <th>EMAIL</th>
+                                <th>PHÒNG BAN</th>
+                                <th>VAI TRÒ</th>
+                                <th>HỒ SƠ PHÉP NĂM</th>
+                                <th>THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODAL SỬA NHÂN VIÊN -->
+            <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="background-color: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;">
+                        <div class="modal-header border-bottom">
+                            <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh Sửa Thông Tin Nhân Viên</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="editUserId">
+                            <div class="mb-3">
+                                <label class="form-label">Họ và Tên</label>
+                                <input type="text" id="editUserName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="editUserEmail" class="form-control" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Phòng Ban</label>
+                                    <select id="editUserDept" class="form-select">
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Production">Production (Sản xuất)</option>
+                                        <option value="Accounting">Accounting (Kế toán)</option>
+                                        <option value="HR">HR (Nhân sự)</option>
+                                        <option value="Engineering">Engineering (Kỹ thuật)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tiêu chuẩn phép (ngày)</label>
+                                    <input type="number" id="editUserLeave" class="form-control" min="1" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Thâm niên (tháng)</label>
+                                <input type="number" id="editUserTenure" class="form-control" min="0" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Đổi Mật Khẩu (Để trống nếu giữ nguyên)</label>
+                                <input type="text" id="editUserPass" class="form-control" placeholder="Nhập mật khẩu mới nếu muốn đổi...">
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-primary fw-bold" onclick="handleUpdateEmployee()"><i class="fa-solid fa-floppy-disk me-1"></i> Lưu Thay Đổi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB E: LANGFUSE METRICS -->
+        <div id="tab-analytics" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-chart-line text-success me-2"></i>Giám Sát & Đánh Giá Suy Luận (Langfuse)</h4>
+                    <p class="text-secondary small mb-0">Đo lường thời gian thực về P95 Latency, Token Usage và RAG Hallucination Check</p>
+                </div>
+            </div>
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="od-card text-center">
+                        <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem;">Độ trễ TB (P95)</small>
+                        <h2 class="fw-bold text-primary my-2">0.38s</h2>
+                        <small class="text-success fw-semibold"><i class="fa-solid fa-bolt me-1"></i>Phản hồi siêu tốc</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="od-card text-center">
+                        <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem;">Tổng lượt Trace</small>
+                        <h2 class="fw-bold text-dark my-2">1,580</h2>
+                        <small class="text-secondary">Trong 15 ngày qua</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="od-card text-center">
+                        <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem;">Chi phí Token TB</small>
+                        <h2 class="fw-bold text-warning my-2">$0.0002</h2>
+                        <small class="text-secondary">Mỗi lượt tương tác</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="od-card text-center">
+                        <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.72rem;">Độ chính xác RAG</small>
+                        <h2 class="fw-bold text-success my-2">98.4%</h2>
+                        <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Trích dẫn đúng văn bản</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentAdmin = JSON.parse(localStorage.getItem('currentUser')) || {
+            id: 2,
+            full_name: 'Quản Trị Viên',
+            email: 'admin@vinfast.vn',
+            role: 'TENANT_ADMIN',
+            tenant_id: 'VINFAST',
+            tenant_name: 'Tập đoàn VinFast'
+        };
+
+        const myTenant = currentAdmin.tenant_id || 'VINFAST';
+        document.getElementById('tenantTitle').innerText = currentAdmin.tenant_name || `${myTenant} Studio`;
+        document.getElementById('tenantCode').innerText = `TENANT: ${myTenant}`;
+        document.getElementById('adminName').innerText = currentAdmin.full_name;
+        document.getElementById('adminRole').innerText = currentAdmin.role;
+
+        // TAB SWITCHER
+        function switchOdTab(tabId, el) {
+            ['tab-builder', 'tab-agents', 'tab-approvals', 'tab-employees', 'tab-analytics'].forEach(id => {
+                document.getElementById(id).style.display = (id === tabId) ? 'block' : 'none';
+            });
+            document.querySelectorAll('.od-nav-item').forEach(b => b.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            if (tabId === 'tab-agents') loadAgents();
+            if (tabId === 'tab-approvals') loadApprovals();
+            if (tabId === 'tab-employees') loadUsers();
+            if (tabId === 'tab-builder') loadTenantDocuments();
+        }
+
+        // 1. LOAD AGENTS
+        async function loadAgents() {
+            try {
+                const res = await fetch(`/api/agents?tenant_id=${myTenant}`);
+                const agents = await res.json();
+                const container = document.getElementById('agentListContainer');
+                container.innerHTML = '';
+
+                agents.forEach(ag => {
+                    const deptBadge = ag.department_access === 'ALL'
+                        ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1"><i class="fa-solid fa-globe me-1"></i>Toàn công ty</span>'
+                        : `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2 py-1"><i class="fa-solid fa-lock me-1"></i>Chỉ phòng ${ag.department_access}</span>`;
+
+                    container.innerHTML += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="od-card h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="fw-bold text-dark mb-0">${ag.name}</h5>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold">${ag.tenant_id}</span>
+                                    </div>
+                                    <div class="mb-3">${deptBadge}</div>
+                                    <p class="text-secondary small mb-3">${ag.description || 'Trợ lý AI chuyên biệt hỗ trợ quy trình công ty.'}</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center border-top border-light-subtle pt-3 mt-2">
+                                    <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động</small>
+                                    <a href="employee_portal.html" class="btn btn-sm btn-outline-primary fw-semibold"><i class="fa-solid fa-comments me-1"></i>Chat thử</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 2. LOAD APPROVALS
+        async function loadApprovals() {
+            try {
+                const res = await fetch(`/api/leave_requests?tenant_id=${myTenant}`);
+                const list = await res.json();
+                const tbody = document.getElementById('approvalTableBody');
+                const pendingCount = list.filter(r => r.status === 'PENDING').length;
+                document.getElementById('pendingCountBadge').innerText = pendingCount;
+
+                tbody.innerHTML = '';
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">Chưa có đơn xin nghỉ phép nào của nhân viên.</td></tr>';
+                    return;
+                }
+
+                list.forEach(req => {
+                    const statusBadge = req.status === 'PENDING'
+                        ? '<span class="badge bg-warning bg-opacity-20 text-dark border border-warning px-2 py-1"><i class="fa-solid fa-clock me-1"></i>Chờ duyệt</span>'
+                        : req.status === 'APPROVED'
+                        ? '<span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1"><i class="fa-solid fa-circle-check me-1"></i>Đã phê duyệt</span>'
+                        : '<span class="badge bg-danger bg-opacity-10 text-danger border border-danger px-2 py-1"><i class="fa-solid fa-circle-xmark me-1"></i>Đã từ chối</span>';
+
+                    const actionBtns = req.status === 'PENDING'
+                        ? `<button class="btn btn-sm btn-success fw-bold me-1" onclick="handleDecision(${req.id}, 'APPROVED')"><i class="fa-solid fa-check me-1"></i>Duyệt</button>
+                           <button class="btn btn-sm btn-outline-danger" onclick="handleDecision(${req.id}, 'REJECTED')"><i class="fa-solid fa-xmark me-1"></i>Từ chối</button>`
+                        : '<small class="text-secondary"><i class="fa-solid fa-check-double me-1"></i>Đã hoàn tất</small>';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><code>#${req.id}</code></td>
+                            <td class="fw-bold text-dark">${req.user_name}</td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary">${req.department || 'N/A'}</span></td>
+                            <td><b class="text-dark">${req.days_requested} ngày</b></td>
+                            <td class="small text-secondary">${req.date_details}</td>
+                            <td>${statusBadge}</td>
+                            <td>${actionBtns}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleDecision(requestId, decision) {
+            try {
+                const res = await fetch('/api/leave_requests/decision', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ request_id: requestId, decision: decision })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(decision === 'APPROVED' ? `✅ ĐÃ PHÊ DUYỆT ĐƠN #${requestId}!` : `❌ ĐÃ TỪ CHỐI ĐƠN #${requestId}!`);
+                    loadApprovals();
+                    loadUsers();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 3. LOAD EMPLOYEES
+        async function loadUsers() {
+            try {
+                const res = await fetch(`/api/users?tenant_id=${myTenant}`);
+                const users = await res.json();
+                const tbody = document.getElementById('employeeTableBody');
+                tbody.innerHTML = '';
+
+                users.forEach(u => {
+                    const remain = (u.total_leave_days || 0) - (u.used_leave_days || 0);
+                    const roleBadge = u.role === 'TENANT_ADMIN'
+                        ? '<span class="badge bg-warning bg-opacity-20 text-dark fw-bold border border-warning">ADMIN</span>'
+                        : '<span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold">EMPLOYEE</span>';
+
+                    const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
+                    const actionBtns = u.role !== 'TENANT_ADMIN'
+                        ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="openEditEmployeeModal(${userJson})" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square me-1"></i>Sửa</button>
+                           <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteUser(${u.id}, '${u.full_name}')" title="Xóa"><i class="fa-solid fa-trash me-1"></i>Xóa</button>`
+                        : `<button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openEditEmployeeModal(${userJson})" title="Sửa hồ sơ"><i class="fa-solid fa-pen-to-square me-1"></i>Sửa hồ sơ</button>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><code>NV-${String(u.id).padStart(3, '0')}</code></td>
+                            <td class="fw-bold text-dark">${u.full_name}</td>
+                            <td class="text-secondary">${u.email}</td>
+                            <td><span class="badge bg-info bg-opacity-10 text-primary">${u.department}</span></td>
+                            <td>${roleBadge}</td>
+                            <td><span class="badge bg-success bg-opacity-10 text-success fs-6">Còn ${remain} / ${u.total_leave_days || 0} ngày</span></td>
+                            <td>${actionBtns}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        let editModalInstance = null;
+        function openEditEmployeeModal(u) {
+            document.getElementById('editUserId').value = u.id;
+            document.getElementById('editUserName').value = u.full_name;
+            document.getElementById('editUserEmail').value = u.email;
+            document.getElementById('editUserDept').value = u.department || 'Production';
+            document.getElementById('editUserLeave').value = u.total_leave_days || 12;
+            document.getElementById('editUserTenure').value = u.tenure_months || 12;
+            document.getElementById('editUserPass').value = '';
+
+            const modalEl = document.getElementById('editEmployeeModal');
+            editModalInstance = new bootstrap.Modal(modalEl);
+            editModalInstance.show();
+        }
+
+        async function handleUpdateEmployee() {
+            const uid = document.getElementById('editUserId').value;
+            const name = document.getElementById('editUserName').value.trim();
+            const email = document.getElementById('editUserEmail').value.trim();
+            const dept = document.getElementById('editUserDept').value;
+            const leave = document.getElementById('editUserLeave').value;
+            const tenure = document.getElementById('editUserTenure').value;
+            const password = document.getElementById('editUserPass').value.trim();
+
+            if (!name || !email) {
+                alert('Vui lòng nhập họ tên và email!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/users/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: uid,
+                        full_name: name,
+                        email: email,
+                        department: dept,
+                        total_leave_days: leave,
+                        tenure_months: tenure,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`✅ ${data.message}`);
+                    if (editModalInstance) editModalInstance.hide();
+                    loadUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể cập nhật'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        function fillSampleBulkUser() {
+            document.getElementById('bulkUserText').value = 'Đỗ Lâm Trang, tranglam17115@gmail.com, Production, 12, 12';
+        }
+
+        function handleBulkFileSelect(e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                document.getElementById('bulkUserText').value = evt.target.result.trim();
+            };
+            reader.readAsText(file);
+        }
+
+        async function handleBulkImport() {
+            const rawText = document.getElementById('bulkUserText').value.trim();
+            if (!rawText) {
+                alert('Vui lòng dán danh sách nhân viên vào ô trước khi bấm tạo!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/users/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: myTenant,
+                        raw_text: rawText
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`🎉 ${data.message}`);
+                    document.getElementById('bulkUserText').value = '';
+                    loadUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Có lỗi xảy ra'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        async function handleCreateSingleUser(e) {
+            e.preventDefault();
+            const name = document.getElementById('singleName').value.trim();
+            const email = document.getElementById('singleEmail').value.trim();
+            const dept = document.getElementById('singleDept').value;
+            const leave = document.getElementById('singleLeave').value;
+
+            try {
+                const res = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: myTenant,
+                        full_name: name,
+                        email: email,
+                        department: dept,
+                        role: 'EMPLOYEE',
+                        total_leave_days: leave
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`🎉 ${data.message}`);
+                    document.getElementById('createSingleUserForm').reset();
+                    document.getElementById('singleLeave').value = '12';
+                    loadUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Có lỗi xảy ra'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối');
+            }
+        }
+
+        async function deleteUser(userId, name) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa nhân viên "${name}" khỏi danh sách và Keycloak?`)) return;
+            try {
+                const res = await fetch('/api/users/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`✅ Đã xóa nhân viên "${name}" thành công!`);
+                    loadUsers();
+                } else {
+                    alert('Lỗi khi xóa: ' + (data.error || 'Không thể xóa'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        // 4. LOAD DOCUMENTS (ISOLATION)
+        async function loadTenantDocuments() {
+            try {
+                const res = await fetch(`/api/documents?tenant_id=${myTenant}`);
+                const docs = await res.json();
+                const select = document.getElementById('docSelect');
+                const badge = document.getElementById('tenantDocBadge');
+                if (badge) badge.innerText = `Độc quyền ${myTenant}`;
+                select.innerHTML = '';
+
+                if (docs.length === 0) {
+                    select.innerHTML = `<option value="">⚠️ Doanh nghiệp ${myTenant} chưa có văn bản nào (Bấm nạp thêm bên dưới)</option>`;
+                } else {
+                    docs.forEach(d => {
+                        select.innerHTML += `<option value="${d.file_name}">📄 ${d.file_name} (${d.file_size_kb || 4} KB)</option>`;
+                    });
+                }
+            } catch (e) {
+                console.error('Lỗi tải tài liệu:', e);
+            }
+        }
+
+        function toggleUploadDocBox() {
+            const box = document.getElementById('uploadDocBox');
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            const zone = document.getElementById('dropZone');
+            zone.style.borderColor = '#cbd5e1';
+            zone.style.background = '#f8fafc';
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                processUploadedFile(e.dataTransfer.files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            if (e.target.files && e.target.files[0]) {
+                processUploadedFile(e.target.files[0]);
+            }
+        }
+
+        async function processUploadedFile(file) {
+            const fileName = file.name;
+            const fileSizeKb = Math.round(file.size / 1024);
+            document.getElementById('newDocName').value = fileName;
+            
+            const statusBox = document.getElementById('fileUploadStatus');
+            const nameEl = document.getElementById('fileUploadName');
+            const detailsEl = document.getElementById('fileUploadDetails');
+            statusBox.classList.remove('d-none');
+            statusBox.classList.add('d-flex');
+            nameEl.innerText = fileName;
+            detailsEl.innerText = `(${fileSizeKb} KB) • Đang trích xuất nội dung...`;
+
+            if (fileName.toLowerCase().endsWith('.pdf')) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    let fullText = '';
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        const pageText = textContent.items.map(item => item.str).join(' ');
+                        fullText += `--- [Trang ${i}] ---\n` + pageText + '\n\n';
+                    }
+                    document.getElementById('newDocContent').value = fullText.trim();
+                    detailsEl.innerText = `(${fileSizeKb} KB) • Đã trích xuất ${pdf.numPages} trang • Sẵn sàng nạp!`;
+                } catch (err) {
+                    console.error('PDF extract error:', err);
+                    alert('Không thể đọc file PDF. Vui lòng kiểm tra file hoặc dán nội dung vào ô bên dưới!');
+                    detailsEl.innerText = `(${fileSizeKb} KB) • Lỗi đọc PDF`;
+                }
+            } else {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('newDocContent').value = e.target.result;
+                    detailsEl.innerText = `(${fileSizeKb} KB) • Text File • Sẵn sàng nạp!`;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function clearSelectedFile() {
+            const statusBox = document.getElementById('fileUploadStatus');
+            if (statusBox) {
+                statusBox.classList.add('d-none');
+                statusBox.classList.remove('d-flex');
+            }
+            const finput = document.getElementById('pdfFileInput');
+            if (finput) finput.value = '';
+            document.getElementById('newDocName').value = '';
+            document.getElementById('newDocContent').value = '';
+        }
+
+        async function handleSaveNewDoc() {
+            const fname = document.getElementById('newDocName').value.trim();
+            const content = document.getElementById('newDocContent').value.trim();
+
+            if (!fname || !content) {
+                alert('Vui lòng nhập tên file và nội dung quy chế của công ty!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/documents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: myTenant,
+                        file_name: fname,
+                        content: content
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`🎉 ${data.message}`);
+                    document.getElementById('newDocName').value = '';
+                    document.getElementById('newDocContent').value = '';
+                    toggleUploadDocBox();
+                    loadTenantDocuments();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể lưu tài liệu'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        // 5. SAVE NEW AGENT
+        async function saveNewAgent() {
+            const name = document.getElementById('newAgentName').value.trim();
+            const dept = document.getElementById('newAgentDept').value;
+            const desc = document.getElementById('newAgentDesc').value.trim();
+            const prompt = document.getElementById('newAgentPrompt').value.trim();
+
+            if (!name) {
+                alert('Vui lòng nhập tên Agent!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/agents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: myTenant,
+                        name: name,
+                        description: desc || 'Trợ lý nghiệp vụ doanh nghiệp',
+                        instruction: prompt || 'Bạn là trợ lý giải đáp câu hỏi và hướng dẫn quy trình.',
+                        department_access: dept
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(`🎉 Agent "${name}" thuộc công ty ${myTenant} đã được lưu thành công vào CSDL SQLite!`);
+                    switchOdTab('tab-agents');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 6. LIVE AGENT PLAYGROUND & STREAM LOG (OpenDesign Feature)
+        function quickTestPlayground(prompt) {
+            document.getElementById('playgroundInput').value = prompt;
+            sendPlaygroundMessage();
+        }
+
+        async function sendPlaygroundMessage() {
+            const input = document.getElementById('playgroundInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const box = document.getElementById('playgroundMessages');
+            box.innerHTML += `<div class="od-bubble-user">${text}</div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            // Show stream trace log
+            const traceContainer = document.getElementById('traceContainer');
+            const traceLog = document.getElementById('traceLogContent');
+            traceContainer.style.display = 'block';
+            traceLog.innerHTML = `
+                <div class="od-trace-node"><i class="fa-solid fa-play text-primary"></i> [1/4] Nhận yêu cầu: <i>"${text.slice(0, 30)}..."</i></div>
+                <div class="od-trace-node"><i class="fa-solid fa-filter text-info"></i> [2/4] Intent Classifier đang phân loại...</div>
+            `;
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentAdmin.id,
+                        agent_name: 'AI Policy Assistant',
+                        message: text
+                    })
+                });
+
+                const data = await res.json();
+
+                traceLog.innerHTML = `
+                    <div class="od-trace-node text-success"><i class="fa-solid fa-check"></i> [State Graph] Intent: <b>${data.intent}</b> | Latency: <b>${data.latency}s</b></div>
+                    <div class="od-trace-node text-primary"><i class="fa-solid fa-quote-left"></i> Source: <b>${data.citation || 'Cơ sở dữ liệu nội bộ'}</b></div>
+                `;
+
+                box.innerHTML += `
+                    <div class="od-bubble-bot">
+                        ${data.reply}
+                        <div class="mt-2 pt-2 border-top border-light-subtle small text-secondary" style="font-size: 0.72rem;">
+                            <i class="fa-solid fa-quote-left text-primary me-1"></i> ${data.citation}
+                        </div>
+                    </div>
+                `;
+                box.scrollTop = box.scrollHeight;
+            } catch (e) {
+                traceLog.innerHTML = `<div class="text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối AI Engine</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
+            window.location.href = `http://localhost:8080/realms/mini-agent-platform/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}&client_id=mini-agent-studio-app`;
+        }
+
+        loadAgents();
+        loadApprovals();
+        loadUsers();
+        loadTenantDocuments();
+    </script>
+</body>
+</html>

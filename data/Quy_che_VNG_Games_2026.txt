@@ -1,0 +1,19 @@
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+---
+CÔNG TY CỔ PHẦN VNG - KHỐI DỊCH VỤ TRÒ CHƠI TRỰC TUYẾN (VNG GAMES)
+
+QUY CHẾ VẬN HÀNH DỰ ÁN GAME VÀ NỘI QUY BẢO MẬT PHÁT HÀNH 2026
+
+ĐIỀU 1: THỜI GIAN LÀM VIỆC VÀ TRỰC VẬN HÀNH SERVER (LIVE-OPS)
+1. Giờ làm việc tiêu chuẩn:
+- 09:00 - 18:00 (Thứ 2 đến Thứ 6). Nghỉ trưa từ 12:00 đến 13:30.
+2. Trực vận hành game (On-call):
+- Đội ngũ Live-ops và Server Engineer trực luân phiên theo ca trong các đợt phát hành phiên bản mới (Game Update/Launch) và được hưởng 200% phụ cấp ca đêm.
+
+ĐIỀU 2: BẢO MẬT MÃ NGUỒN VÀ DỮ LIỆU GAME (TUYỆT MẬT)
+- Toàn bộ source code, chỉ số kinh tế ingame (Economy Model) và tỉ lệ gacha phải được bảo mật tuyệt đối. Nhân viên làm rò rỉ sẽ bị chấm dứt hợp đồng lao động ngay lập tức.
+
+ĐIỀU 3: CHẾ ĐỘ NGHỈ PHÉP NĂM VÀ NGHỈ XẢ HƠI (REST & RELAX)
+- Tiêu chuẩn phép năm: 14 ngày phép/năm hưởng nguyên lương.
+- Sau mỗi đợt "Crunch time" ra mắt sản phẩm thành công, toàn bộ team dự án được cấp thêm 2 ngày nghỉ phép thưởng (Game Release Leave).

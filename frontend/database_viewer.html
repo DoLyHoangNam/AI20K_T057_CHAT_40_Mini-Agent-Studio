@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Explorer — Multi-Tenant SQLite Browser</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 32px 40px;
+        }
+        .card-custom {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+        .table thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 12px 14px;
+        }
+        .table tbody td {
+            padding: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f8fafc;
+        }
+        .badge-tenant {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            font-weight: 700;
+            border-radius: 6px;
+        }
+        pre {
+            background: #f1f5f9;
+            padding: 14px;
+            border-radius: 10px;
+            color: #0369a1;
+            font-size: 0.85rem;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid max-w-7xl">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light-subtle">
+            <div>
+                <h3 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-database text-primary me-2"></i>Trình Xem Dữ Liệu Thực Tế (Database Explorer)</h3>
+                <p class="text-secondary small mb-0 fw-medium">File CSDL SQLite thực tế: <code>D:\mini-agent-studio\backend\database.db</code> • Cập nhật Real-Time</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-primary me-2 fw-semibold" onclick="loadAllData()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
+                <a href="login.html" class="btn btn-outline-secondary me-2 fw-semibold"><i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập</a>
+                <a href="super_admin.html" class="btn btn-danger me-2 fw-semibold"><i class="fa-solid fa-shield-halved me-1"></i> Super Admin</a>
+                <a href="admin_studio.html" class="btn btn-primary fw-semibold"><i class="fa-solid fa-sliders me-1"></i> Tenant Studio</a>
+            </div>
+        </div>
+
+        <!-- 1. BẢNG TENANTS -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-building text-warning me-2"></i>1. Bảng <code>tenants</code> (Doanh nghiệp & Gói bản quyền)</h5>
+                <span class="badge bg-warning bg-opacity-20 text-dark fw-bold border border-warning-subtle" id="countTenants">-- bản ghi</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>MÃ TENANT</th>
+                            <th>TÊN DOANH NGHIỆP</th>
+                            <th>EMAIL ADMIN</th>
+                            <th>GÓI BẢN QUYỀN</th>
+                            <th>NGÀY TẠO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tenantsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. BẢNG USERS -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-users text-primary me-2"></i>2. Bảng <code>users</code> (Hồ sơ Nhân sự & Phân lập Tenant)</h5>
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" id="countUsers">-- bản ghi</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TENANT</th>
+                            <th>HỌ VÀ TÊN</th>
+                            <th>EMAIL</th>
+                            <th>VAI TRÒ</th>
+                            <th>PHÒNG BAN</th>
+                            <th>THÂM NIÊN</th>
+                            <th>TIÊU CHUẨN</th>
+                            <th>ĐÃ NGHỈ</th>
+                            <th>CÒN LẠI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. BẢNG DOCUMENTS -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-book text-info me-2"></i>3. Bảng <code>documents</code> (Tài liệu Tri thức & Vector RAG cô lập)</h5>
+                <span class="badge bg-info bg-opacity-15 text-primary fw-bold" id="countDocs">-- bản ghi</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TENANT</th>
+                            <th>TÊN FILE TÀI LIỆU</th>
+                            <th>ĐƯỜNG DẪN LƯU TRỮ</th>
+                            <th>DUNG LƯỢNG</th>
+                        </tr>
+                    </thead>
+                    <tbody id="docsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. BẢNG AGENTS -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-robot text-success me-2"></i>4. Bảng <code>agents</code> (Danh sách Trợ lý AI theo Tenant)</h5>
+                <span class="badge bg-success bg-opacity-10 text-success fw-bold" id="countAgents">-- bản ghi</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TENANT</th>
+                            <th>TÊN AGENT</th>
+                            <th>PHÂN QUYỀN ACL</th>
+                            <th>MÔ TẢ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agentsBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. BẢNG LEAVE_REQUESTS -->
+        <div class="card-custom">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-calendar-check text-danger me-2"></i>5. Bảng <code>leave_requests</code> (Đơn xin nghỉ & Phê duyệt HITL)</h5>
+                <span class="badge bg-danger bg-opacity-10 text-danger fw-bold" id="countRequests">-- bản ghi</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TENANT</th>
+                            <th>NHÂN VIÊN</th>
+                            <th>SỐ NGÀY XIN</th>
+                            <th>CHI TIẾT LÝ DO</th>
+                            <th>TRẠNG THÁI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getTenantBadge(tid) {
+            if (tid === 'VINFAST') return '<span class="badge bg-primary bg-opacity-10 text-primary badge-tenant">VINFAST</span>';
+            if (tid === 'FPT') return '<span class="badge bg-info bg-opacity-15 text-primary badge-tenant">FPT</span>';
+            if (tid === 'VNG') return '<span class="badge bg-danger bg-opacity-10 text-danger badge-tenant">VNG</span>';
+            if (tid === 'PLATFORM') return '<span class="badge bg-secondary bg-opacity-10 text-secondary badge-tenant">PLATFORM</span>';
+            return `<span class="badge bg-light text-dark badge-tenant border">${tid}</span>`;
+        }
+
+        async function loadAllData() {
+            try {
+                const res = await fetch('/api/all_data');
+                const data = await res.json();
+
+                // 1. Tenants
+                document.getElementById('countTenants').innerText = `${data.tenants.length} doanh nghiệp`;
+                const tBody = document.getElementById('tenantsBody');
+                tBody.innerHTML = '';
+                data.tenants.forEach(t => {
+                    tBody.innerHTML += `
+                        <tr>
+                            <td>${getTenantBadge(t.id)}</td>
+                            <td class="fw-bold text-dark">${t.name}</td>
+                            <td class="text-secondary">${t.contact_email}</td>
+                            <td><span class="badge bg-warning bg-opacity-20 text-dark border border-warning-subtle">${t.plan_type}</span></td>
+                            <td class="small text-secondary">${t.created_at || 'Mới đây'}</td>
+                        </tr>
+                    `;
+                });
+
+                // 2. Users
+                document.getElementById('countUsers').innerText = `${data.users.length} tài khoản`;
+                const uBody = document.getElementById('usersBody');
+                uBody.innerHTML = '';
+                data.users.forEach(u => {
+                    const remain = (u.total_leave_days || 0) - (u.used_leave_days || 0);
+                    const roleBadge = u.role === 'SUPER_ADMIN'
+                        ? '<span class="badge bg-danger bg-opacity-10 text-danger fw-bold border border-danger-subtle">SUPER_ADMIN</span>'
+                        : u.role === 'TENANT_ADMIN'
+                        ? '<span class="badge bg-warning bg-opacity-20 text-dark fw-bold border border-warning-subtle">TENANT_ADMIN</span>'
+                        : '<span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold">EMPLOYEE</span>';
+
+                    uBody.innerHTML += `
+                        <tr>
+                            <td><code>#${u.id}</code></td>
+                            <td>${getTenantBadge(u.tenant_id)}</td>
+                            <td class="fw-bold text-dark">${u.full_name}</td>
+                            <td class="text-secondary">${u.email}</td>
+                            <td>${roleBadge}</td>
+                            <td><span class="badge bg-light text-dark border">${u.department || 'N/A'}</span></td>
+                            <td>${u.tenure_months || 0} tháng</td>
+                            <td>${u.total_leave_days || 0} ngày</td>
+                            <td class="text-warning text-dark">${u.used_leave_days || 0} ngày</td>
+                            <td><b class="text-success fs-6">${remain} ngày</b></td>
+                        </tr>
+                    `;
+                });
+
+                // 3. Documents
+                document.getElementById('countDocs').innerText = `${data.documents.length} tài liệu`;
+                const dBody = document.getElementById('docsBody');
+                dBody.innerHTML = '';
+                data.documents.forEach(d => {
+                    dBody.innerHTML += `
+                        <tr>
+                            <td><code>#${d.id}</code></td>
+                            <td>${getTenantBadge(d.tenant_id)}</td>
+                            <td class="fw-bold text-primary"><i class="fa-solid fa-file-lines me-2"></i>${d.file_name}</td>
+                            <td class="small text-secondary"><code>${d.file_path}</code></td>
+                            <td><span class="badge bg-light text-dark border">${d.file_size_kb || 4} KB</span></td>
+                        </tr>
+                    `;
+                });
+
+                // 4. Agents
+                document.getElementById('countAgents').innerText = `${data.agents.length} bot`;
+                const aBody = document.getElementById('agentsBody');
+                aBody.innerHTML = '';
+                data.agents.forEach(a => {
+                    aBody.innerHTML += `
+                        <tr>
+                            <td><code>#${a.id}</code></td>
+                            <td>${getTenantBadge(a.tenant_id)}</td>
+                            <td class="fw-bold text-dark">${a.name}</td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary">${a.department_access}</span></td>
+                            <td class="small text-secondary">${a.description || ''}</td>
+                        </tr>
+                    `;
+                });
+
+                // 5. Leave Requests
+                document.getElementById('countRequests').innerText = `${data.leave_requests.length} đơn`;
+                const rBody = document.getElementById('requestsBody');
+                rBody.innerHTML = '';
+                if (data.leave_requests.length === 0) {
+                    rBody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-secondary">Chưa có đơn xin nghỉ nào trong CSDL</td></tr>';
+                } else {
+                    data.leave_requests.forEach(r => {
+                        const statusBadge = r.status === 'APPROVED' 
+                            ? '<span class="badge bg-success bg-opacity-10 text-success"><i class="fa-solid fa-check me-1"></i>APPROVED</span>' 
+                            : r.status === 'PENDING'
+                            ? '<span class="badge bg-warning bg-opacity-20 text-dark"><i class="fa-solid fa-clock me-1"></i>PENDING</span>'
+                            : '<span class="badge bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-xmark me-1"></i>REJECTED</span>';
+
+                        rBody.innerHTML += `
+                            <tr>
+                                <td><code>#${r.id}</code></td>
+                                <td>${getTenantBadge(r.tenant_id)}</td>
+                                <td class="fw-bold text-dark">${r.user_name}</td>
+                                <td><b class="text-warning text-dark">${r.days_requested} ngày</b></td>
+                                <td class="small text-secondary">${r.date_details}</td>
+                                <td>${statusBadge}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        loadAllData();
+    </script>
+</body>
+</html>

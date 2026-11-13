@@ -43,3 +43,18 @@ qdrant_storage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local secrets / scratch
+backend/.env
+backend/sent_emails.log
+sqlitebrowser/
+backend/check_actions.py
+backend/check_pass.py
+backend/clean_test.py
+backend/debug_sync.py
+backend/search_lines.py
+backend/set_exact_pass.py
+backend/test_reset.py
+backend/get_kc_users.py
+backend/fix_fpt.py
+backend/cleanup_and_create_superadmin.py

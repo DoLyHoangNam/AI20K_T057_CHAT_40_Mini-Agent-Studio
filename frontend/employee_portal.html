@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cổng Trợ Lý Nhân Viên — Enterprise Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            height: 100vh;
+            padding: 24px 20px;
+            z-index: 10;
+        }
+        .chat-main {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8fafc;
+            position: relative;
+        }
+        .chat-header {
+            background-color: #ffffff;
+            padding: 16px 28px;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+            z-index: 5;
+        }
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .chat-footer {
+            background-color: #ffffff;
+            padding: 16px 28px;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.03);
+        }
+        .agent-item {
+            padding: 12px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            background-color: #ffffff;
+        }
+        .agent-item:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .agent-item.active {
+            background-color: #eff6ff;
+            border-color: #2563eb;
+            color: #1d4ed8;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+        }
+        .agent-item.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f8fafc;
+        }
+        .msg {
+            max-width: 72%;
+            padding: 15px 20px;
+            border-radius: 16px;
+            line-height: 1.55;
+            font-size: 0.935rem;
+        }
+        .msg-user {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 3px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+        }
+        .msg-agent {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            color: #0f172a;
+            align-self: flex-start;
+            border-bottom-left-radius: 3px;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+        }
+        .citation {
+            background-color: #eff6ff;
+            border-left: 3px solid #2563eb;
+            padding: 8px 12px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            color: #1e40af;
+            font-weight: 500;
+        }
+        .hitl-box {
+            background: #fff1f2;
+            border: 1.5px solid #fda4af;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            color: #9f1239;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+        .form-control {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            border-radius: 10px;
+        }
+        .form-control:focus {
+            background-color: #ffffff;
+            color: #0f172a;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+        .quick-btn {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            white-space: nowrap;
+        }
+        .quick-btn:hover {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-color: #2563eb;
+        }
+        .toast-banner {
+            position: absolute;
+            top: 80px;
+            right: 28px;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.15);
+            z-index: 999;
+            animation: slideDown 0.35s ease-out;
+            max-width: 380px;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- CỘT TRÁI: DANH SÁCH BOT & HỒ SƠ NHÂN SỰ -->
+            <div class="col-md-4 col-lg-3 sidebar d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-light-subtle">
+                        <div class="p-2 rounded-3 bg-primary bg-opacity-10 text-primary me-2">
+                            <i class="fa-solid fa-building-user fa-lg"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold text-dark" id="portalHeaderTitle">Employee Portal</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" id="portalTenantBadge" style="font-size: 0.7rem;">Doanh nghiệp: FPT</span>
+                        </div>
+                    </div>
+
+                    <!-- HỒ SƠ PHÉP NĂM LƯU TỪ SQLITE -->
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small text-secondary fw-semibold"><i class="fa-solid fa-calendar-check text-primary me-1"></i> Hồ sơ phép năm:</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary" id="badgeDept">Phòng Ban</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 pt-2 border-top border-light-subtle text-center">
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Tiêu chuẩn</div>
+                                <div class="fw-bold text-dark" id="statTotal">-- ngày</div>
+                            </div>
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Đã nghỉ</div>
+                                <div class="fw-bold text-warning text-dark" id="statUsed">-- ngày</div>
+                            </div>
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.7rem; font-weight: 600;">Còn lại</div>
+                                <div class="fw-bold text-success fs-6" id="statRemain">-- ngày</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="form-label small text-secondary fw-bold text-uppercase mt-2 mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Trợ lý AI được phân quyền:</label>
+                    <div id="agentListSidebar"></div>
+                </div>
+
+                <!-- THÔNG TIN NHÂN VIÊN ĐANG ĐĂNG NHẬP -->
+                <div class="pt-3 border-top border-light-subtle">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div style="line-height: 1.2;">
+                            <div class="fw-bold text-dark" style="font-size: 0.875rem;" id="empName">Đang tải...</div>
+                            <small class="text-secondary" id="empDept" style="font-size: 0.72rem;">Phòng ban</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold py-2" onclick="logout()">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Đăng xuất
+                    </button>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: MÀN HÌNH CHAT -->
+            <div class="col-md-8 col-lg-9 chat-main">
+                <div id="notificationArea"></div>
+
+                <div class="chat-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2 me-3" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-robot fa-lg"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark" id="currentBotName">AI Policy Assistant</h5>
+                            <small class="text-secondary" id="currentBotDesc">Trợ lý nghiệp vụ & quy trình nội bộ</small>
+                        </div>
+                    </div>
+                    <div id="adminNavContainer">
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle me-2 px-2 py-1"><i class="fa-solid fa-circle fa-2xs me-1"></i>Sẵn sàng hỗ trợ</span>
+                        <span id="adminStudioBtnSlot"></span>
+                    </div>
+                </div>
+
+                <div class="chat-body" id="chatBody">
+                    <div class="msg msg-agent" id="welcomeMsg">
+                        👋 Dạ em chào anh/chị <b><span id="welcomeEmpName">bạn</span></b>! Em là Trợ lý AI nội bộ của doanh nghiệp. Em có thể giải đáp văn bản nội quy quy chế, kiểm tra số ngày phép hoặc giúp làm đơn xin nghỉ phép nhanh chóng.
+                    </div>
+                </div>
+
+                <div class="chat-footer">
+                    <div class="d-flex gap-2 mb-3 overflow-auto" id="quickButtonsContainer">
+                        <button class="quick-btn" onclick="sendQuick('Tôi còn bao nhiêu ngày nghỉ trong tháng này?')"><i class="fa-solid fa-calendar-days me-1 text-primary"></i>Tra cứu ngày nghỉ</button>
+                        <button class="quick-btn" onclick="sendQuick('Tôi muốn xin nghỉ 1 ngày')"><i class="fa-solid fa-file-signature me-1 text-warning"></i>Xin nghỉ phép 1 ngày</button>
+                        <button class="quick-btn" onclick="sendQuick('Nội quy phòng marketing như thế nào?')"><i class="fa-solid fa-bullhorn me-1 text-info"></i>Nội quy phòng ban</button>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="userInput" class="form-control py-2 px-3" placeholder="Nhập câu hỏi hoặc yêu cầu nghiệp vụ..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button class="btn btn-primary px-4 fw-bold" onclick="sendMessage()"><i class="fa-solid fa-paper-plane me-1"></i> Gửi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || {
+            id: 7,
+            full_name: 'Phong',
+            email: 'Phong1812205@gmail.com',
+            role: 'EMPLOYEE',
+            department: 'Marketing',
+            tenant_id: 'FPT',
+            total_leave_days: 12,
+            used_leave_days: 0,
+            tenure_months: 12
+        };
+
+        let currentActiveBot = {
+            name: 'AI Policy Assistant',
+            desc: 'Trợ lý nghiệp vụ & thủ tục nội bộ'
+        };
+
+        let agentState = { step: 'idle', leaveData: { days: 1, date: '' } };
+
+        // 1. Phân quyền hiển thị nút Admin Studio
+        if (currentUser.role === 'ADMIN' || currentUser.role === 'TENANT_ADMIN' || currentUser.role === 'SUPER_ADMIN') {
+            document.getElementById('adminStudioBtnSlot').innerHTML = `
+                <a href="admin_studio.html" class="btn btn-sm btn-outline-primary fw-semibold" title="Vào Studio Quản Trị"><i class="fa-solid fa-sliders me-1"></i>Studio Admin</a>
+            `;
+        }
+
+        async function fetchUserData() {
+            try {
+                const res = await fetch(`/api/users/${currentUser.id}`);
+                if (res.ok) {
+                    const freshUser = await res.json();
+                    currentUser = freshUser;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                }
+            } catch (e) {
+                console.error("Không thể kết nối API users:", e);
+            }
+            updateProfileUI();
+        }
+
+        function updateProfileUI() {
+            const remain = (currentUser.total_leave_days || 0) - (currentUser.used_leave_days || 0);
+            document.getElementById('statTotal').innerText = `${currentUser.total_leave_days || 0} ngày`;
+            document.getElementById('statUsed').innerText = `${currentUser.used_leave_days || 0} ngày`;
+            document.getElementById('statRemain').innerText = `${remain} ngày`;
+
+            document.getElementById('empName').innerText = currentUser.full_name;
+            document.getElementById('welcomeEmpName').innerText = currentUser.full_name;
+            document.getElementById('empDept').innerText = `Phòng: ${currentUser.department} (${currentUser.role})`;
+            document.getElementById('badgeDept').innerText = currentUser.department;
+            document.getElementById('portalTenantBadge').innerText = `Doanh nghiệp: ${currentUser.tenant_id || 'FPT'}`;
+            document.getElementById('portalHeaderTitle').innerText = `${currentUser.tenant_id || 'Enterprise'} Employee Portal`;
+        }
+
+        // 2. Định kỳ kiểm tra thông báo Quản lý duyệt đơn
+        async function checkApprovalNotifications() {
+            try {
+                const res = await fetch(`/api/notifications?user_id=${currentUser.id}`);
+                const data = await res.json();
+
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notif => {
+                        showNotificationToast(notif);
+                    });
+                    await fetchUserData();
+                }
+            } catch (e) {}
+        }
+
+        function showNotificationToast(notif) {
+            const isApproved = notif.status === 'APPROVED';
+            const icon = isApproved ? 'fa-circle-check text-success' : 'fa-circle-xmark text-danger';
+            const title = isApproved ? 'ĐƠN NGHỈ PHÉP ĐÃ ĐƯỢC DUYỆT!' : 'ĐƠN NGHỈ PHÉP BỊ TỪ CHỐI!';
+            const borderColor = isApproved ? '#10b981' : '#ef4444';
+
+            const area = document.getElementById('notificationArea');
+            const toast = document.createElement('div');
+            toast.className = 'toast-banner';
+            toast.style.borderLeft = `5px solid ${borderColor}`;
+            toast.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <strong class="d-flex align-items-center text-dark"><i class="fa-solid ${icon} me-2 fs-5"></i> ${title}</strong>
+                    <button class="btn-close btn-sm" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+                <div class="small text-secondary">
+                    • <b>Mã đơn:</b> #${notif.id}<br>
+                    • <b>Số ngày:</b> ${notif.days_requested} ngày (${notif.date_details})<br>
+                    • <b>Trạng thái:</b> ${isApproved ? '<span class="badge bg-success bg-opacity-10 text-success">Đã được Quản lý duyệt</span>' : '<span class="badge bg-danger bg-opacity-10 text-danger">Bị từ chối</span>'}<br>
+                    ${isApproved ? '<b class="text-success">👉 Quỹ ngày phép của bạn đã được cập nhật tự động!</b>' : ''}
+                </div>
+            `;
+            area.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast && toast.parentElement) toast.remove();
+            }, 8000);
+
+            appendMessage(`
+                <div style="border-left: 3px solid ${isApproved ? '#10b981' : '#ef4444'}; padding-left: 10px;">
+                    🔔 <b>THÔNG BÁO TỪ QUẢN LÝ DOANH NGHIỆP:</b><br>
+                    • Đơn xin nghỉ phép <b>#${notif.id}</b> (${notif.days_requested} ngày) của anh/chị vừa được Quản lý <b>${isApproved ? 'PHÊ DUYỆT THÀNH CÔNG' : 'TỪ CHỐI'}</b>.<br>
+                    ${isApproved ? '• Hệ thống đã tự động cộng số ngày này vào mục <i>"Đã nghỉ"</i> và trừ số ngày phép còn lại trong hồ sơ nhân sự của anh/chị!' : '• Số ngày phép của anh/chị được giữ nguyên.'}
+                </div>
+            `);
+        }
+
+        setInterval(checkApprovalNotifications, 3000);
+
+        // 3. Tải danh sách Agent theo Tenant
+        async function loadAgents() {
+            try {
+                const userTenant = currentUser.tenant_id || 'FPT';
+                const res = await fetch(`/api/agents?tenant_id=${userTenant}`);
+                const agents = await res.json();
+                const sidebar = document.getElementById('agentListSidebar');
+                sidebar.innerHTML = '';
+
+                if (agents.length === 0) {
+                    sidebar.innerHTML = `<div class="small text-secondary p-2">Doanh nghiệp ${userTenant} chưa xuất bản Agent nào.</div>`;
+                    return;
+                }
+
+                agents.forEach((ag, idx) => {
+                    const isAllowed = ag.department_access === 'ALL' || ag.department_access === currentUser.department;
+                    if (idx === 0 && isAllowed) {
+                        currentActiveBot.name = ag.name;
+                        currentActiveBot.desc = ag.description;
+                        document.getElementById('currentBotName').innerText = ag.name;
+                        document.getElementById('currentBotDesc').innerText = ag.description || 'Trợ lý AI chuyên biệt';
+                    }
+
+                    if (isAllowed) {
+                        sidebar.innerHTML += `
+                            <div class="agent-item ${idx === 0 ? 'active' : ''}" onclick="selectAgent('${ag.name}', '${ag.description}')">
+                                <div class="fw-bold small text-dark"><i class="fa-solid fa-circle-check text-success me-1"></i> ${ag.name}</div>
+                                <div class="text-secondary" style="font-size: 0.72rem;">Phạm vi: ${ag.department_access} (${ag.tenant_id})</div>
+                            </div>
+                        `;
+                    } else {
+                        sidebar.innerHTML += `
+                            <div class="agent-item locked" onclick="alert('⛔ BỊ CHẶN TRUY CẬP (ACL Security):\\nBạn thuộc phòng ${currentUser.department}, không có quyền truy cập ${ag.name}!')">
+                                <div class="fw-bold small text-secondary"><i class="fa-solid fa-lock text-danger me-1"></i> ${ag.name}</div>
+                                <div class="text-danger" style="font-size: 0.7rem;">Bị khóa (Chỉ dành cho phòng ${ag.department_access})</div>
+                            </div>
+                        `;
+                    }
+                });
+            } catch (err) {
+                console.error("Lỗi tải agents:", err);
+            }
+        }
+
+        function selectAgent(name, desc) {
+            currentActiveBot.name = name;
+            currentActiveBot.desc = desc;
+            document.getElementById('currentBotName').innerText = name;
+            document.getElementById('currentBotDesc').innerText = desc || 'Trợ lý AI chuyên biệt';
+            document.querySelectorAll('.agent-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            appendMessage(`🤖 <i>Bạn đã kết nối với <b>${name}</b>. Hãy đặt câu hỏi hoặc yêu cầu nghiệp vụ nhé!</i>`);
+        }
+
+        function appendMessage(text, isUser = false) {
+            const chatBody = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = `msg ${isUser ? 'msg-user' : 'msg-agent'}`;
+            div.innerHTML = text;
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        function sendQuick(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage(text, true);
+            input.value = '';
+
+            if (agentState.step === 'collecting_date') {
+                agentState.leaveData.date = text;
+                agentState.step = 'ready_to_confirm';
+
+                const remain = currentUser.total_leave_days - currentUser.used_leave_days;
+                const hitlHtml = `
+                    ⚙️ <i>[Agent đã kiểm tra hồ sơ và tự động điền đơn trình ký]</i><br>
+                    <div class="hitl-box">
+                        <h6 class="text-danger fw-bold mb-2"><i class="fa-solid fa-shield-halved me-1"></i> XÁC NHẬN BẢO MẬT (Human-In-The-Loop)</h6>
+                        <p class="small mb-2">
+                            📋 <b>Chi tiết đơn đề nghị:</b><br>
+                            • Doanh nghiệp: <b>${currentUser.tenant_id}</b><br>
+                            • Nhân viên: <b>${currentUser.full_name}</b> (Phòng: ${currentUser.department})<br>
+                            • Số ngày xin nghỉ: <b>${agentState.leaveData.days} ngày</b><br>
+                            • Thời gian & Lý do: <b>${agentState.leaveData.date}</b><br>
+                            • Quỹ phép hiện còn: <b>${remain} ngày</b><br>
+                            Anh/chị có xác nhận gửi đơn này tới Quản lý (${currentUser.tenant_id}) phê duyệt không?
+                        </p>
+                        <button class="btn btn-sm btn-success fw-bold me-2" onclick="confirmLeave(true)"><i class="fa-solid fa-check me-1"></i> Xác nhận gửi đơn</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="confirmLeave(false)"><i class="fa-solid fa-xmark me-1"></i> Hủy thao tác</button>
+                    </div>
+                `;
+                appendMessage(hitlHtml);
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: currentUser.id,
+                        agent_name: currentActiveBot.name,
+                        message: text
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.intent === 'CREATE_LEAVE') {
+                    const match = text.match(/\d+/);
+                    const days = match ? parseInt(match[0]) : 1;
+                    const remain = currentUser.total_leave_days - currentUser.used_leave_days;
+
+                    if (days > remain) {
+                        appendMessage(`⚠️ <b>Cảnh báo:</b> Bạn muốn xin nghỉ <b>${days} ngày</b>, nhưng quỹ phép còn lại chỉ có <b>${remain} ngày</b>.`);
+                        return;
+                    }
+
+                    agentState.leaveData.days = days;
+                    agentState.step = 'collecting_date';
+                    appendMessage(`Dạ em đã ghi nhận bạn muốn xin nghỉ <b>${days} ngày</b>.<br>👉 Bạn vui lòng cho em biết <b>ngày dự kiến nghỉ (ngày nào, thứ mấy)</b> và <b>lý do xin nghỉ</b> là gì ạ?`);
+                    return;
+                }
+
+                appendMessage(`
+                    ${data.reply}
+                    <div class="citation"><i class="fa-solid fa-quote-left me-1 text-primary"></i> <b>Nguồn trích dẫn:</b> ${data.citation}</div>
+                `);
+
+            } catch (err) {
+                console.error(err);
+                appendMessage('❌ Không thể kết nối với máy chủ AI Agent.');
+            }
+        }
+
+        async function confirmLeave(isConfirmed) {
+            if (isConfirmed) {
+                try {
+                    const res = await fetch('/api/leave_requests', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: currentUser.id,
+                            user_name: currentUser.full_name,
+                            days_requested: agentState.leaveData.days,
+                            date_details: agentState.leaveData.date,
+                            tenant_id: currentUser.tenant_id || 'FPT'
+                        })
+                    });
+
+                    const result = await res.json();
+                    if (result.success) {
+                        appendMessage(`
+                            🎉 <b>[GỬI ĐƠN THÀNH CÔNG VÀO HỆ THỐNG]</b><br>
+                            • Đơn xin nghỉ phép <b>Mã đơn #${result.id}</b> (${agentState.leaveData.days} ngày) đã được lưu vào CSDL và gửi tới hòm thư Quản lý ${currentUser.tenant_id}.<br>
+                            • 🔔 <b>Khi Quản lý ${currentUser.tenant_id} bấm Duyệt, màn hình của bạn sẽ ngay lập tức nhận được thông báo thời gian thực!</b>
+                        `);
+                    } else {
+                        appendMessage('❌ Lỗi lưu đơn vào hệ thống.');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    appendMessage('❌ Lỗi kết nối gửi đơn.');
+                }
+            } else {
+                appendMessage('❌ Đã hủy yêu cầu gửi đơn. Quỹ phép của bạn được giữ nguyên.');
+            }
+            agentState.step = 'idle';
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
+            window.location.href = `http://localhost:8080/realms/mini-agent-platform/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}&client_id=mini-agent-studio-app`;
+        }
+
+        fetchUserData();
+        loadAgents();
+    </script>
+</body>
+</html>

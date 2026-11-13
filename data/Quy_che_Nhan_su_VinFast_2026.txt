@@ -1,0 +1,32 @@
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+---
+TẬP ĐOÀN VINGROUP - CÔNG TY CỔ PHẦN SẢN XUẤT VÀ KINH DOANH VINFAST
+PHÒNG QUẢN TRỊ NHÂN SỰ & CHÍNH SÁCH LAO ĐỘNG
+
+QUY CHẾ NỘI BỘ VÀ CHẾ ĐỘ NGHỈ PHÉP NĂM 2026
+
+ĐIỀU 1: THỜI GIỜ LÀM VIỆC VÀ NGHỈ NGƠI
+1. Thời giờ làm việc tiêu chuẩn:
+- Từ Thứ 2 đến Thứ 6: 08:00 - 17:00 (Nghỉ trưa từ 12:00 đến 13:00).
+- Thứ 7: Làm việc luân phiên ca sáng 08:00 - 12:00 đối với khối Kỹ thuật / Sản xuất xưởng; Khối Văn phòng nghỉ Thứ 7 và Chủ nhật.
+2. Chấm công và vào ca:
+- Nhân viên thực hiện chấm công bằng khuôn mặt (FaceID) hoặc thẻ nhân viên qua cổng an ninh VinFast trước giờ làm việc ít nhất 10 phút.
+
+ĐIỀU 2: TIÊU CHUẨN VÀ TÍNH TOÁN NGÀY NGHỈ PHÉP NĂM
+1. Tiêu chuẩn phép năm cơ bản:
+- Nhân viên làm việc đủ 12 tháng tại VinFast được hưởng 12 ngày phép năm hưởng nguyên lương.
+- Nhân viên làm việc chưa đủ 12 tháng: Số ngày phép năm = Số tháng làm việc thực tế (Ví dụ: Thâm niên 8 tháng = 8 ngày phép năm).
+2. Thưởng thâm niên phép năm:
+- Cứ mỗi 05 năm làm việc liên tục tại VinFast hoặc Tập đoàn Vingroup, nhân viên được cộng thêm 01 ngày phép năm vào quỹ tiêu chuẩn.
+3. Chuyển tiếp phép năm:
+- Phép năm chưa sử dụng hết trong năm được phép chuyển tiếp sang quý 1 của năm tiếp theo (hạn chót ngày 31/03). Sau thời hạn này, số ngày chưa sử dụng sẽ bị hủy hoặc chi trả theo quy định.
+
+ĐIỀU 3: QUY TRÌNH XIN NGHỈ PHÉP VÀ PHÊ DUYỆT (HITL)
+1. Thời hạn gửi đơn:
+- Nghỉ từ 1 - 2 ngày: Phải gửi đơn trước ít nhất 24 giờ qua hệ thống Trợ lý ảo Portal để Quản lý trực tiếp phê duyệt.
+- Nghỉ từ 3 ngày trở lên: Phải gửi đơn trước ít nhất 03 ngày làm việc và được Trưởng bộ phận phê duyệt.
+- Trường hợp nghỉ ốm đột xuất hoặc việc gia đình khẩn cấp: Phải thông báo cho Quản lý trong vòng 02 giờ đầu giờ làm việc và nộp bổ sung đơn trong ngày đi làm lại.
+2. Cơ chế phê duyệt Human-In-The-Loop:
+- Mọi đơn xin nghỉ tạo qua AI Agent đều trải qua bước xác nhận trực tiếp của nhân viên trước khi chuyển đến hòm thư Admin / Quản lý.
+- Sau khi Quản lý duyệt, hệ thống tự động ghi nhận trừ vào sổ ngày phép và gửi thông báo phản hồi về tài khoản của nhân viên.

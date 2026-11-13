@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Hub — OpenDesign Admin</title>
+    <!-- Fonts: Plus Jakarta Sans & JetBrains Mono (Matches Geist & Fira Code in open-design) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        (function checkSuperAdmin() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user || user.role !== 'SUPER_ADMIN') {
+                alert('⛔ TỪ CHỐI TRUY CẬP: Trang này chỉ dành riêng cho SUPER_ADMIN!');
+                window.location.replace('login.html');
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --fg: #09090b;
+            --muted: #71717a;
+            --border: #e4e4e7;
+            --accent: #09090b;
+            --accent-hover: #27272a;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--fg);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 1. MINIMAL HEADER (OpenDesign Standard) */
+        .od-nav {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .od-logo-mark {
+            width: 24px;
+            height: 24px;
+            background: var(--fg);
+            color: #fff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .eyebrow {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+        }
+
+        /* 2. BUTTONS (Shadcn Pure Action) */
+        .btn-shadcn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-shadcn-primary {
+            background: var(--accent);
+            color: #ffffff !important;
+            border-color: var(--accent);
+        }
+        .btn-shadcn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .btn-shadcn-secondary {
+            background: #ffffff;
+            color: var(--fg);
+            border-color: var(--border);
+        }
+        .btn-shadcn-secondary:hover {
+            background: #f4f4f5;
+        }
+
+        .btn-shadcn-ghost {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 6px 10px;
+        }
+        .btn-shadcn-ghost:hover {
+            background: #f4f4f5;
+            color: var(--fg);
+        }
+
+        .btn-shadcn-danger {
+            background: transparent;
+            color: #dc2626;
+            border-color: transparent;
+            padding: 6px 10px;
+        }
+        .btn-shadcn-danger:hover {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        /* 3. CARDS & CONTAINER */
+        .od-container {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 32px 28px;
+        }
+
+        .od-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        .od-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--fg);
+            margin: 0 0 4px 0;
+        }
+
+        /* 4. FORM INPUTS */
+        .form-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--fg);
+            margin-bottom: 6px;
+        }
+
+        .form-control, .form-select {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--fg);
+            transition: all 150ms ease;
+        }
+        .form-control:focus, .form-select:focus {
+            background: #ffffff;
+            border-color: var(--fg);
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px #09090b;
+            color: var(--fg);
+            outline: none;
+        }
+
+        /* 5. MINIMALIST TABLE */
+        .table-shadcn {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table-shadcn th {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 14px;
+            text-align: left;
+            background: #fafafa;
+        }
+        .table-shadcn td {
+            font-size: 13px;
+            color: var(--fg);
+            padding: 12px 14px;
+            border-bottom: 1px solid #f4f4f5;
+            vertical-align: middle;
+        }
+        .table-shadcn tr:hover td {
+            background-color: #fafafa;
+        }
+
+        /* 6. BADGES */
+        .badge-mono {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #fafafa;
+            color: var(--fg);
+            display: inline-block;
+        }
+        .badge-role-super {
+            background: #09090b;
+            color: #ffffff;
+            border-color: #09090b;
+        }
+        .badge-role-admin {
+            background: #ffffff;
+            color: var(--fg);
+            border-color: #09090b;
+            font-weight: 600;
+        }
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #16a34a;
+            display: inline-block;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- TOP NAVIGATION (OpenDesign Minimalist App Bar) -->
+    <header class="od-nav">
+        <div class="d-flex align-items-center gap-3">
+            <div class="od-logo-mark"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="d-flex align-items-baseline gap-2">
+                <span class="fw-bold" style="letter-spacing: -0.02em;">OpenDesign Platform</span>
+                <span class="badge-mono">SUPER_ADMIN</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="database_viewer.html" target="_blank" class="btn-shadcn btn-shadcn-secondary">
+                <i class="fa-solid fa-database"></i> SQLite Explorer
+            </a>
+            <a href="admin_studio.html" class="btn-shadcn btn-shadcn-secondary">
+                <i class="fa-solid fa-sliders"></i> Tenant Studio
+            </a>
+            <button class="btn-shadcn btn-shadcn-ghost" onclick="logout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+            </button>
+        </div>
+    </header>
+
+    <div class="od-container">
+        <!-- HEADER TITLE -->
+        <div class="mb-4">
+            <div class="eyebrow mb-1">Platform Control Plane</div>
+            <h2 class="fw-bold mb-1" style="font-size: 24px; letter-spacing: -0.03em;">Quản Trị Bản Quyền & Hệ Thống Đa Khách Hàng</h2>
+            <p class="text-secondary" style="font-size: 13px;">Phát hành giấy phép doanh nghiệp (Tenants), tạo tài khoản Admin và giám sát cơ sở dữ liệu SQLite.</p>
+        </div>
+
+        <!-- 1. FORM PROVISION TENANT (Clean Shadcn Card) -->
+        <div class="od-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h5 class="od-card-title">Cấp Bản Quyền & Khởi Tạo Doanh Nghiệp Mới</h5>
+                    <p class="text-secondary mb-0" style="font-size: 13px;">Tạo tenant riêng biệt và tự động sinh tài khoản Tenant Admin đầu tiên.</p>
+                </div>
+                <span class="badge-mono">B2B SAAS PROVISION</span>
+            </div>
+
+            <form id="createTenantForm" onsubmit="handleCreateTenant(event)">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Mã Doanh Nghiệp (ID)</label>
+                        <input type="text" id="newTenantId" class="form-control" placeholder="VIETTEL" style="text-transform: uppercase;" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Tên Doanh Nghiệp</label>
+                        <input type="text" id="newTenantName" class="form-control" placeholder="Tập đoàn Viettel" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Gói Dịch Vụ</label>
+                        <select id="newPlan" class="form-select">
+                            <option value="ENTERPRISE">Enterprise (500 Users)</option>
+                            <option value="PROFESSIONAL">Professional (100 Users)</option>
+                            <option value="TRIAL">Trial (30 Ngày)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Email Admin Bàn Giao (Nhận Mật Khẩu)</label>
+                        <input type="email" id="newAdminEmail" class="form-control" placeholder="admin@viettel.vn" required>
+                    </div>
+                    <div class="col-12 d-flex justify-content-between align-items-center pt-2">
+                        <span class="text-secondary" style="font-size: 12px;">
+                            <i class="fa-solid fa-shield-halved text-success me-1"></i> Mật khẩu khởi tạo sẽ được sinh ngẫu nhiên, mã hóa trên Keycloak và gửi tự động về hòm thư Admin.
+                        </span>
+                        <button type="submit" class="btn-shadcn btn-shadcn-primary">
+                            <i class="fa-solid fa-plus"></i> Cấp Phép & Tạo Doanh Nghiệp
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- 2. DANH SÁCH DOANH NGHIỆP ĐANG HOẠT ĐỘNG -->
+        <div class="od-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="od-card-title">Danh Sách Doanh Nghiệp Đang Hoạt Động</h5>
+                    <p class="text-secondary mb-0" style="font-size: 13px;">Các tổ chức đã kích hoạt bản quyền trên nền tảng.</p>
+                </div>
+                <button class="btn-shadcn btn-shadcn-ghost" onclick="loadTenants()">
+                    <i class="fa-solid fa-rotate"></i> Làm mới
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table-shadcn">
+                    <thead>
+                        <tr>
+                            <th>MÃ TENANT</th>
+                            <th>TÊN DOANH NGHIỆP</th>
+                            <th>EMAIL LIÊN HỆ</th>
+                            <th>BẢN QUYỀN</th>
+                            <th>NHÂN VIÊN</th>
+                            <th>AI BOTS</th>
+                            <th>TRẠNG THÁI</th>
+                            <th>NGÀY CẤP</th>
+                            <th style="text-align: right;">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tenantTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. QUẢN LÝ TOÀN BỘ TÀI KHOẢN -->
+        <div class="od-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="od-card-title">Quản Lý Toàn Bộ Tài Khoản Trên Nền Tảng</h5>
+                    <p class="text-secondary mb-0" style="font-size: 13px;">Chỉnh sửa thông tin, đặt lại mật khẩu, phân lại vai trò hoặc xóa tài khoản.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select id="filterTenantSelect" class="form-select form-select-sm" style="width: 220px;" onchange="filterUsers()">
+                        <option value="ALL">Tất cả Doanh Nghiệp</option>
+                    </select>
+                    <button class="btn-shadcn btn-shadcn-ghost" onclick="loadAllUsers()">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table-shadcn">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TENANT</th>
+                            <th>HỌ VÀ TÊN</th>
+                            <th>EMAIL</th>
+                            <th>PHÒNG BAN</th>
+                            <th>VAI TRÒ</th>
+                            <th>QUỸ PHÉP</th>
+                            <th style="text-align: right;">THAO TÁC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allUsersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SỬA TÀI KHOẢN (Shadcn Dialog) -->
+    <div class="modal fade" id="superEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md);">
+                <div class="modal-header border-bottom" style="padding: 16px 20px;">
+                    <div>
+                        <h6 class="modal-title fw-bold" style="font-size: 15px;">Chỉnh Sửa Hồ Sơ Tài Khoản</h6>
+                        <small class="text-secondary" style="font-size: 12px;">Cập nhật thông tin lưu trực tiếp vào CSDL SQLite.</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <input type="hidden" id="saEditUserId">
+                    <div class="mb-3">
+                        <label class="form-label">Họ và Tên</label>
+                        <input type="text" id="saEditUserName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="saEditUserEmail" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vai Trò (Role)</label>
+                            <select id="saEditUserRole" class="form-select">
+                                <option value="EMPLOYEE">EMPLOYEE (Nhân viên)</option>
+                                <option value="TENANT_ADMIN">TENANT_ADMIN (Quản trị công ty)</option>
+                                <option value="SUPER_ADMIN">SUPER_ADMIN (Chủ nền tảng)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phòng Ban</label>
+                            <input type="text" id="saEditUserDept" class="form-control" placeholder="HR, Marketing, IT...">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tiêu chuẩn phép (ngày)</label>
+                            <input type="number" id="saEditUserLeave" class="form-control" min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Thâm niên (tháng)</label>
+                            <input type="number" id="saEditUserTenure" class="form-control" min="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Đặt Lại Mật Khẩu (Để trống nếu giữ nguyên)</label>
+                        <input type="text" id="saEditUserPass" class="form-control" placeholder="Nhập mật khẩu mới...">
+                    </div>
+                </div>
+                <div class="modal-footer border-top" style="padding: 12px 20px;">
+                    <button type="button" class="btn-shadcn btn-shadcn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-shadcn btn-shadcn-primary" onclick="saveSaEditUser()">Lưu Cập Nhật</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allUsersData = [];
+        let editModal = null;
+
+        async function loadTenants() {
+            try {
+                const res = await fetch('/api/tenants');
+                const list = await res.json();
+                const tbody = document.getElementById('tenantTableBody');
+                const selectFilter = document.getElementById('filterTenantSelect');
+                tbody.innerHTML = '';
+
+                selectFilter.innerHTML = '<option value="ALL">Tất cả Doanh Nghiệp</option>';
+
+                list.forEach(t => {
+                    selectFilter.innerHTML += `<option value="${t.id}">${t.name} (${t.id})</option>`;
+
+                    const deleteBtn = `<button class="btn-shadcn btn-shadcn-danger" onclick="deleteTenant('${t.id}', '${t.name}')" title="Xóa toàn bộ doanh nghiệp này"><i class="fa-regular fa-trash-can me-1"></i>Xóa</button>`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="badge-mono">${t.id}</span></td>
+                            <td class="fw-semibold">${t.name}</td>
+                            <td class="text-secondary">${t.contact_email}</td>
+                            <td><span class="badge-mono">${t.plan_type}</span></td>
+                            <td>${t.employee_count}</td>
+                            <td>${t.agent_count}</td>
+                            <td><span class="status-dot"></span>Active</td>
+                            <td class="text-secondary" style="font-size: 12px;">${t.created_at || 'Mới cấp'}</td>
+                            <td style="text-align: right;">${deleteBtn}</td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function handleCreateTenant(e) {
+            e.preventDefault();
+            const tid = document.getElementById('newTenantId').value.trim().toUpperCase();
+            const tname = document.getElementById('newTenantName').value.trim();
+            const plan = document.getElementById('newPlan').value;
+            const aemail = document.getElementById('newAdminEmail').value.trim();
+
+            try {
+                const res = await fetch('/api/tenants', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenant_id: tid,
+                        tenant_name: tname,
+                        plan_type: plan,
+                        admin_email: aemail
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`🎉 CẤP BẢN QUYỀN THÀNH CÔNG!\n${data.message}`);
+                    document.getElementById('createTenantForm').reset();
+                    loadTenants();
+                    loadAllUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể tạo doanh nghiệp'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        async function deleteTenant(tenantId, tenantName) {
+            if (!confirm(`⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA HOÀN TOÀN doanh nghiệp "${tenantName}" (${tenantId})?\n\nToàn bộ tài khoản, bot và dữ liệu của công ty này sẽ bị xóa vĩnh viễn khỏi CSDL!`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/tenants/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tenant_id: tenantId })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ ${data.message}`);
+                    loadTenants();
+                    loadAllUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể xóa'));
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadAllUsers() {
+            try {
+                const res = await fetch('/api/users');
+                allUsersData = await res.json();
+                renderUsersTable(allUsersData);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function filterUsers() {
+            const selectedTenant = document.getElementById('filterTenantSelect').value;
+            if (selectedTenant === 'ALL') {
+                renderUsersTable(allUsersData);
+            } else {
+                renderUsersTable(allUsersData.filter(u => u.tenant_id === selectedTenant));
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('allUsersTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(u => {
+                const roleBadge = u.role === 'SUPER_ADMIN'
+                    ? '<span class="badge-mono badge-role-super">SUPER_ADMIN</span>'
+                    : u.role === 'TENANT_ADMIN'
+                    ? '<span class="badge-mono badge-role-admin">TENANT_ADMIN</span>'
+                    : '<span class="badge-mono text-secondary">EMPLOYEE</span>';
+
+                const remain = (u.total_leave_days || 0) - (u.used_leave_days || 0);
+                const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
+
+                const editBtn = `<button class="btn-shadcn btn-shadcn-ghost" onclick="openSaEditModal(${userJson})" title="Sửa"><i class="fa-regular fa-pen-to-square"></i></button>`;
+
+                const deleteBtn = u.role !== 'SUPER_ADMIN'
+                    ? `<button class="btn-shadcn btn-shadcn-danger" onclick="deleteUser(${u.id}, '${u.full_name}')" title="Xóa"><i class="fa-regular fa-trash-can"></i></button>`
+                    : '<span class="text-secondary" style="font-size: 11px;">Root</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><code style="font-family: var(--font-mono); font-size: 12px; color: var(--muted);">#${u.id}</code></td>
+                        <td><span class="badge-mono">${u.tenant_id}</span></td>
+                        <td class="fw-semibold">${u.full_name}</td>
+                        <td class="text-secondary">${u.email}</td>
+                        <td>${u.department || '—'}</td>
+                        <td>${roleBadge}</td>
+                        <td>Còn ${remain} / ${u.total_leave_days || 0} ngày</td>
+                        <td style="text-align: right;">${editBtn} ${deleteBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openSaEditModal(u) {
+            document.getElementById('saEditUserId').value = u.id;
+            document.getElementById('saEditUserName').value = u.full_name;
+            document.getElementById('saEditUserEmail').value = u.email;
+            document.getElementById('saEditUserRole').value = u.role;
+            document.getElementById('saEditUserDept').value = u.department || '';
+            document.getElementById('saEditUserLeave').value = u.total_leave_days || 12;
+            document.getElementById('saEditUserTenure').value = u.tenure_months || 12;
+            document.getElementById('saEditUserPass').value = '';
+
+            const modalEl = document.getElementById('superEditModal');
+            editModal = new bootstrap.Modal(modalEl);
+            editModal.show();
+        }
+
+        async function saveSaEditUser() {
+            const uid = document.getElementById('saEditUserId').value;
+            const name = document.getElementById('saEditUserName').value.trim();
+            const email = document.getElementById('saEditUserEmail').value.trim();
+            const role = document.getElementById('saEditUserRole').value;
+            const dept = document.getElementById('saEditUserDept').value.trim();
+            const leave = document.getElementById('saEditUserLeave').value;
+            const tenure = document.getElementById('saEditUserTenure').value;
+            const password = document.getElementById('saEditUserPass').value.trim();
+
+            if (!name || !email) {
+                alert('Vui lòng nhập họ tên và email!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/users/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: uid,
+                        full_name: name,
+                        email: email,
+                        role: role,
+                        department: dept,
+                        total_leave_days: leave,
+                        tenure_months: tenure,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`✅ ${data.message}`);
+                    if (editModal) editModal.hide();
+                    loadAllUsers();
+                } else {
+                    alert('Lỗi: ' + (data.error || 'Không thể cập nhật'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        async function deleteUser(userId, name) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa tài khoản "${name}" (#${userId}) khỏi hệ thống và Keycloak?`)) return;
+            try {
+                const res = await fetch('/api/users/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`✅ ${data.message}`);
+                    loadAllUsers();
+                    loadTenants();
+                } else {
+                    alert('Lỗi khi xóa: ' + (data.error || 'Không thể xóa'));
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Lỗi kết nối máy chủ');
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            // Đăng xuất đồng bộ khỏi máy chủ Keycloak SSO
+            const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
+            window.location.href = `http://localhost:8080/realms/mini-agent-platform/protocol/openid-connect/logout?post_logout_redirect_uri=${redirectUri}&client_id=mini-agent-studio-app`;
+        }
+
+        loadTenants();
+        loadAllUsers();
+    </script>
+</body>
+</html>

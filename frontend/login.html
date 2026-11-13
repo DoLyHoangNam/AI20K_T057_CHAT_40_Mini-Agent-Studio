@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Đăng nhập — Mini Agent Studio Platform</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Keycloak Official JS Adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@24.0.0/dist/keycloak.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #ffffff;
+            --surface: #ffffff;
+            --fg: #111827;
+            --muted: #64748b;
+            --border: #e5e7eb;
+            --accent: #000000;
+            --accent-hover: #1f2937;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--fg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-sans);
+            padding: 30px 15px;
+            margin: 0;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 44px 36px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        .brand-logo-mark {
+            width: 52px;
+            height: 52px;
+            background: #000000;
+            color: #ffffff;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-keycloak {
+            background: #000000;
+            color: #ffffff !important;
+            border: 1px solid #000000;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            padding: 14px 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 150ms ease;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-keycloak:hover {
+            background: #1f2937;
+            border-color: #1f2937;
+            transform: translateY(-1px);
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #f4f4f5;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #52525b;
+            margin-bottom: 24px;
+        }
+
+        .status-pill {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #16a34a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="brand-logo-mark">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h4 class="fw-bold mb-1" style="letter-spacing: -0.02em;">OpenDesign Platform</h4>
+        <p class="text-muted small mb-3">Hệ thống Đăng nhập Tập trung & Phân quyền Doanh nghiệp</p>
+
+        <div class="security-badge">
+            <span class="status-pill"></span>
+            <span>Keycloak OIDC / OAuth2 Active</span>
+        </div>
+
+        <p class="text-secondary small mb-4" style="line-height: 1.6;">
+            Hệ thống áp dụng chính sách bảo mật cấp độ Enterprise. Toàn bộ người dùng và quản trị viên phải xác thực qua máy chủ tập trung <strong>Keycloak SSO</strong>.
+        </p>
+
+        <!-- DUY NHẤT 1 NÚT ĐĂNG NHẬP KEYCLOAK -->
+        <button type="button" class="btn-keycloak mb-3" onclick="loginWithKeycloak()">
+            <i class="fa-solid fa-key" style="color: #60a5fa; font-size: 16px;"></i>
+            <span>Đăng nhập bằng Keycloak SSO</span>
+        </button>
+
+        <div class="mt-4 pt-3 border-top" style="font-size: 11px; color: var(--muted); font-family: var(--font-mono);">
+            Realm: mini-agent-platform • Port: 8080
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH KEYCLOAK CLIENT
+        const keycloak = new Keycloak({
+            url: 'http://localhost:8080',
+            realm: 'mini-agent-platform',
+            clientId: 'mini-agent-studio-app'
+        });
+
+        // Tự động kiểm tra phiên đăng nhập
+        keycloak.init({ 
+            onLoad: 'check-sso',
+            checkLoginIframe: false,
+            pkceMethod: 'S256'
+        }).then(authenticated => {
+            if (authenticated) {
+                console.log('✅ Keycloak Authenticated!');
+                handleKeycloakSuccess(keycloak);
+            }
+        }).catch(err => {
+            console.log('Keycloak init:', err);
+        });
+
+        function loginWithKeycloak() {
+            keycloak.login({
+                redirectUri: window.location.origin + '/login.html'
+            });
+        }
+
+        function handleKeycloakSuccess(kc) {
+            const tokenParsed = kc.tokenParsed;
+            console.log('Keycloak Token Claims:', tokenParsed);
+
+            const roles = (tokenParsed.realm_access && tokenParsed.realm_access.roles) || [];
+            let role = 'EMPLOYEE';
+            if (roles.includes('SUPER_ADMIN')) {
+                role = 'SUPER_ADMIN';
+            } else if (roles.includes('TENANT_ADMIN')) {
+                role = 'TENANT_ADMIN';
+            }
+
+            const currentUser = {
+                id: tokenParsed.sub,
+                email: tokenParsed.email || tokenParsed.preferred_username,
+                full_name: tokenParsed.name || tokenParsed.preferred_username,
+                role: role,
+                tenant_id: tokenParsed.tenant_id || (role === 'SUPER_ADMIN' ? 'PLATFORM' : 'VINFAST'),
+                department: tokenParsed.department || 'All',
+                auth_provider: 'KEYCLOAK'
+            };
+
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('keycloak_token', kc.token);
+
+            // Tự động điều hướng theo quyền được Keycloak chứng thực
+            if (role === 'SUPER_ADMIN') {
+                window.location.href = 'super_admin.html';
+            } else if (role === 'TENANT_ADMIN') {
+                window.location.href = 'admin_studio.html';
+            } else {
+                window.location.href = 'employee_portal.html';
+            }
+        }
+    </script>
+</body>
+</html>
