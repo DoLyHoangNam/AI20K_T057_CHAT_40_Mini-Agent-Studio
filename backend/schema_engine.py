@@ -8,27 +8,27 @@ PRESET_SCHEMAS: Dict[str, Dict[str, Any]] = {
     "ENTERPRISE": {
         "domain_type": "ENTERPRISE",
         "profile_card": {
-            "title": "Hồ sơ nhân sự & Chế độ",
+            "title": "Hồ sơ công tác & Nhiệm vụ",
             "scope_label": "Phòng ban",
             "metrics": [
-                {"key": "total_leave_days", "label": "Tiêu chuẩn", "unit": "ngày"},
-                {"key": "used_leave_days", "label": "Đã nghỉ", "unit": "ngày"},
-                {"key": "leave_remain", "label": "Khả dụng", "unit": "ngày", "formula": "total_leave_days - used_leave_days"}
+                {"key": "assigned_quota", "label": "Định mức tác vụ", "unit": "lượt"},
+                {"key": "processed_quota", "label": "Đã hoàn thành", "unit": "lượt"},
+                {"key": "available_quota", "label": "Khả dụng", "unit": "lượt", "formula": "assigned_quota - processed_quota"}
             ]
         },
         "actions": [
             {
                 "intent": "CREATE_REQUEST",
-                "label": "Làm đơn xin nghỉ phép",
+                "label": "Tạo đề xuất & Yêu cầu nghiệp vụ",
                 "approver_role": "TENANT_ADMIN",
-                "fields": ["Số ngày nghỉ", "Lý do", "Ngày bắt đầu"],
-                "guard": "leave_remain > 0"
+                "fields": ["Nội dung đề xuất", "Căn cứ / Lý do", "Thời hạn hoàn thành"],
+                "guard": "available_quota > 0"
             }
         ],
         "terms": {
-            "user": "Nhân viên",
-            "request": "Đơn xin nghỉ phép",
-            "admin": "Quản lý nhân sự"
+            "user": "Nhân sự",
+            "request": "Đề xuất nghiệp vụ",
+            "admin": "Quản lý / Trưởng bộ phận"
         }
     },
     "EDUCATION": {
@@ -285,11 +285,17 @@ def resolve_user_attributes(user_dict: Dict[str, Any]) -> Dict[str, Any]:
     elif isinstance(raw_attrs, dict):
         attrs.update(raw_attrs)
 
-    # Đảm bảo các thuộc tính legacy được nạp vào
+    # Đảm bảo các thuộc tính doanh nghiệp & legacy được nạp vào
+    total_val = user_dict.get("total_leave_days", 20) or 20
+    used_val = user_dict.get("used_leave_days", 5) or 5
+    if "assigned_quota" not in attrs:
+        attrs["assigned_quota"] = total_val
+    if "processed_quota" not in attrs:
+        attrs["processed_quota"] = used_val
     if "total_leave_days" not in attrs:
-        attrs["total_leave_days"] = user_dict.get("total_leave_days", 12)
+        attrs["total_leave_days"] = total_val
     if "used_leave_days" not in attrs:
-        attrs["used_leave_days"] = user_dict.get("used_leave_days", 0)
+        attrs["used_leave_days"] = used_val
     if "tenure_months" not in attrs:
         attrs["tenure_months"] = user_dict.get("tenure_months", 12)
 
