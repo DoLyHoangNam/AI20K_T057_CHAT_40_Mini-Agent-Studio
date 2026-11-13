@@ -403,7 +403,7 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
         path = url.path
 
         content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
+        body = self.rfile.read(content_length).decode("utf-8", errors="replace") if content_length > 0 else "{}"
         try:
             data = json.loads(body)
         except Exception:
@@ -823,14 +823,14 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute("SELECT full_name, department, total_leave_days, used_leave_days, tenure_months, tenant_id FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT full_name, department, total_leave_days, used_leave_days, tenure_months, tenant_id, attributes FROM users WHERE id = ?", (user_id,))
             user = cursor.fetchone()
 
             cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ?", (agent_name,))
             agent_row = cursor.fetchone()
             conn.close()
 
-            user_dict = dict(user) if user else {"full_name": "Nhân viên", "department": "Sản xuất", "total_leave_days": 12, "used_leave_days": 0, "tenure_months": 12, "tenant_id": "VINFAST"}
+            user_dict = dict(user) if user else {"full_name": "Nhân viên", "department": "Sản xuất", "total_leave_days": 20, "used_leave_days": 5, "tenure_months": 12, "tenant_id": "VINFAST", "attributes": "{}"}
             tenant_id = user_dict.get("tenant_id") or (agent_row["tenant_id"] if agent_row else "VINFAST")
             instruction = agent_row["instruction"] if agent_row else "Bạn là trợ lý ảo doanh nghiệp."
             dept_access = agent_row["department_access"] if agent_row else "ALL"

@@ -563,11 +563,11 @@
                         <div class="od-flow-canvas text-center">
                             <div class="od-node od-node-start"><i class="fa-solid fa-play"></i> Start Node: Nhận Message từ Nhân viên</div>
                             <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
-                            <div class="od-node od-node-intent"><i class="fa-solid fa-filter"></i> Intent Classifier: Phân Loại Ý Định (Phép / RAG)</div>
+                            <div class="od-node od-node-intent"><i class="fa-solid fa-filter"></i> Intent Classifier: Phân Loại Ý Định (Đề xuất / Tra cứu RAG)</div>
                             <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
                             <div class="od-node od-node-rag"><i class="fa-solid fa-database"></i> Context Engine: SQLite DB / Vector RAG Search</div>
                             <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
-                            <div class="od-node od-node-hitl"><i class="fa-solid fa-shield-halved"></i> HITL Gate: Tạm Dừng Chờ Quản Lý Duyệt (Nếu xin nghỉ)</div>
+                            <div class="od-node od-node-hitl"><i class="fa-solid fa-shield-halved"></i> HITL Gate: Tạm Dừng Chờ Quản Lý Duyệt (Nếu tạo đề xuất)</div>
                             <i class="fa-solid fa-arrow-down od-flow-arrow"></i>
                             <div class="od-node od-node-end"><i class="fa-solid fa-check-double"></i> Gemini Generator: Trả Lời Trích Dẫn Ngữ Nghĩa</div>
                         </div>
@@ -607,9 +607,9 @@
 
                         <div class="od-playground-footer">
                             <div class="d-flex gap-1 mb-2 overflow-auto pb-1">
-                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi còn bao nhiêu ngày nghỉ?')">Tra cứu phép</button>
+                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi còn bao nhiêu lượt định mức tác vụ?')">Tra cứu định mức</button>
                                 <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Quy định làm việc và trực ca thế nào?')">Quy chế nội bộ</button>
-                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi muốn xin nghỉ 2 ngày')">Lập đơn HITL</button>
+                                <button class="btn btn-sm btn-light border py-0 px-2 small text-secondary" style="font-size: 0.72rem; white-space: nowrap;" onclick="quickTestPlayground('Tôi muốn tạo 1 đề xuất nghiệp vụ')">Lập đề xuất HITL</button>
                             </div>
                             <div class="input-group">
                                 <input type="text" id="playgroundInput" class="form-control" placeholder="Gõ thử nghiệm prompt..." onkeypress="if(event.key === 'Enter') sendPlaygroundMessage()">
@@ -633,12 +633,12 @@
             <div class="row g-4" id="agentListContainer"></div>
         </div>
 
-        <!-- TAB C: DUYỆT ĐƠN NGHỈ PHÉP HITL -->
+        <!-- TAB C: DUYỆT ĐỀ XUẤT NGHIỆP VỤ HITL -->
         <div id="tab-approvals" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-envelope-open-text text-warning me-2"></i>Hộp Thư Phê Duyệt Đơn Nghỉ Phép</h4>
-                    <p class="text-secondary small mb-0">Các đơn do Bot trình ký từ luồng bảo mật Human-In-The-Loop</p>
+                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-envelope-open-text text-warning me-2"></i>Hộp Thư Phê Duyệt Đề Xuất & Yêu Cầu Nghiệp Vụ</h4>
+                    <p class="text-secondary small mb-0">Các đề xuất do Bot trình ký từ luồng bảo mật Human-In-The-Loop</p>
                 </div>
                 <button class="btn btn-sm btn-outline-secondary" onclick="loadApprovals()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
             </div>
@@ -647,11 +647,11 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>MÃ ĐƠN</th>
-                                <th>NHÂN VIÊN</th>
+                                <th>MÃ YÊU CẦU</th>
+                                <th>NGƯỜI GỬI</th>
                                 <th>PHÒNG BAN</th>
-                                <th>SỐ NGÀY</th>
-                                <th>CHI TIẾT LÝ DO</th>
+                                <th>ĐỊNH MỨC / SỐ LƯỢNG</th>
+                                <th>NỘI DUNG CHI TIẾT</th>
                                 <th>TRẠNG THÁI</th>
                                 <th>THAO TÁC DUYỆT</th>
                             </tr>
@@ -720,8 +720,8 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Phép Tiêu Chuẩn</label>
-                            <input type="number" id="singleLeave" class="form-control" value="12" min="1">
+                            <label class="form-label">Định Mức Tiêu Chuẩn</label>
+                            <input type="number" id="singleLeave" class="form-control" value="20" min="1">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-success fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu User</button>
@@ -742,7 +742,7 @@
                                 <th>EMAIL</th>
                                 <th>PHÒNG BAN</th>
                                 <th>VAI TRÒ</th>
-                                <th>HỒ SƠ PHÉP NĂM</th>
+                                <th>ĐỊNH MỨC TÁC VỤ</th>
                                 <th>THAO TÁC</th>
                             </tr>
                         </thead>
@@ -869,7 +869,7 @@
                         <p class="text-secondary small mb-3">Chọn nhanh mẫu cấu hình có sẵn cho Doanh nghiệp, Giáo dục hoặc Y tế.</p>
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <button type="button" class="btn btn-sm btn-outline-dark" onclick="applyPresetSchema('ENTERPRISE')">
-                                <i class="fa-solid fa-building me-1"></i> 🏢 Doanh Nghiệp (Quỹ Phép)
+                                <i class="fa-solid fa-building me-1"></i> 🏢 Doanh Nghiệp (Đề Xuất & Tác Vụ)
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-dark" onclick="applyPresetSchema('EDUCATION')">
                                 <i class="fa-solid fa-graduation-cap me-1"></i> 🎓 Đại Học (Tín Chỉ & Đào Tạo)
@@ -1204,7 +1204,7 @@
 
                 tbody.innerHTML = '';
                 if (list.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">Chưa có đơn xin nghỉ phép nào của nhân viên.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">Chưa có đề xuất hoặc yêu cầu nghiệp vụ nào từ nhân sự.</td></tr>';
                     return;
                 }
 
@@ -1225,7 +1225,7 @@
                             <td><code>#${req.id}</code></td>
                             <td class="fw-bold text-dark">${req.user_name}</td>
                             <td><span class="badge bg-primary bg-opacity-10 text-primary">${req.department || 'N/A'}</span></td>
-                            <td><b class="text-dark">${req.days_requested} ngày</b></td>
+                            <td><b class="text-dark">${req.days_requested} lượt</b></td>
                             <td class="small text-secondary">${req.date_details}</td>
                             <td>${statusBadge}</td>
                             <td>${actionBtns}</td>

@@ -239,14 +239,14 @@
 
                 <div class="chat-body" id="chatBody">
                     <div class="msg msg-agent" id="welcomeMsg">
-                        👋 Dạ em chào anh/chị <b><span id="welcomeEmpName">bạn</span></b>! Em là Trợ lý AI nội bộ của doanh nghiệp. Em có thể giải đáp văn bản nội quy quy chế, kiểm tra số ngày phép hoặc giúp làm đơn xin nghỉ phép nhanh chóng.
+                        👋 Dạ em chào anh/chị <b><span id="welcomeEmpName">bạn</span></b>! Em là Trợ lý AI nội bộ của doanh nghiệp. Em có thể giải đáp tài liệu quy trình vận hành, kiểm tra định mức tác vụ hoặc giúp lập đề xuất trình ký nhanh chóng.
                     </div>
                 </div>
 
                 <div class="chat-footer">
                     <div class="d-flex gap-2 mb-3 overflow-auto" id="quickButtonsContainer">
-                        <button class="quick-btn" onclick="sendQuick('Tôi còn bao nhiêu ngày nghỉ trong tháng này?')"><i class="fa-solid fa-calendar-days me-1 text-primary"></i>Tra cứu ngày nghỉ</button>
-                        <button class="quick-btn" onclick="sendQuick('Tôi muốn xin nghỉ 1 ngày')"><i class="fa-solid fa-file-signature me-1 text-warning"></i>Xin nghỉ phép 1 ngày</button>
+                        <button class="quick-btn" onclick="sendQuick('Định mức tác vụ hiện tại của tôi còn bao nhiêu lượt?')"><i class="fa-solid fa-chart-pie me-1 text-primary"></i>Kiểm tra định mức</button>
+                        <button class="quick-btn" onclick="sendQuick('Tôi muốn lập một đề xuất nghiệp vụ mới')"><i class="fa-solid fa-file-signature me-1 text-warning"></i>Lập đề xuất trình ký</button>
                         <button class="quick-btn" onclick="sendQuick('Nội quy phòng marketing như thế nào?')"><i class="fa-solid fa-bullhorn me-1 text-info"></i>Nội quy phòng ban</button>
                     </div>
                     <div class="input-group">
@@ -350,8 +350,10 @@
                     Object.assign(attrs, currentUser.attributes);
                 }
             }
-            attrs.total_leave_days = currentUser.total_leave_days || 12;
-            attrs.used_leave_days = currentUser.used_leave_days || 0;
+            attrs.assigned_quota = attrs.assigned_quota || currentUser.total_leave_days || 20;
+            attrs.processed_quota = attrs.processed_quota || currentUser.used_leave_days || 5;
+            attrs.total_leave_days = attrs.assigned_quota;
+            attrs.used_leave_days = attrs.processed_quota;
             attrs.tenure_months = currentUser.tenure_months || 12;
             attrs.credits_total = attrs.credits_total || currentUser.total_leave_days || 120;
             attrs.credits_done = attrs.credits_done || currentUser.used_leave_days || 45;
@@ -363,15 +365,15 @@
         function updateProfileUI() {
             const schema = tenantUiSchema || {
                 profile_card: {
-                    title: 'Hồ sơ nhân sự & Chế độ',
+                    title: 'Hồ sơ công tác & Nhiệm vụ',
                     scope_label: 'Phòng ban',
                     metrics: [
-                        { key: 'total_leave_days', label: 'Tiêu chuẩn', unit: 'ngày' },
-                        { key: 'used_leave_days', label: 'Đã nghỉ', unit: 'ngày' },
-                        { key: 'leave_remain', label: 'Khả dụng', unit: 'ngày', formula: 'total_leave_days - used_leave_days' }
+                        { key: 'assigned_quota', label: 'Định mức tác vụ', unit: 'lượt' },
+                        { key: 'processed_quota', label: 'Đã hoàn thành', unit: 'lượt' },
+                        { key: 'available_quota', label: 'Khả dụng', unit: 'lượt', formula: 'assigned_quota - processed_quota' }
                     ]
                 },
-                terms: { user: 'Nhân viên', request: 'Đơn xin nghỉ phép', admin: 'Quản lý nhân sự' }
+                terms: { user: 'Nhân sự', request: 'Đề xuất nghiệp vụ', admin: 'Quản lý / Trưởng bộ phận' }
             };
 
             const userAttrs = getUserResolvedAttributes();
@@ -616,19 +618,14 @@
 
                 const data = await res.json();
 
-                if (data.intent === 'CREATE_LEAVE') {
+                if (data.intent === 'CREATE_REQUEST' || data.intent === 'CREATE_LEAVE') {
                     const match = text.match(/\d+/);
-                    const days = match ? parseInt(match[0]) : 1;
-                    const remain = currentUser.total_leave_days - currentUser.used_leave_days;
+                    const qty = match ? parseInt(match[0]) : 1;
+                    const terms = (tenantUiSchema && tenantUiSchema.terms) || { request: 'Đề xuất nghiệp vụ' };
 
-                    if (days > remain) {
-                        appendMessage(`⚠️ <b>Cảnh báo:</b> Bạn muốn xin nghỉ <b>${days} ngày</b>, nhưng quỹ phép còn lại chỉ có <b>${remain} ngày</b>.`);
-                        return;
-                    }
-
-                    agentState.leaveData.days = days;
+                    agentState.leaveData.days = qty;
                     agentState.step = 'collecting_date';
-                    appendMessage(`Dạ em đã ghi nhận bạn muốn xin nghỉ <b>${days} ngày</b>.<br>👉 Bạn vui lòng cho em biết <b>ngày dự kiến nghỉ (ngày nào, thứ mấy)</b> và <b>lý do xin nghỉ</b> là gì ạ?`);
+                    appendMessage(`Dạ em đã ghi nhận bạn muốn tạo <b>${terms.request || 'yêu cầu'} (${qty} định mức/lượt)</b>.<br>👉 Bạn vui lòng cho em biết <b>nội dung chi tiết của đề xuất</b> và <b>căn cứ / lý do thực hiện</b> là gì ạ?`);
                     return;
                 }
 
@@ -644,6 +641,7 @@
         }
 
         async function confirmLeave(isConfirmed) {
+            const terms = (tenantUiSchema && tenantUiSchema.terms) || { request: 'Đề xuất nghiệp vụ', admin: 'Quản lý / Trưởng bộ phận' };
             if (isConfirmed) {
                 try {
                     const res = await fetch('/api/leave_requests', {
@@ -661,19 +659,19 @@
                     const result = await res.json();
                     if (result.success) {
                         appendMessage(`
-                            🎉 <b>[GỬI ĐƠN THÀNH CÔNG VÀO HỆ THỐNG]</b><br>
-                            • Đơn xin nghỉ phép <b>Mã đơn #${result.id}</b> (${agentState.leaveData.days} ngày) đã được lưu vào CSDL và gửi tới hòm thư Quản lý ${currentUser.tenant_id}.<br>
-                            • 🔔 <b>Khi Quản lý ${currentUser.tenant_id} bấm Duyệt, màn hình của bạn sẽ ngay lập tức nhận được thông báo thời gian thực!</b>
+                            🎉 <b>[GỬI ${terms.request.toUpperCase()} THÀNH CÔNG VÀO HỆ THỐNG]</b><br>
+                            • ${terms.request} <b>Mã #${result.id}</b> (${agentState.leaveData.days} lượt/đơn vị) đã được lưu vào CSDL và gửi tới ${terms.admin} (${currentUser.tenant_id}).<br>
+                            • 🔔 <b>Khi ${terms.admin} bấm Duyệt, màn hình của bạn sẽ ngay lập tức nhận được thông báo thời gian thực!</b>
                         `);
                     } else {
-                        appendMessage('❌ Lỗi lưu đơn vào hệ thống.');
+                        appendMessage('❌ Lỗi lưu yêu cầu vào hệ thống.');
                     }
                 } catch (e) {
                     console.error(e);
-                    appendMessage('❌ Lỗi kết nối gửi đơn.');
+                    appendMessage('❌ Lỗi kết nối gửi yêu cầu.');
                 }
             } else {
-                appendMessage('❌ Đã hủy yêu cầu gửi đơn. Quỹ phép của bạn được giữ nguyên.');
+                appendMessage(`❌ Đã hủy thao tác. Định mức ${terms.request.toLowerCase()} của bạn được giữ nguyên.`);
             }
             agentState.step = 'idle';
         }
