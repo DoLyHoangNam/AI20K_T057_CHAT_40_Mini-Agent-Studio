@@ -58,3 +58,10 @@ backend/test_reset.py
 backend/get_kc_users.py
 backend/fix_fpt.py
 backend/cleanup_and_create_superadmin.py
+
+# Local presentation drafts & test import files
+DEMO_SCRIPT.md
+SLIDE_DECK_OUTLINE.md
+danh_sach_nhan_vien*
+*.csv
+
