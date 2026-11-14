@@ -364,11 +364,11 @@
 
         function updateProfileUI() {
             const tenantTitle = currentUser.tenant_id || 'VINFAST';
-            document.getElementById('portalHeaderTitle').textContent = `Cổng Trợ Lý Doanh Nghiệp`;
-            document.getElementById('portalTenantBadge').textContent = `Doanh nghiệp: ${tenantTitle}`;
-            document.getElementById('empName').textContent = currentUser.full_name || 'Người dùng';
-            document.getElementById('welcomeEmpName').textContent = currentUser.full_name || 'Người dùng';
-            document.getElementById('empDept').textContent = `Phòng: ${currentUser.department || 'Chung'} (${currentUser.role || 'EMPLOYEE'})`;
+            document.getElementById('portalHeaderTitle').textContent = `Cổng Trợ Lý AI Đa Lĩnh Vực`;
+            document.getElementById('portalTenantBadge').textContent = `Tổ chức: ${tenantTitle}`;
+            document.getElementById('empName').textContent = currentUser.full_name || 'Thành viên';
+            document.getElementById('welcomeEmpName').textContent = currentUser.full_name || 'Thành viên';
+            document.getElementById('empDept').textContent = `Đơn vị: ${currentUser.department || 'Chung'} (${currentUser.role || 'EMPLOYEE'})`;
 
             const cardContainer = document.getElementById('dynamicProfileCardContainer');
             if (cardContainer) {
@@ -378,8 +378,8 @@
                             <i class="fa-solid fa-id-badge fa-lg"></i>
                         </div>
                         <div style="line-height: 1.25;">
-                            <div class="fw-bold text-dark" style="font-size: 0.88rem;">${currentUser.full_name || 'Nhân sự'}</div>
-                            <div class="small text-secondary" style="font-size: 0.75rem;">Phòng ban: <b class="text-primary">${currentUser.department || 'Chung'}</b></div>
+                            <div class="fw-bold text-dark" style="font-size: 0.88rem;">${currentUser.full_name || 'Thành viên'}</div>
+                            <div class="small text-secondary" style="font-size: 0.75rem;">Đơn vị / Lớp / Phòng: <b class="text-primary">${currentUser.department || 'Chung'}</b></div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
@@ -480,9 +480,9 @@
                         `;
                     } else {
                         sidebar.innerHTML += `
-                            <div class="agent-item locked" onclick="alert('⛔ BỊ CHẶN TRUY CẬP (ACL Security):\\nBạn thuộc phòng ${currentUser.department}, không có quyền truy cập ${ag.name}!')">
+                            <div class="agent-item locked" onclick="alert('⛔ BỊ CHẶN TRUY CẬP (ACL Security):\\nBạn thuộc đơn vị/lớp ${currentUser.department}, không có quyền truy cập ${ag.name}!')">
                                 <div class="fw-bold small text-secondary"><i class="fa-solid fa-lock text-danger me-1"></i> ${ag.name}</div>
-                                <div class="text-danger" style="font-size: 0.7rem;">Bị khóa (Chỉ dành cho phòng ${ag.department_access})</div>
+                                <div class="text-danger" style="font-size: 0.7rem;">Bị khóa (Chỉ dành cho đơn vị: ${ag.department_access})</div>
                             </div>
                         `;
                     }
@@ -538,17 +538,28 @@
 
                 const data = await res.json();
 
+                let hitlActionsHtml = '';
+                if (data.require_confirm) {
+                    agentState.step = 'await_confirm';
+                    agentState.leaveData = {
+                        days: data.days || 1,
+                        date: data.date_str || text
+                    };
+                    hitlActionsHtml = `
+                        <div class="mt-2 pt-2 border-top d-flex gap-2">
+                            <button class="btn btn-sm btn-success fw-semibold" onclick="confirmLeave(true)">
+                                <i class="fa-solid fa-check me-1"></i>Xác nhận gửi phê duyệt (HITL)
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="confirmLeave(false)">
+                                Hủy bỏ
+                            </button>
+                        </div>
+                    `;
+                }
+
                 appendMessage(`
                     ${data.reply}
-                    <div class="citation"><i class="fa-solid fa-quote-left me-1 text-primary"></i> <b>Nguồn trích dẫn:</b> ${data.citation}</div>
-                `);
-
-            } catch (err) {
-                console.error(err);
-                appendMessage('❌ Không thể kết nối với máy chủ AI Agent.');
-            }
-        }
-                    ${data.reply}
+                    ${hitlActionsHtml}
                     <div class="citation"><i class="fa-solid fa-quote-left me-1 text-primary"></i> <b>Nguồn trích dẫn:</b> ${data.citation}</div>
                 `);
 

@@ -435,16 +435,25 @@
                     <!-- SECTION 1: SPECIFICATIONS & ACL SECURITY -->
                     <div class="od-card">
                         <div class="od-card-header">
-                            <h6 class="od-card-title"><i class="fa-solid fa-sliders text-primary"></i>1. Định Danh & Phân Quyền Truy Cập (ACL Matrix)</h6>
-                            <span class="badge bg-primary bg-opacity-10 text-primary badge-pill-soft">No-Code Agent Config</span>
+                            <h6 class="od-card-title"><i class="fa-solid fa-sliders text-primary"></i>1. Định Danh & Phân Quyền Đơn Vị (Multi-Domain ACL Matrix)</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary badge-pill-soft">Đa ngành nghề: Doanh nghiệp • Giáo dục • Y tế</span>
                         </div>
 
-                        <!-- 1-CLICK DEPARTMENT TEMPLATES -->
+                        <!-- MULTI-INDUSTRY 1-CLICK TEMPLATES -->
                         <div class="mb-3 p-3 bg-light rounded-3 border">
-                            <label class="form-label small text-dark fw-bold text-uppercase d-flex align-items-center mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                                <i class="fa-solid fa-bolt text-warning me-1"></i> Chọn Nhanh Mẫu Trợ Lý Theo Phòng Ban (1-Click):
-                            </label>
-                            <div class="d-flex flex-wrap gap-2">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+                                <label class="form-label small text-dark fw-bold text-uppercase d-flex align-items-center mb-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                    <i class="fa-solid fa-bolt text-warning me-1"></i> Chọn Mẫu Agent Theo Ngành Nghề & Đơn Vị (1-Click):
+                                </label>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-dark fw-semibold py-0 px-2" id="domainTabEnterprise" onclick="switchTemplateDomain('ENTERPRISE')" style="font-size: 0.72rem;">🏢 Doanh nghiệp (Phòng ban)</button>
+                                    <button type="button" class="btn btn-outline-dark fw-semibold py-0 px-2" id="domainTabEducation" onclick="switchTemplateDomain('EDUCATION')" style="font-size: 0.72rem;">🎓 Giáo dục (Khoa / Lớp)</button>
+                                    <button type="button" class="btn btn-outline-dark fw-semibold py-0 px-2" id="domainTabHealthcare" onclick="switchTemplateDomain('HEALTHCARE')" style="font-size: 0.72rem;">🏥 Y tế / Tổ chức</button>
+                                </div>
+                            </div>
+
+                            <!-- ENTERPRISE TEMPLATES -->
+                            <div id="templateGroupEnterprise" class="d-flex flex-wrap gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('marketing')">
                                     <i class="fa-solid fa-bullhorn text-primary me-1"></i> 🎯 Phòng Marketing
                                 </button>
@@ -461,32 +470,82 @@
                                     <i class="fa-solid fa-chart-line text-danger me-1"></i> 📈 Phòng Kinh Doanh (Sales)
                                 </button>
                             </div>
+
+                            <!-- EDUCATION TEMPLATES -->
+                            <div id="templateGroupEducation" class="d-flex flex-wrap gap-2" style="display: none !important;">
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('edu_class_ai')">
+                                    <i class="fa-solid fa-chalkboard-user text-primary me-1"></i> 👨‍🏫 Trợ Giảng Lớp AI / CNTT
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('edu_academic')">
+                                    <i class="fa-solid fa-graduation-cap text-success me-1"></i> 🏛️ Phòng Đào Tạo & Học Vụ
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('edu_econ')">
+                                    <i class="fa-solid fa-book-open-reader text-warning me-1"></i> 📚 Khoa Kinh Tế & Quản Trị
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('edu_student')">
+                                    <i class="fa-solid fa-user-graduate text-info me-1"></i> 🎓 Công Tác Sinh Viên (CTSV)
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('edu_library')">
+                                    <i class="fa-solid fa-book-atlas text-danger me-1"></i> 📖 Thư Viện & Học Liệu
+                                </button>
+                            </div>
+
+                            <!-- HEALTHCARE / OTHER TEMPLATES -->
+                            <div id="templateGroupHealthcare" class="d-flex flex-wrap gap-2" style="display: none !important;">
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('med_clinic')">
+                                    <i class="fa-solid fa-stethoscope text-primary me-1"></i> 🩺 Khoa Khám Bệnh & Tư Vấn
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('med_pahrmacy')">
+                                    <i class="fa-solid fa-pills text-success me-1"></i> 💊 Khoa Dược & Phác Đồ
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-dark bg-white" onclick="applyDeptTemplate('med_admin')">
+                                    <i class="fa-solid fa-hospital-user text-warning me-1"></i> 🏥 Hành Chính & Quy Trình
+                                </button>
+                            </div>
                         </div>
 
                         <div class="row g-3">
-                            <div class="col-md-7">
+                            <div class="col-md-6">
                                 <label class="form-label">Tên Trợ Lý AI (Agent Name)</label>
-                                <input type="text" id="newAgentName" class="form-control" placeholder="Ví dụ: Agent Phòng Marketing...">
+                                <input type="text" id="newAgentName" class="form-control" placeholder="VD: Agent Phòng Marketing / Trợ giảng Lớp AI-K5...">
                             </div>
-                            <div class="col-md-5">
-                                <label class="form-label">Phòng Ban Truy Cập (ACL Role Guard)</label>
-                                <select id="newAgentDept" class="form-select">
-                                    <option value="ALL">Toàn công ty (Mọi phòng ban)</option>
-                                    <option value="Marketing">Phòng Marketing</option>
-                                    <option value="Accounting">Phòng Kế Toán</option>
-                                    <option value="HR">Phòng Nhân Sự (HR)</option>
-                                    <option value="IT">Phòng Kỹ thuật & IT</option>
-                                    <option value="Sales">Phòng Kinh Doanh (Sales)</option>
-                                    <option value="Production">Phòng Sản xuất</option>
-                                </select>
+                            <div class="col-md-6">
+                                <label class="form-label">Đơn Vị Phân Quyền (Phòng ban / Khoa / Lớp học)</label>
+                                <div class="input-group">
+                                    <select id="newAgentDeptSelect" class="form-select" onchange="onAgentDeptSelectChange(this.value)">
+                                        <option value="ALL">🌐 Toàn tổ chức (Mọi Phòng ban / Lớp / Khoa)</option>
+                                        <optgroup label="🏢 Doanh nghiệp — Phòng ban">
+                                            <option value="Marketing">Phòng Marketing</option>
+                                            <option value="Accounting">Phòng Kế Toán (Accounting)</option>
+                                            <option value="HR">Phòng Nhân Sự (HR)</option>
+                                            <option value="IT">Phòng Kỹ thuật & IT</option>
+                                            <option value="Sales">Phòng Kinh Doanh (Sales)</option>
+                                            <option value="Production">Phòng Sản xuất (Production)</option>
+                                        </optgroup>
+                                        <optgroup label="🎓 Giáo dục — Khoa / Lớp học">
+                                            <option value="Lop_AI_CNTT">Lớp AI / Khoa CNTT</option>
+                                            <option value="Phong_Dao_Tao">Phòng Đào Tạo & Học Vụ</option>
+                                            <option value="Khoa_Kinh_Te">Khoa Kinh Tế & Quản Trị</option>
+                                            <option value="CTSV">Phòng Công Tác Sinh Viên</option>
+                                            <option value="Thu_Vien">Thư Viện & Học Liệu</option>
+                                        </optgroup>
+                                        <optgroup label="🏥 Y tế / Tổ chức — Chuyên khoa">
+                                            <option value="Khoa_Kham_Benh">Khoa Khám Bệnh</option>
+                                            <option value="Khoa_Duoc">Khoa Dược</option>
+                                            <option value="Hanh_Chinh">Hành Chính Tổng Hợp</option>
+                                        </optgroup>
+                                        <option value="__CUSTOM__">➕ Tự nhập tên Lớp / Phòng ban / Đơn vị mới...</option>
+                                    </select>
+                                    <input type="text" id="newAgentDept" class="form-control d-none" value="ALL" placeholder="Nhập tên Lớp / Phòng ban (VD: Lớp K68-AI)...">
+                                </div>
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Mô tả vai trò nghiệp vụ</label>
-                                <input type="text" id="newAgentDesc" class="form-control" placeholder="Mô tả chức năng chính để nhân viên dễ nhận diện...">
+                                <label class="form-label">Mô tả vai trò chuyên môn</label>
+                                <input type="text" id="newAgentDesc" class="form-control" placeholder="Mô tả chức năng chính để thành viên / nhân viên / sinh viên dễ nhận diện...">
                             </div>
                             <div class="col-12">
                                 <label class="form-label">System Instruction (Chỉ dẫn hệ thống chuyên sâu)</label>
-                                <textarea id="newAgentPrompt" class="form-control" rows="3" placeholder="Bạn là trợ lý AI chuyên nghiệp thuộc doanh nghiệp. Nhiệm vụ của bạn là tra cứu quy chế, giải đáp thắc mắc và hỗ trợ nhân viên tuân thủ đúng nội quy..."></textarea>
+                                <textarea id="newAgentPrompt" class="form-control" rows="3" placeholder="Bạn là trợ lý AI chuyên trách của đơn vị. Nhiệm vụ của bạn là tra cứu tài liệu, giải đáp thắc mắc và hỗ trợ thành viên đúng phạm vi phân quyền..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -686,12 +745,12 @@
             </div>
         </div>
 
-        <!-- TAB D: QUẢN LÝ NHÂN SỰ & BULK PROVISIONING -->
+        <!-- TAB D: QUẢN LÝ THÀNH VIÊN & ĐƠN VỊ (PHÒNG BAN / KHOA / LỚP) -->
         <div id="tab-employees" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-users text-primary me-2"></i>Quản Lý Nhân Sự & Cấp Quyền</h4>
-                    <p class="text-secondary small mb-0">Thêm nhân viên hàng loạt, phân quyền phòng ban, sửa hồ sơ hoặc xóa tài khoản</p>
+                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-users text-primary me-2"></i>Quản Lý Thành Viên & Phân Quyền Đơn Vị</h4>
+                    <p class="text-secondary small mb-0">Thêm thành viên (nhân viên / giảng viên / sinh viên) hàng loạt, gán Đơn vị (Phòng ban / Khoa / Lớp học) để phân quyền truy cập Agent</p>
                 </div>
                 <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
             </div>
@@ -699,74 +758,79 @@
             <!-- BULK IMPORT BOX -->
             <div class="od-card border-primary border-opacity-25" style="background-color: #fafcff;">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-file-csv me-1"></i>Thêm Nhân Viên Hàng Loạt (Bulk Provisioning)</h6>
+                    <h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-file-csv me-1"></i>Thêm Thành Viên Hàng Loạt (Bulk Provisioning)</h6>
                     <div>
                         <input type="file" id="bulkCsvInput" accept=".csv,.txt" style="display: none;" onchange="handleBulkFileSelect(event)">
                         <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="document.getElementById('bulkCsvInput').click()">
                             <i class="fa-solid fa-folder-open me-1"></i> Chọn File CSV / TXT
                         </button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillSampleBulkUser()">
-                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Điền 1 nhân viên mẫu
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Điền mẫu nhanh
                         </button>
                     </div>
                 </div>
-                <p class="text-secondary small mb-2">Dán hoặc tải file danh sách nhân viên (Mỗi dòng một người: <code>Họ và Tên, Email, Phòng ban, Ngày phép, Thâm niên</code>)</p>
-                <textarea id="bulkUserText" class="form-control mb-3" rows="3" placeholder="Đỗ Lý Hoàng Nam, dolyhoangnam13072005@gmail.com, Production, 12, 12"></textarea>
+                <p class="text-secondary small mb-2">Dán hoặc tải file danh sách thành viên (Mỗi dòng một người: <code>Họ và Tên, Email, Đơn vị (Phòng ban / Lớp / Khoa)</code>)</p>
+                <textarea id="bulkUserText" class="form-control mb-3" rows="3" placeholder="Đỗ Lý Hoàng Nam, dolyhoangnam13072005@gmail.com, Marketing"></textarea>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-secondary small" style="font-size: 11px;">
-                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Mỗi nhân viên sẽ được sinh mật khẩu ngẫu nhiên riêng biệt, mã hóa trên Keycloak và gửi email bàn giao.
+                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Mỗi tài khoản sẽ được sinh mật khẩu ngẫu nhiên riêng biệt, đồng bộ lên Keycloak SSO và gửi email bàn giao.
                     </span>
-                    <button class="btn btn-dark fw-bold" onclick="handleBulkImport()"><i class="fa-solid fa-bolt me-1"></i> Tạo Toàn Bộ Nhân Viên Hàng Loạt</button>
+                    <button class="btn btn-dark fw-bold" onclick="handleBulkImport()"><i class="fa-solid fa-bolt me-1"></i> Tạo Toàn Bộ Tài Khoản Hàng Loạt</button>
                 </div>
             </div>
 
             <!-- TẠO ĐƠN LẺ -->
             <div class="od-card">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-plus text-success me-2"></i>Thêm Từng Nhân Viên Đơn Lẻ:</h6>
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-plus text-success me-2"></i>Thêm Thành Viên Đơn Lẻ:</h6>
                 <form id="createSingleUserForm" onsubmit="handleCreateSingleUser(event)">
                     <div class="row g-3">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label class="form-label">Họ và Tên</label>
                             <input type="text" id="singleName" class="form-control" placeholder="Trần Đức Nam" required>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Email</label>
-                            <input type="email" id="singleEmail" class="form-control" placeholder="nam.td@company.vn" required>
+                        <div class="col-md-4">
+                            <label class="form-label">Email đăng nhập SSO</label>
+                            <input type="email" id="singleEmail" class="form-control" placeholder="nam.td@organization.vn" required>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Phòng Ban</label>
-                            <select id="singleDept" class="form-select">
-                                <option value="Marketing">Marketing</option>
-                                <option value="Production">Production (Sản xuất)</option>
-                                <option value="Accounting">Accounting (Kế toán)</option>
-                                <option value="HR">HR (Nhân sự)</option>
-                                <option value="Engineering">Engineering (Kỹ thuật)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Định Mức Tiêu Chuẩn</label>
-                            <input type="number" id="singleLeave" class="form-control" value="20" min="1">
+                            <label class="form-label">Đơn Vị (Phòng / Lớp / Khoa)</label>
+                            <input type="text" id="singleDept" list="unitOptionsDatalist" class="form-control" value="Marketing" placeholder="Chọn hoặc tự nhập..." required>
+                            <datalist id="unitOptionsDatalist">
+                                <option value="Marketing">🏢 Phòng Marketing</option>
+                                <option value="Accounting">🏢 Phòng Kế Toán</option>
+                                <option value="HR">🏢 Phòng Nhân Sự (HR)</option>
+                                <option value="IT">🏢 Phòng Kỹ thuật & IT</option>
+                                <option value="Sales">🏢 Phòng Kinh Doanh</option>
+                                <option value="Production">🏢 Phòng Sản xuất</option>
+                                <option value="Lop_AI_CNTT">🎓 Lớp AI / Khoa CNTT</option>
+                                <option value="Phong_Dao_Tao">🎓 Phòng Đào Tạo & Học Vụ</option>
+                                <option value="Khoa_Kinh_Te">🎓 Khoa Kinh Tế & Quản Trị</option>
+                                <option value="CTSV">🎓 Phòng Công Tác Sinh Viên</option>
+                                <option value="Khoa_Kham_Benh">🏥 Khoa Khám Bệnh</option>
+                                <option value="Khoa_Duoc">🏥 Khoa Dược</option>
+                            </datalist>
+                            <input type="hidden" id="singleLeave" value="12">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-success fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu User</button>
+                            <button type="submit" class="btn btn-success fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu Thành Viên</button>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <!-- DANH SÁCH NHÂN VIÊN -->
+            <!-- DANH SÁCH THÀNH VIÊN -->
             <div class="od-card">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i>Danh Sách Nhân Viên Thuộc Công Ty</h6>
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i>Danh Sách Thành Viên & Đơn Vị Phân Quyền</h6>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>MÃ NV</th>
+                                <th>MÃ ĐỊNH DANH</th>
                                 <th>HỌ VÀ TÊN</th>
                                 <th>EMAIL</th>
-                                <th>PHÒNG BAN</th>
+                                <th>ĐƠN VỊ (PHÒNG / LỚP / KHOA)</th>
                                 <th>VAI TRÒ</th>
-                                <th>ĐỊNH MỨC TÁC VỤ</th>
+                                <th>QUYỀN TRUY CẬP ACL</th>
                                 <th>THAO TÁC</th>
                             </tr>
                         </thead>
@@ -775,16 +839,18 @@
                 </div>
             </div>
 
-            <!-- MODAL SỬA NHÂN VIÊN -->
+            <!-- MODAL SỬA THÀNH VIÊN -->
             <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content" style="background-color: #ffffff; border: 1px solid #e2e8f0; color: #0f172a;">
                         <div class="modal-header border-bottom">
-                            <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh Sửa Thông Tin Nhân Viên</h5>
+                            <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-user-pen me-2"></i>Chỉnh Sửa Hồ Sơ & Đơn Vị</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <input type="hidden" id="editUserId">
+                            <input type="hidden" id="editUserLeave" value="12">
+                            <input type="hidden" id="editUserTenure" value="12">
                             <div class="mb-3">
                                 <label class="form-label">Họ và Tên</label>
                                 <input type="text" id="editUserName" class="form-control" required>
@@ -793,28 +859,12 @@
                                 <label class="form-label">Email</label>
                                 <input type="email" id="editUserEmail" class="form-control" required>
                             </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Phòng Ban</label>
-                                    <select id="editUserDept" class="form-select">
-                                        <option value="Marketing">Marketing</option>
-                                        <option value="Production">Production (Sản xuất)</option>
-                                        <option value="Accounting">Accounting (Kế toán)</option>
-                                        <option value="HR">HR (Nhân sự)</option>
-                                        <option value="Engineering">Engineering (Kỹ thuật)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tiêu chuẩn phép (ngày)</label>
-                                    <input type="number" id="editUserLeave" class="form-control" min="1" required>
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label">Đơn Vị Trực Thuộc (Phòng ban / Lớp học / Khoa)</label>
+                                <input type="text" id="editUserDept" list="unitOptionsDatalist" class="form-control" placeholder="Chọn hoặc nhập tên Phòng ban / Lớp / Khoa..." required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Thâm niên (tháng)</label>
-                                <input type="number" id="editUserTenure" class="form-control" min="0" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Đổi Mật Khẩu (Để trống nếu giữ nguyên)</label>
+                                <label class="form-label">Đổi Mật Khẩu SSO (Để trống nếu giữ nguyên)</label>
                                 <input type="text" id="editUserPass" class="form-control" placeholder="Nhập mật khẩu mới nếu muốn đổi...">
                             </div>
                         </div>
@@ -900,10 +950,47 @@
             if (tabId === 'tab-builder') loadTenantDocuments();
         }
 
-        // --- BỘ MẪU TRỢ LÝ PHÒNG BAN DOANH NGHIỆP (1-CLICK TEMPLATES) ---
+        // --- CHUYỂN ĐỔI LĨNH VỰC MẪU AGENT (DOANH NGHIỆP / GIÁO DỤC / Y TẾ) ---
+        function switchTemplateDomain(domain) {
+            const groups = {
+                ENTERPRISE: document.getElementById('templateGroupEnterprise'),
+                EDUCATION: document.getElementById('templateGroupEducation'),
+                HEALTHCARE: document.getElementById('templateGroupHealthcare')
+            };
+            const tabs = {
+                ENTERPRISE: document.getElementById('domainTabEnterprise'),
+                EDUCATION: document.getElementById('domainTabEducation'),
+                HEALTHCARE: document.getElementById('domainTabHealthcare')
+            };
+            Object.keys(groups).forEach(k => {
+                if (groups[k]) {
+                    groups[k].style.setProperty('display', k === domain ? 'flex' : 'none', 'important');
+                }
+                if (tabs[k]) {
+                    tabs[k].className = k === domain
+                        ? 'btn btn-dark fw-semibold py-0 px-2'
+                        : 'btn btn-outline-dark fw-semibold py-0 px-2';
+                }
+            });
+        }
+
+        function onAgentDeptSelectChange(val) {
+            const customInput = document.getElementById('newAgentDept');
+            if (val === '__CUSTOM__') {
+                customInput.classList.remove('d-none');
+                customInput.value = '';
+                customInput.focus();
+            } else {
+                customInput.classList.add('d-none');
+                customInput.value = val;
+            }
+        }
+
+        // --- BỘ MẪU TRỢ LÝ ĐA NGÀNH NGHỀ (DOANH NGHIỆP, GIÁO DỤC, Y TẾ) ---
         function applyDeptTemplate(deptKey) {
             const company = currentAdmin.tenant_name || myTenant;
             const templates = {
+                // 1. DOANH NGHIỆP (THEO PHÒNG BAN)
                 marketing: {
                     name: 'Agent Phòng Marketing',
                     dept: 'Marketing',
@@ -911,35 +998,91 @@
                     prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Marketing tại ${company}.\nNhiệm vụ của bạn là giải đáp thắc mắc về kế hoạch truyền thông, hướng dẫn triển khai chiến dịch quảng cáo, tra cứu tài liệu nhận diện thương hiệu và giải đáp quy trình nghiệp vụ của phòng Marketing.`
                 },
                 accounting: {
-                    name: 'Agent Phòng Kế Toán & Thuế',
+                    name: 'Agent Phòng Kế Toán & Tài Chính',
                     dept: 'Accounting',
-                    desc: 'Trợ lý thanh toán công tác phí, hóa đơn chứng từ và thủ tục tạm ứng',
+                    desc: 'Trợ lý thanh toán công tác phí, hóa đơn chứng từ và thủ tục tài chính',
                     prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Kế Toán & Tài Chính tại ${company}.\nNhiệm vụ của bạn là hướng dẫn nhân viên quy trình thanh toán công tác phí, thủ tục xuất hóa đơn VAT, quy định tạm ứng/hoàn ứng và đối soát chứng từ tài chính đúng quy chuẩn nội bộ.`
                 },
                 hr: {
-                    name: 'Agent Nhân Sự & Phúc Lợi (HR)',
+                    name: 'Agent Nhân Sự & Đào Tạo (HR)',
                     dept: 'HR',
-                    desc: 'Trợ lý nội quy lao động, chính sách đãi ngộ, bảo hiểm và văn hóa công ty',
+                    desc: 'Trợ lý nội quy lao động, chính sách đãi ngộ, bảo hiểm và văn hóa doanh nghiệp',
                     prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Nhân Sự (HR) tại ${company}.\nNhiệm vụ của bạn là giải đáp chính sách đãi ngộ, bảo hiểm, nội quy lao động, quy trình đào tạo và hướng dẫn nhân viên các quyền lợi theo quy định của ${company}.`
                 },
                 it: {
                     name: 'Agent Kỹ Thuật & IT Helpdesk',
                     dept: 'IT',
                     desc: 'Trợ lý hỗ trợ kỹ thuật, xử lý sự cố thiết bị, tài khoản và an toàn thông tin',
-                    prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Kỹ Thuật & CNTT tại ${company}.\nNhiệm vụ của bạn là hướng dẫn nhân viên xử lý sự cố máy tính, cấu hình mạng nội bộ, quy trình cấp phát tài khoản phần mềm và các quy chuẩn an toàn bảo mật thông tin doanh nghiệp.`
+                    prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Kỹ Thuật & CNTT tại ${company}.\nNhiệm vụ của bạn là hướng dẫn nhân viên xử lý sự cố máy tính, cấu hình mạng nội bộ, quy trình cấp phát tài khoản phần mềm và các quy chuẩn an toàn bảo mật thông tin.`
                 },
                 sales: {
                     name: 'Agent Kinh Doanh & Bán Hàng (Sales)',
                     dept: 'Sales',
                     desc: 'Trợ lý tra cứu chính sách giá, sản phẩm, hợp đồng mẫu và quy trình bán hàng',
-                    prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Kinh Doanh tại ${company}.\nNhiệm vụ của bạn là tra cứu báo giá sản phẩm, chính sách chiết khấu, quy trình soạn thảo hợp đồng thương mại và tư vấn kịch bản tiếp cận khách hàng doanh nghiệp.`
+                    prompt: `Bạn là Trợ lý AI chuyên trách của Phòng Kinh Doanh tại ${company}.\nNhiệm vụ của bạn là tra cứu báo giá sản phẩm, chính sách chiết khấu, quy trình soạn thảo hợp đồng thương mại và tư vấn kịch bản tiếp cận khách hàng.`
+                },
+                // 2. GIÁO DỤC / TRƯỜNG HỌC (THEO KHOA & LỚP HỌC)
+                edu_class_ai: {
+                    name: 'Trợ Giảng AI — Lớp CNTT & AI',
+                    dept: 'Lop_AI_CNTT',
+                    desc: 'Trợ giảng giải đáp bài giảng, hướng dẫn lab thực hành và tài liệu môn học cho sinh viên lớp AI/CNTT',
+                    prompt: `Bạn là Trợ giảng AI chuyên trách của Lớp AI / Khoa CNTT tại ${company}.\nNhiệm vụ của bạn là giải đáp kiến thức bài giảng, hướng dẫn bài tập thực hành (Lab), gợi ý phương pháp giải quyết vấn đề và trích dẫn đúng đề cương môn học của lớp.`
+                },
+                edu_academic: {
+                    name: 'Agent Phòng Đào Tạo & Học Vụ',
+                    dept: 'Phong_Dao_Tao',
+                    desc: 'Trợ lý tra cứu quy chế đào tạo, lịch thi, đăng ký học phần và thủ tục học vụ',
+                    prompt: `Bạn là Trợ lý AI của Phòng Đào Tạo & Học Vụ tại ${company}.\nNhiệm vụ của bạn là giải đáp quy chế đào tạo, điều kiện tốt nghiệp, hướng dẫn thủ tục đăng ký môn học, phúc khảo, bảo lưu và lịch học tập cho sinh viên và giảng viên.`
+                },
+                edu_econ: {
+                    name: 'Cố Vấn Học Tập — Khoa Kinh Tế',
+                    dept: 'Khoa_Kinh_Te',
+                    desc: 'Trợ lý học thuật, tài liệu nghiên cứu và hướng dẫn khóa luận Khoa Kinh Tế & Quản Trị',
+                    prompt: `Bạn là Trợ lý AI Học thuật của Khoa Kinh Tế & Quản Trị tại ${company}.\nNhiệm vụ của bạn là hỗ trợ sinh viên và giảng viên trong khoa tra cứu đề cương môn học, chuẩn trích dẫn khóa luận, thông báo học thuật và hoạt động chuyên môn của Khoa.`
+                },
+                edu_student: {
+                    name: 'Agent Công Tác Sinh Viên (CTSV)',
+                    dept: 'CTSV',
+                    desc: 'Trợ lý tư vấn học bổng, điểm rèn luyện, câu lạc bộ và hỗ trợ đời sống sinh viên',
+                    prompt: `Bạn là Trợ lý AI của Phòng Công Tác Sinh Viên (CTSV) tại ${company}.\nNhiệm vụ của bạn là giải đáp tiêu chí xét học bổng, khung điểm rèn luyện, quy trình xin giấy xác nhận sinh viên và thông tin hoạt động ngoại khóa.`
+                },
+                edu_library: {
+                    name: 'Agent Thư Viện & Học Liệu Số',
+                    dept: 'Thu_Vien',
+                    desc: 'Trợ lý tra cứu giáo trình, tài liệu tham khảo, luận văn và quy định mượn trả sách',
+                    prompt: `Bạn là Trợ lý AI Thư Viện & Học Liệu Số tại ${company}.\nNhiệm vụ của bạn là hướng dẫn tra cứu giáo trình, cơ sở dữ liệu khoa học, nội quy thư viện và trích dẫn tài liệu học thuật chuẩn xác.`
+                },
+                // 3. Y TẾ / BỆNH VIỆN / TỔ CHỨC (THEO CHUYÊN KHOA)
+                med_clinic: {
+                    name: 'Agent Khoa Khám Bệnh & Tư Vấn',
+                    dept: 'Khoa_Kham_Benh',
+                    desc: 'Trợ lý hướng dẫn quy trình tiếp đón, phân luồng khám và tra cứu hướng dẫn lâm sàng',
+                    prompt: `Bạn là Trợ lý AI chuyên trách của Khoa Khám Bệnh tại ${company}.\nNhiệm vụ của bạn là hỗ trợ tra cứu quy trình tiếp đón, hướng dẫn phân luồng chuyên khoa và giải đáp các quy chuẩn khám chữa bệnh nội bộ.`
+                },
+                med_pahrmacy: {
+                    name: 'Agent Khoa Dược & Phác Đồ',
+                    dept: 'Khoa_Duoc',
+                    desc: 'Trợ lý tra cứu danh mục thuốc nội viện, tương tác thuốc và quy trình cấp phát dược',
+                    prompt: `Bạn là Trợ lý AI của Khoa Dược tại ${company}.\nNhiệm vụ của bạn là hỗ trợ nhân viên y tế tra cứu danh mục dược phẩm nội viện, quy định bảo quản, cấp phát thuốc và hướng dẫn sử dụng thuốc an toàn.`
+                },
+                med_admin: {
+                    name: 'Agent Hành Chính & Quy Trình',
+                    dept: 'Hanh_Chinh',
+                    desc: 'Trợ lý giải đáp thủ tục hành chính, quy định trực chuyên môn và phối hợp liên khoa',
+                    prompt: `Bạn là Trợ lý AI Hành Chính Tổng Hợp tại ${company}.\nNhiệm vụ của bạn là giải đáp các quy trình hành chính, lịch trực, biểu mẫu nội bộ và quy định phối hợp giữa các đơn vị/chuyên khoa.`
                 }
             };
 
             const t = templates[deptKey];
             if (t) {
                 document.getElementById('newAgentName').value = t.name;
-                document.getElementById('newAgentDept').value = t.dept;
+                const selectEl = document.getElementById('newAgentDeptSelect');
+                const customInput = document.getElementById('newAgentDept');
+                if (selectEl) {
+                    selectEl.value = t.dept;
+                    customInput.classList.add('d-none');
+                }
+                customInput.value = t.dept;
                 document.getElementById('newAgentDesc').value = t.desc;
                 document.getElementById('newAgentPrompt').value = t.prompt;
                 
@@ -959,8 +1102,8 @@
 
                 agents.forEach(ag => {
                     const deptBadge = ag.department_access === 'ALL'
-                        ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1"><i class="fa-solid fa-globe me-1"></i>Toàn công ty</span>'
-                        : `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2 py-1"><i class="fa-solid fa-lock me-1"></i>Chỉ phòng ${ag.department_access}</span>`;
+                        ? '<span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1"><i class="fa-solid fa-globe me-1"></i>Toàn tổ chức (ALL)</span>'
+                        : `<span class="badge bg-warning bg-opacity-15 text-dark border border-warning px-2 py-1"><i class="fa-solid fa-lock me-1"></i>Đơn vị: ${ag.department_access}</span>`;
 
                     container.innerHTML += `
                         <div class="col-md-6 col-lg-4">
@@ -971,7 +1114,7 @@
                                         <span class="badge bg-primary bg-opacity-10 text-primary fw-bold">${ag.tenant_id}</span>
                                     </div>
                                     <div class="mb-3">${deptBadge}</div>
-                                    <p class="text-secondary small mb-3">${ag.description || 'Trợ lý AI chuyên biệt hỗ trợ quy trình công ty.'}</p>
+                                    <p class="text-secondary small mb-3">${ag.description || 'Trợ lý AI chuyên biệt hỗ trợ quy trình đơn vị.'}</p>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center border-top border-light-subtle pt-3 mt-2">
                                     <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động</small>
@@ -997,7 +1140,7 @@
 
                 tbody.innerHTML = '';
                 if (list.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">Chưa có đề xuất hoặc yêu cầu nghiệp vụ nào từ nhân sự.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-secondary">Chưa có đề xuất hoặc yêu cầu phê duyệt nào từ thành viên.</td></tr>';
                     return;
                 }
 
@@ -1018,7 +1161,7 @@
                             <td><code>#${req.id}</code></td>
                             <td class="fw-bold text-dark">${req.user_name}</td>
                             <td><span class="badge bg-primary bg-opacity-10 text-primary">${req.department || 'N/A'}</span></td>
-                            <td><b class="text-dark">${req.days_requested} lượt</b></td>
+                            <td><b class="text-dark">${req.days_requested}</b></td>
                             <td class="small text-secondary">${req.date_details}</td>
                             <td>${statusBadge}</td>
                             <td>${actionBtns}</td>
@@ -1040,7 +1183,7 @@
 
                 const data = await res.json();
                 if (data.success) {
-                    alert(decision === 'APPROVED' ? `✅ ĐÃ PHÊ DUYỆT ĐƠN #${requestId}!` : `❌ ĐÃ TỪ CHỐI ĐƠN #${requestId}!`);
+                    alert(decision === 'APPROVED' ? `✅ ĐÃ PHÊ DUYỆT YÊU CẦU #${requestId}!` : `❌ ĐÃ TỪ CHỐI YÊU CẦU #${requestId}!`);
                     loadApprovals();
                     loadUsers();
                 }
@@ -1049,7 +1192,7 @@
             }
         }
 
-        // 3. LOAD EMPLOYEES
+        // 3. LOAD EMPLOYEES / MEMBERS
         async function loadUsers() {
             try {
                 const res = await fetch(`/api/users?tenant_id=${myTenant}`);
@@ -1058,10 +1201,9 @@
                 tbody.innerHTML = '';
 
                 users.forEach(u => {
-                    const remain = (u.total_leave_days || 0) - (u.used_leave_days || 0);
                     const roleBadge = u.role === 'TENANT_ADMIN'
                         ? '<span class="badge bg-warning bg-opacity-20 text-dark fw-bold border border-warning">ADMIN</span>'
-                        : '<span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold">EMPLOYEE</span>';
+                        : '<span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold">MEMBER / USER</span>';
 
                     const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
                     const actionBtns = u.role !== 'TENANT_ADMIN'
@@ -1071,12 +1213,12 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><code>NV-${String(u.id).padStart(3, '0')}</code></td>
+                            <td><code>ID-${String(u.id).padStart(3, '0')}</code></td>
                             <td class="fw-bold text-dark">${u.full_name}</td>
                             <td class="text-secondary">${u.email}</td>
-                            <td><span class="badge bg-info bg-opacity-10 text-primary">${u.department}</span></td>
+                            <td><span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-2 py-1">${u.department || 'ALL'}</span></td>
                             <td>${roleBadge}</td>
-                            <td><span class="badge bg-success bg-opacity-10 text-success fs-6">Còn ${remain} / ${u.total_leave_days || 0} ngày</span></td>
+                            <td><span class="badge bg-success bg-opacity-10 text-success border border-success-subtle"><i class="fa-solid fa-shield-halved me-1"></i>Agent đơn vị: ${u.department || 'ALL'}</span></td>
                             <td>${actionBtns}</td>
                         </tr>
                     `;
@@ -1145,7 +1287,7 @@
         }
 
         function fillSampleBulkUser() {
-            document.getElementById('bulkUserText').value = 'Đỗ Lâm Trang, tranglam17115@gmail.com, Production, 12, 12';
+            document.getElementById('bulkUserText').value = 'Đỗ Lâm Trang, tranglam17115@gmail.com, Marketing\nNguyễn Minh Quân, quan.nm@edu.vn, Lớp AI - K68';
         }
 
         function handleBulkFileSelect(e) {

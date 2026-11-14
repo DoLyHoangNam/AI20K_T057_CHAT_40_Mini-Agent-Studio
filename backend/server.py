@@ -823,17 +823,34 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute("SELECT full_name, department, total_leave_days, used_leave_days, tenure_months, tenant_id, attributes FROM users WHERE id = ?", (user_id,))
+            cursor.execute("SELECT full_name, department, role, total_leave_days, used_leave_days, tenure_months, tenant_id, attributes FROM users WHERE id = ?", (user_id,))
             user = cursor.fetchone()
 
-            cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ?", (agent_name,))
+            user_dict = dict(user) if user else {"full_name": "Thành viên", "department": "Chung", "role": "EMPLOYEE", "total_leave_days": 20, "used_leave_days": 5, "tenure_months": 12, "tenant_id": "VINFAST", "attributes": "{}"}
+            tenant_id = user_dict.get("tenant_id") or "VINFAST"
+
+            cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ? AND tenant_id = ?", (agent_name, tenant_id))
             agent_row = cursor.fetchone()
+            if not agent_row:
+                cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ?", (agent_name,))
+                agent_row = cursor.fetchone()
             conn.close()
 
-            user_dict = dict(user) if user else {"full_name": "Nhân viên", "department": "Sản xuất", "total_leave_days": 20, "used_leave_days": 5, "tenure_months": 12, "tenant_id": "VINFAST", "attributes": "{}"}
-            tenant_id = user_dict.get("tenant_id") or (agent_row["tenant_id"] if agent_row else "VINFAST")
-            instruction = agent_row["instruction"] if agent_row else "Bạn là trợ lý ảo doanh nghiệp."
-            dept_access = agent_row["department_access"] if agent_row else "ALL"
+            instruction = agent_row["instruction"] if agent_row else "Bạn là trợ lý ảo đa lĩnh vực của tổ chức."
+            dept_access = (agent_row["department_access"] if agent_row else "ALL") or "ALL"
+
+            # Enforce Unit / Department / Class ACL at Backend Runtime
+            user_role = (user_dict.get("role") or "EMPLOYEE").upper()
+            user_dept = (user_dict.get("department") or "").strip()
+            if dept_access.upper() != "ALL" and user_role == "EMPLOYEE" and user_dept.lower() != dept_access.strip().lower():
+                return self.send_json({
+                    "reply": f"⛔ <b>[BẢO MẬT PHÂN QUYỀN ĐƠN VỊ - ACL DENIED]</b><br>Tài khoản của bạn thuộc đơn vị <b>{user_dept or 'Chưa phân đơn vị'}</b>, không có quyền truy cập vào <b>{agent_name}</b> (chỉ dành riêng cho đơn vị/lớp/phòng: <b>{dept_access}</b>).",
+                    "citation": f"RBAC & Unit ACL Guardrail [{tenant_id}]",
+                    "intent": "ACL_DENIED",
+                    "require_confirm": False,
+                    "latency": 0.01,
+                    "token_estimate": 45
+                })
 
             graph_agent = LangGraphAgent(agent_name, instruction, dept_access, tenant_id=tenant_id)
             result = graph_agent.run(user_dict, message)
@@ -842,6 +859,9 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
                 "reply": result["reply"],
                 "citation": result["citation"],
                 "intent": result["intent"],
+                "require_confirm": result.get("interrupt_hitl", False),
+                "days": result.get("days", 1),
+                "date_str": result.get("date_str", message),
                 "latency": result["latency"],
                 "token_estimate": result["token_estimate"]
             })
