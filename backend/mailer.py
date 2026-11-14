@@ -1,21 +1,19 @@
 import secrets
 import string
 import smtplib
+import html
+import uuid
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import datetime
 import os
 
-# 1. HÀM SINH MẬT KHẨU NGẪU NHIÊN BẢO MẬT CAO
+# 1. HÀM SINH MẬT KHẨU NGẪU NHIÊN BẢO MẬT CAO (Dễ copy, không chứa ký tự &, ^, % gây lỗi HTML hoặc tách từ khi bôi đen)
 def generate_secure_password(length=10):
-    chars = string.ascii_letters + string.digits + "!@#$%^&*"
-    while True:
-        password = ''.join(secrets.choice(chars) for _ in range(length))
-        if (any(c.islower() for c in password) and 
-            any(c.isupper() for c in password) and 
-            any(c.isdigit() for c in password) and
-            any(c in "!@#$%^&*" for c in password)):
-            return password
+    upper = secrets.choice(string.ascii_uppercase)
+    lower = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(4))
+    digits = ''.join(secrets.choice(string.digits) for _ in range(4))
+    return f"{upper}{lower}@{digits}"
 
 # 2. CẤU HÌNH GOOGLE GMAIL SMTP CỐ ĐỊNH CHO HỆ THỐNG
 def _load_env():
@@ -42,7 +40,13 @@ EMAIL_LOG_FILE = os.path.join(LOG_DIR, "sent_emails.log")
 # 3. HÀM TỰ ĐỘNG GỬI EMAIL BÀN GIAO MẬT KHẨU
 def send_welcome_credentials_email(recipient_email, full_name, role, tenant_name, raw_password, smtp_config=None):
     cfg = smtp_config or SMTP_CONFIG
-    subject = f"[{tenant_name}] Bàn giao tài khoản quản trị & Mật khẩu đăng nhập hệ thống"
+    now_str = datetime.datetime.now().strftime('%H:%M:%S %d/%m/%Y')
+    subject = f"[{tenant_name}] Bàn giao tài khoản & Mật khẩu đăng nhập ({now_str})"
+    safe_email = html.escape(str(recipient_email).strip())
+    safe_password = html.escape(str(raw_password).strip())
+    safe_name = html.escape(str(full_name).strip())
+    safe_tenant = html.escape(str(tenant_name).strip())
+    safe_role = html.escape(str(role).strip())
     
     html_body = f"""
     <!DOCTYPE html>
@@ -57,7 +61,7 @@ def send_welcome_credentials_email(recipient_email, full_name, role, tenant_name
             .cred-box {{ background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin: 24px 0; }}
             .cred-row {{ margin-bottom: 10px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; }}
             .cred-label {{ color: #64748b; font-weight: 500; }}
-            .cred-val {{ font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: 700; color: #09090b; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.05em; }}
+            .cred-val {{ font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: 700; color: #09090b; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; letter-spacing: 0.05em; user-select: all; }}
             .btn {{ display: block; text-align: center; background: #000000; color: #ffffff !important; padding: 14px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; margin-top: 24px; }}
             .note {{ font-size: 12px; color: #ef4444; margin-top: 16px; line-height: 1.5; }}
             .footer {{ font-size: 11px; color: #94a3b8; margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 16px; text-align: center; }}
@@ -66,10 +70,10 @@ def send_welcome_credentials_email(recipient_email, full_name, role, tenant_name
     <body>
         <div class="card">
             <div class="brand">MINI AGENT STUDIO • ENTERPRISE IAM</div>
-            <h1 class="title">Xin chào {full_name},</h1>
+            <h1 class="title">Xin chào {safe_name},</h1>
             
             <p style="font-size: 14px; color: #334155; line-height: 1.6;">
-                Tổ chức <strong>{tenant_name}</strong> đã cấp quyền tài khoản cho bạn trên nền tảng với vai trò: <strong>{role}</strong>.
+                Tổ chức <strong>{safe_tenant}</strong> đã cấp quyền tài khoản cho bạn trên nền tảng với vai trò: <strong>{safe_role}</strong> (Thời điểm cấp: {now_str}).
             </p>
 
             <div class="cred-box">
@@ -79,11 +83,11 @@ def send_welcome_credentials_email(recipient_email, full_name, role, tenant_name
                 </div>
                 <div class="cred-row">
                     <span class="cred-label">Tài khoản (Email):</span>
-                    <span class="cred-val">{recipient_email}</span>
+                    <span class="cred-val">{safe_email}</span>
                 </div>
                 <div class="cred-row">
                     <span class="cred-label">Mật khẩu khởi tạo:</span>
-                    <span class="cred-val" style="color: #2563eb; background: #eff6ff;">{raw_password}</span>
+                    <span class="cred-val" style="color: #2563eb; background: #eff6ff;">{safe_password}</span>
                 </div>
             </div>
 

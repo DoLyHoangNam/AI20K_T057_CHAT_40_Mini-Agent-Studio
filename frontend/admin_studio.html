@@ -1290,6 +1290,12 @@
         };
 
         const myTenant = currentAdmin.tenant_id || 'VINFAST';
+        if (currentAdmin.role === 'SUPER_ADMIN') {
+            const topLink = document.getElementById('topSuperAdminLink');
+            const sideLink = document.getElementById('sideSuperAdminLink');
+            if (topLink) topLink.style.display = 'inline-flex';
+            if (sideLink) sideLink.style.display = 'flex';
+        }
         document.getElementById('tenantTitle').innerText = currentAdmin.tenant_name || `${myTenant} Manage`;
         document.getElementById('brandLogoLetter').innerText = (myTenant || 'M').charAt(0).toUpperCase();
         document.getElementById('tenantCode').innerText = `TENANT: ${myTenant}`;
@@ -1758,6 +1764,7 @@
             const name = document.getElementById('singleName').value.trim();
             const email = document.getElementById('singleEmail').value.trim();
             const dept = document.getElementById('singleDept').value;
+            const role = document.getElementById('singleRole') ? document.getElementById('singleRole').value : 'EMPLOYEE';
             const leave = document.getElementById('singleLeave').value;
 
             try {
@@ -1769,7 +1776,7 @@
                         full_name: name,
                         email: email,
                         department: dept,
-                        role: 'EMPLOYEE',
+                        role: role,
                         total_leave_days: leave
                     })
                 });

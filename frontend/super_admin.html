@@ -396,20 +396,17 @@
     <div class="em-app-shell">
         <aside class="em-sidebar" id="saSidebar">
             <div class="em-side-menu">
+                <a href="#sectionProvision" class="em-side-item active">
+                    <i class="fa-solid fa-plus-circle"></i> Cấp Tổ chức & Tạo Admin
+                </a>
                 <a href="#sectionTenants" class="em-side-item">
-                    <i class="fa-solid fa-border-all"></i> Tổng quan
+                    <i class="fa-regular fa-building"></i> Danh sách Tổ chức (Tenants)
                 </a>
-                <a href="#sectionUsers" class="em-side-item active">
-                    <i class="fa-regular fa-user"></i> Quản lý Người dùng
-                </a>
-                <a href="#sectionProvision" class="em-side-item">
-                    <i class="fa-regular fa-building"></i> Quản lý Tổ chức (Tenants)
+                <a href="#sectionUsers" class="em-side-item">
+                    <i class="fa-regular fa-user"></i> Quản lý Tài khoản & Role
                 </a>
                 <a href="admin_studio.html" class="em-side-item">
-                    <i class="fa-solid fa-shield-halved"></i> Vai trò & Phân quyền
-                </a>
-                <a href="admin_studio.html" class="em-side-item">
-                    <i class="fa-solid fa-layer-group"></i> Quản lý Phòng ban / Lớp
+                    <i class="fa-solid fa-sliders"></i> Chuyển sang Tenant Studio
                 </a>
                 <a href="employee_portal.html" class="em-side-item">
                     <i class="fa-regular fa-comment-dots"></i> Cổng AI Chat
@@ -428,10 +425,10 @@
     <div class="od-container" style="flex: 1; max-width: 100%; padding: 20px 28px;">
         <!-- HORIZONTAL SUBTABS -->
         <div class="em-subtabs">
-            <a href="#sectionProvision" class="em-subtab text-decoration-none"><i class="fa-solid fa-plus-circle"></i> Cấp bản quyền Tổ chức</a>
-            <a href="#sectionTenants" class="em-subtab text-decoration-none"><i class="fa-regular fa-building"></i> Danh sách Tổ chức (Tenants)</a>
-            <a href="#sectionUsers" class="em-subtab active text-decoration-none"><i class="fa-solid fa-user-group"></i> Tài khoản & Đơn vị</a>
-            <a href="admin_studio.html" class="em-subtab text-decoration-none"><i class="fa-solid fa-robot"></i> Studio & Agents</a>
+            <a href="#sectionProvision" class="em-subtab active text-decoration-none"><i class="fa-solid fa-plus-circle"></i> 1. Cấp Tổ chức & Tạo Admin Mới</a>
+            <a href="#sectionTenants" class="em-subtab text-decoration-none"><i class="fa-regular fa-building"></i> 2. Danh sách Tổ chức (Tenants)</a>
+            <a href="#sectionUsers" class="em-subtab text-decoration-none"><i class="fa-solid fa-user-group"></i> 3. Quản lý Tài khoản (Admin & Employee)</a>
+            <a href="admin_studio.html" class="em-subtab text-decoration-none"><i class="fa-solid fa-robot"></i> Mở Tenant Studio</a>
         </div>
 
         <!-- 1. FORM PROVISION TENANT (Clean Shadcn Card) -->

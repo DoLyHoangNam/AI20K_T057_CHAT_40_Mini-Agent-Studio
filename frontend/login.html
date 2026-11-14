@@ -153,13 +153,14 @@
             clientId: 'mini-agent-studio-app'
         });
 
-        // Tự động kiểm tra phiên đăng nhập
+        // Chỉ tự động xử lý token khi người dùng vừa xác thực từ trang Keycloak quay về (có chứa OAuth code)
+        const isOAuthCallback = window.location.search.includes('code=') || window.location.hash.includes('code=');
         keycloak.init({ 
-            onLoad: 'check-sso',
+            onLoad: isOAuthCallback ? 'check-sso' : undefined,
             checkLoginIframe: false,
             pkceMethod: 'S256'
         }).then(authenticated => {
-            if (authenticated) {
+            if (authenticated && isOAuthCallback) {
                 console.log('✅ Keycloak Authenticated!');
                 handleKeycloakSuccess(keycloak);
             }
@@ -168,8 +169,11 @@
         });
 
         function loginWithKeycloak() {
+            // Bắt buộc hiển thị form nhập Email & Mật khẩu của Keycloak (prompt: 'login')
+            // để khi bấm link từ Email mới không bị tự động đăng nhập đè vào tài khoản cũ
             keycloak.login({
-                redirectUri: window.location.origin + '/login.html'
+                redirectUri: window.location.origin + '/login.html',
+                prompt: 'login'
             });
         }
 

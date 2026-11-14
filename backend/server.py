@@ -189,9 +189,11 @@ def sync_user_to_keycloak(email, password, role, tenant_id, full_name="Admin", d
             print(f"Error creating user {email}: {e}")
             return False
     else:
-        # Nếu đã có: Cập nhật đầy đủ thông tin để kích hoạt tài khoản
+        # Nếu đã có: Cập nhật đầy đủ thông tin (BAO GỒM cả username và email để Keycloak PUT không xóa trường email!)
         try:
             update_payload = {
+                'username': email,
+                'email': email,
                 'firstName': first_name,
                 'lastName': last_name,
                 'enabled': True,
@@ -217,8 +219,21 @@ def sync_user_to_keycloak(email, password, role, tenant_id, full_name="Admin", d
         print(f"Error resetting password for {email}: {e}")
         return False
 
-    # 4. Gán role
+    # 4. Gán role (và gỡ các role cũ nếu user được đổi vai trò)
     try:
+        cur_roles_req = urllib.request.Request(f'{KEYCLOAK_URL}/admin/realms/mini-agent-platform/users/{u_id}/role-mappings/realm', headers=headers)
+        with urllib.request.urlopen(cur_roles_req, timeout=5) as resp:
+            cur_roles = json.loads(resp.read().decode())
+        to_remove = [r for r in cur_roles if r.get('name') in ('SUPER_ADMIN', 'TENANT_ADMIN', 'EMPLOYEE') and r.get('name') != role]
+        if to_remove:
+            del_role_req = urllib.request.Request(
+                f'{KEYCLOAK_URL}/admin/realms/mini-agent-platform/users/{u_id}/role-mappings/realm',
+                data=json.dumps(to_remove).encode(),
+                headers=headers,
+                method='DELETE'
+            )
+            urllib.request.urlopen(del_role_req, timeout=5)
+
         role_req = urllib.request.Request(f'{KEYCLOAK_URL}/admin/realms/mini-agent-platform/roles/{role}', headers=headers)
         with urllib.request.urlopen(role_req, timeout=5) as resp:
             role_obj = json.loads(resp.read().decode())
@@ -553,17 +568,19 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
-            # 2. Chạy tác vụ mạng (Đồng bộ Keycloak + Gửi Email) trong luồng ngầm (Không block Database)
-            import threading
-            def bg_sync_and_mail():
-                sync_user_to_keycloak(admin_email, auto_password, 'TENANT_ADMIN', tenant_id, admin_display_name, 'Executive')
-                send_welcome_credentials_email(admin_email, admin_display_name, 'TENANT_ADMIN', tenant_name, auto_password)
+            # 2. Đồng bộ tài khoản & mật khẩu lên Keycloak NGAY LẬP TỨC (đảm bảo đăng nhập được ngay 100%)
+            sync_user_to_keycloak(admin_email, auto_password, 'TENANT_ADMIN', tenant_id, admin_display_name, 'Executive')
 
-            threading.Thread(target=bg_sync_and_mail, daemon=True).start()
+            # 3. Gửi Email trong luồng ngầm để phản hồi UI nhanh
+            import threading
+            threading.Thread(
+                target=lambda: send_welcome_credentials_email(admin_email, admin_display_name, 'TENANT_ADMIN', tenant_name, auto_password),
+                daemon=True
+            ).start()
 
             return self.send_json({
                 "success": True, 
-                "message": f"Đã cấp phép bản quyền cho {tenant_name} (Lĩnh vực: {domain_type})! Mật khẩu ngẫu nhiên an toàn đã được mã hóa trên Keycloak và gửi tới hòm thư '{admin_email}'.",
+                "message": f"Đã cấp phép bản quyền cho {tenant_name} (Lĩnh vực: {domain_type})! Mật khẩu ngẫu nhiên an toàn ({auto_password}) đã được đồng bộ lên Keycloak và gửi tới hòm thư '{admin_email}'.",
                 "generated_password": auto_password
             })
 
@@ -731,17 +748,17 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
                 conn.commit()
                 conn.close()
 
-                # Gửi mail & Keycloak ngầm
+                # Đồng bộ Keycloak ngay lập tức & gửi mail ngầm
+                sync_user_to_keycloak(email, auto_pass, role, tenant_id, full_name, department)
                 import threading
                 threading.Thread(target=lambda: (
-                    sync_user_to_keycloak(email, auto_pass, role, tenant_id, full_name, department),
                     send_welcome_credentials_email(email, full_name, role, tenant_id, auto_pass)
                 ), daemon=True).start()
 
                 return self.send_json({
                     "success": True, 
                     "id": new_id, 
-                    "message": f"Đã tạo tài khoản cho {full_name}! Mật khẩu ngẫu nhiên an toàn đã được mã hóa trên Keycloak và gửi tới hòm thư '{email}'.",
+                    "message": f"Đã tạo tài khoản cho {full_name}! Mật khẩu ({auto_pass}) đã được đồng bộ trên Keycloak và gửi tới hòm thư '{email}'.",
                     "generated_password": auto_pass
                 })
             except sqlite3.IntegrityError:
@@ -793,7 +810,18 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
                         """, (full_name, email, department, total_leave_days, tenure_months, user_id))
 
                 conn.commit()
+                cursor.execute("SELECT email, hashed_password, role, tenant_id, full_name, department FROM users WHERE id = ?", (user_id,))
+                updated_u = cursor.fetchone()
                 conn.close()
+                if updated_u:
+                    sync_user_to_keycloak(
+                        updated_u["email"],
+                        updated_u["hashed_password"],
+                        updated_u["role"],
+                        updated_u["tenant_id"],
+                        updated_u["full_name"],
+                        updated_u["department"]
+                    )
                 return self.send_json({"success": True, "message": f"Đã cập nhật thông tin tài khoản #{user_id} ({full_name}) thành công!"})
             except sqlite3.IntegrityError:
                 conn.close()
@@ -826,6 +854,11 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_db()
             cursor = conn.cursor()
+            cursor.execute("SELECT email FROM users WHERE tenant_id = ?", (tenant_id,))
+            tenant_users = cursor.fetchall()
+            for tu in tenant_users:
+                delete_user_from_keycloak(tu["email"])
+
             cursor.execute("DELETE FROM leave_requests WHERE tenant_id = ?", (tenant_id,))
             cursor.execute("DELETE FROM agents WHERE tenant_id = ?", (tenant_id,))
             cursor.execute("DELETE FROM documents WHERE tenant_id = ?", (tenant_id,))
@@ -833,7 +866,7 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute("DELETE FROM tenants WHERE id = ?", (tenant_id,))
             conn.commit()
             conn.close()
-            return self.send_json({"success": True, "message": f"Đã xóa hoàn toàn doanh nghiệp {tenant_id} cùng toàn bộ tài khoản liên quan!"})
+            return self.send_json({"success": True, "message": f"Đã xóa hoàn toàn doanh nghiệp {tenant_id} cùng toàn bộ tài khoản liên quan trên CSDL và Keycloak!"})
 
         # 6. TẠO AGENT MỚI
         elif path == "/api/agents":
