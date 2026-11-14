@@ -82,16 +82,26 @@ Truy cập ứng dụng tại: 👉 **`http://localhost:8000/login.html`**
 
 ---
 
-## 👥 IV. DANH SÁCH TÀI KHOẢN CÓ SẴN TRONG CSDL (`backend/database.db`)
+## 👥 IV. QUY TRÌNH DEMO END-TO-END BẰNG EMAIL THẬT & KEYCLOAK SSO
 
-| Tổ chức (`tenant_id`) | Tài khoản (`email`) | Vai trò (`role`) | Đơn vị (`department`) | Kịch bản kiểm thử chính |
-| :--- | :--- | :---: | :---: | :--- |
-| 🌐 **`PLATFORM`** | `dolyhoangnam13072005@gmail.com` | `SUPER_ADMIN` | `Executive` | Cấp bản quyền Tổ chức mới (Doanh nghiệp/Giáo dục/Y tế), đồng bộ Keycloak & SMTP. |
-| 🏢 **`VINFAST`** | `admin@vinfast.vn` | `TENANT_ADMIN` | `Executive` | Tạo Agent theo phòng ban, tải PDF quy chế, nhập CSV nhân sự, duyệt đơn HITL. |
-| 🏢 **`VINFAST`** | `marketing@vinfast.vn` | `EMPLOYEE` | `Marketing` | Mở khóa `Trợ lý Phòng Marketing`, tra cứu Brand Guideline (Cosine ~0.87), gửi HITL. |
-| 🏢 **`VINFAST`** | `ketoan@vinfast.vn` | `EMPLOYEE` | `Accounting` | Mở khóa `Trợ lý Phòng Kế toán`, tra cứu định mức công tác phí & hóa đơn VAT. |
-| 🏢 **`VINFAST`** | `nam.dlh@vinfast.vn` | `EMPLOYEE` | `Production` | Chỉ dùng được Agent `ALL`; bị khóa cứng (`ACL_DENIED`) khi bấm sang Marketing/Kế toán. |
-| 🎓 **`VNU`** *(VinUni)* | `phonghoangthe112@gmail.com` | `TENANT_ADMIN` | `Executive` | Quản trị viên Trường ĐH VinUni: Tạo Trợ giảng theo Lớp/Khoa, duyệt đơn học vụ. |
-| 🎓 **`VNU`** *(VinUni)* | `sv.ai@vnu.edu.vn` | `EMPLOYEE` | `Lớp AI - K68` | Sinh viên Lớp AI - K68: Xem hồ sơ tín chỉ động, chat với `Trợ Giảng Lớp AI - K68`. |
-| 🏥 **`BVQT`** *(Bệnh viện)* | `admin@benhvien.vn` | `TENANT_ADMIN` | `Executive` | Quản trị viên Bệnh viện: Quản lý Chuyên khoa, duyệt yêu cầu đổi ca trực. |
-| 🏥 **`BVQT`** *(Bệnh viện)* | `bs.noi@benhvien.vn` | `EMPLOYEE` | `Khoa Nội` | Bác sĩ Khoa Nội: Xem định mức ca trực tháng, gửi yêu cầu đổi ca trực qua HITL. |
+Hệ thống được thiết lập ở trạng thái **Clean Enterprise State** — khởi đầu chỉ với **duy nhất 1 tài khoản Chủ nền tảng (`SUPER_ADMIN`)** trên cả Keycloak và CSDL để trình diễn trọn vẹn luồng cấp phát tự động từ con số 0:
+
+### Bước 1: Đăng nhập Chủ nền tảng (`SUPER_ADMIN`)
+- Truy cập `http://localhost:8000/login.html` $\rightarrow$ Bấm **Đăng nhập bằng Keycloak SSO**.
+- Nhập tài khoản gốc:
+  - **Email:** `dolyhoangnam13072005@gmail.com`
+  - **Mật khẩu:** `Admin@123`
+- Hệ thống tự động điều hướng vào `super_admin.html`. Tại đây, nhập Mã tổ chức (VD: `VINFAST` hoặc `VNU`), chọn Lĩnh vực (`ENTERPRISE` / `EDUCATION` / `HEALTHCARE`) và nhập **Email Gmail thật của Quản trị viên Tổ chức**.
+- Hệ thống tự động khởi tạo tài khoản `TENANT_ADMIN` trên Keycloak và **gửi mật khẩu ngẫu nhiên trực tiếp về hộp thư Gmail thật**.
+
+### Bước 2: Đăng nhập Quản trị viên Tổ chức (`TENANT_ADMIN`)
+- Mở hộp thư Gmail vừa nhận $\rightarrow$ Copy mật khẩu khởi tạo và đăng nhập qua Keycloak SSO để vào `admin_studio.html`.
+- Thực hiện:
+  1. **Thêm Thành viên & Đơn vị (`#tab-employees`):** Nhập Gmail thật của các thành viên trong nhóm (hoặc tải file CSV), phân vào các Phòng ban / Khoa / Lớp học khác nhau (VD: `Marketing`, `Accounting`, `Lớp AI - K68`). Hệ thống tiếp tục đồng bộ lên Keycloak và gửi mật khẩu về từng Gmail.
+  2. **Khởi tạo Agent & Nạp PDF RAG (`#tab-builder`):** Chọn mẫu Agent theo đơn vị, tải file `.pdf` / `.txt` quy chế nội bộ để nhúng Vector 3.072 chiều và bấm **Xuất bản Agent**.
+
+### Bước 3: Đăng nhập Thành viên Đơn vị (`EMPLOYEE`) & Kiểm chứng Bảo mật
+- Thành viên dùng mật khẩu nhận qua Gmail đăng nhập vào `employee_portal.html`:
+  - **Tra cứu Vector RAG:** Hỏi đáp quy chế của đơn vị mình (kèm hộp trích dẫn nguồn và điểm Cosine Similarity).
+  - **Kiểm chứng Chặn ACL (`ACL_DENIED`):** Thử truy cập Agent hoặc hỏi tài liệu của phòng ban/lớp học khác $\rightarrow$ Hệ thống lập tức khóa và từ chối truy xuất.
+  - **Trình ký HITL thời gian thực:** Gửi yêu cầu phê duyệt trong khung chat $\rightarrow$ Bấm xác nhận HITL $\rightarrow$ Quản trị viên bấm **Duyệt** bên `admin_studio.html` $\rightarrow$ Thành viên nhận thông báo Toast thời gian thực.
