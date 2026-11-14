@@ -40,7 +40,7 @@
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
             --primary-subtle: #eff6ff;
-            --success: #10b981;
+            --success: #16a34a;
             --warning: #f59e0b;
             --danger: #ef4444;
         }
@@ -54,106 +54,359 @@
             overflow-x: hidden;
         }
 
-        /* 1. TOP STUDIO APP BAR (OpenDesign Header) */
-        .od-topbar {
+        /* 1. TOP BAR (EduManage / SaaS Portal Style) */
+        .em-topbar {
             height: 60px;
             background: #ffffff;
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
+            padding: 0 24px 0 0;
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
         }
 
-        .od-brand-badge {
+        .em-topbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .em-brand-box {
+            width: 250px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-right: 1px solid transparent;
+        }
+
+        .em-logo-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+            flex-shrink: 0;
+        }
+
+        .em-brand-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .em-hamburger {
+            background: transparent;
+            border: none;
+            color: #64748b;
+            font-size: 1rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .em-hamburger:hover { background: #f1f5f9; color: #0f172a; }
+
+        .em-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .em-lang {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .em-btn-assistant {
+            background: #2563eb;
+            color: #ffffff !important;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
+            transition: background 0.15s;
+        }
+        .em-btn-assistant:hover { background: #1d4ed8; }
+
+        .em-bell {
+            position: relative;
+            color: #64748b;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .em-bell-badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 17px;
+            height: 17px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid #ffffff;
+        }
+
+        .em-user-profile {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .od-logo {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-            color: #fff;
-            border-radius: 8px;
+        .em-avatar-purple {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #7c3aed;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.78rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+            text-transform: uppercase;
+            flex-shrink: 0;
         }
 
-        /* SEGMENTED TAB NAVIGATION */
-        .od-nav-segmented {
+        .em-avatar-blue {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 0.85rem;
             display: flex;
-            background: #f1f5f9;
-            padding: 3px;
-            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        /* 2. APP SHELL: LEFT SIDEBAR + MAIN CONTENT */
+        .em-app-shell {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        .em-sidebar {
+            width: 250px;
+            background: #ffffff;
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            transition: width 0.2s ease;
+        }
+
+        .em-sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+            border-right: none;
+        }
+
+        .em-side-menu {
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .em-side-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            background: transparent;
+            border: none;
+            border-left: 3px solid transparent;
+            width: 100%;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .em-side-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .em-side-item:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .em-side-item.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+            border-left: 3px solid #2563eb;
+        }
+
+        .em-side-item.active i {
+            color: #2563eb;
+        }
+
+        .em-side-footer {
+            padding: 12px 10px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            flex-direction: column;
             gap: 2px;
+        }
+
+        /* 3. MAIN WORKSPACE AREA */
+        .em-main {
+            flex: 1;
+            padding: 20px 28px 60px 28px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* TOP CONTEXT SUMMARY CARD */
+        .em-context-card {
+            background: #ffffff;
             border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 16px 22px;
+            margin-bottom: 16px;
+        }
+
+        .em-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 12px;
+        }
+
+        .em-stat-box {
+            border: 1px solid #f1f5f9;
+            background: #fafbfc;
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+
+        /* HORIZONTAL SUB-TAB BAR (DARK PILL ACTIVE) */
+        .em-subtabs {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 6px 10px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            overflow-x: auto;
         }
 
         .od-nav-item {
-            padding: 6px 14px;
+            padding: 8px 18px;
             border-radius: 8px;
-            font-size: 0.825rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #475569;
             cursor: pointer;
-            transition: all 0.15s ease-in-out;
-            display: flex;
+            transition: all 0.15s ease;
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 7px;
             border: none;
             background: transparent;
-            user-select: none;
+            white-space: nowrap;
+            flex: 1;
         }
 
         .od-nav-item:hover {
-            color: var(--text-primary);
+            color: #0f172a;
+            background: #f8fafc;
         }
 
         .od-nav-item.active {
-            background: #ffffff;
-            color: var(--primary);
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-            font-weight: 700;
+            background: #0f172a;
+            color: #ffffff !important;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
         }
 
-        .od-viewport-switch {
-            display: flex;
-            background: #f1f5f9;
-            padding: 3px;
-            border-radius: 8px;
-            border: 1px solid var(--border-subtle);
+        .od-nav-item.active i {
+            color: #ffffff !important;
         }
 
-        .od-viewport-btn {
-            border: none;
-            background: transparent;
-            padding: 4px 8px;
+        /* STATUS BADGES (EduManage Soft Green Style) */
+        .em-status-active {
+            background: #dcfce7;
+            color: #16a34a;
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 4px 10px;
             border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .od-viewport-btn.active {
-            background: #ffffff;
-            color: var(--primary);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        /* FLOATING ACTION BUTTON (BOTTOM RIGHT) */
+        .em-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.38);
+            text-decoration: none;
+            z-index: 999;
+            transition: transform 0.15s ease, background 0.15s ease;
         }
-
-        /* 2. MAIN WORKSPACE CONTAINER */
-        .od-workspace {
-            padding: 24px;
-            max-width: 1600px;
-            margin: 0 auto;
+        .em-fab:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
         }
 
         /* CARDS & CONTAINERS */
@@ -367,68 +620,136 @@
     </style>
 </head>
 <body>
-    <!-- 1. TOP STUDIO APP BAR (OpenDesign Architecture) -->
-    <header class="od-topbar">
-        <div class="od-brand-badge">
-            <div class="od-logo"><i class="fa-solid fa-shapes"></i></div>
-            <div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="fw-bold text-dark" style="font-size: 0.925rem;" id="tenantTitle">Studio</span>
-                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle" style="font-size: 0.68rem;" id="tenantPlanBadge">ENTERPRISE</span>
-                </div>
-                <div class="text-secondary" style="font-size: 0.72rem;" id="tenantCode">TENANT: VNG</div>
+    <!-- 1. TOP APP BAR (EduManage / SaaS Portal Style) -->
+    <header class="em-topbar">
+        <div class="em-topbar-left">
+            <div class="em-brand-box">
+                <div class="em-logo-circle" id="brandLogoLetter">M</div>
+                <div class="em-brand-title" id="tenantTitle">MiniAgent Studio</div>
             </div>
+            <button class="em-hamburger" onclick="document.getElementById('emSidebar').classList.toggle('collapsed')" title="Thu gọn / Mở rộng menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
 
-        <!-- CENTER: SEGMENTED NAVIGATION -->
-        <nav class="od-nav-segmented">
-            <button class="od-nav-item active" onclick="switchOdTab('tab-builder', this)">
-                <i class="fa-solid fa-wand-magic-sparkles text-primary"></i> Studio Builder
-            </button>
-            <button class="od-nav-item" onclick="switchOdTab('tab-agents', this)">
-                <i class="fa-solid fa-robot"></i> Danh sách Agent
-            </button>
-            <button class="od-nav-item" onclick="switchOdTab('tab-approvals', this)">
-                <i class="fa-solid fa-envelope-open-text text-warning"></i> Duyệt Đơn HITL
-                <span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.65rem;" id="pendingCountBadge">0</span>
-            </button>
-            <button class="od-nav-item" onclick="switchOdTab('tab-employees', this)">
-                <i class="fa-solid fa-users text-info"></i> Quản lý Nhân sự
-            </button>
-            <button class="od-nav-item" onclick="switchOdTab('tab-analytics', this)">
-                <i class="fa-solid fa-chart-line text-success"></i> Langfuse Tracing
-            </button>
-        </nav>
-
-        <!-- RIGHT: VIEWPORT & ACTIONS -->
-        <div class="d-flex align-items-center gap-3">
-            <div class="od-viewport-switch d-none d-md-flex">
-                <button class="od-viewport-btn active" title="Desktop Viewport"><i class="fa-solid fa-desktop"></i></button>
-                <button class="od-viewport-btn" title="Tablet Viewport"><i class="fa-solid fa-tablet-screen-button"></i></button>
-                <button class="od-viewport-btn" title="Mobile Viewport"><i class="fa-solid fa-mobile-screen"></i></button>
-            </div>
-            <a href="database_viewer.html" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
-                <i class="fa-solid fa-database text-primary me-1"></i> Database Explorer
+        <div class="em-topbar-right">
+            <span class="em-lang">VN</span>
+            <a href="employee_portal.html" class="em-btn-assistant">
+                <i class="fa-solid fa-robot"></i> Trợ lý ảo
             </a>
-            <div class="d-flex align-items-center gap-2 ps-2 border-start border-light-subtle">
-                <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-1 text-center" style="width: 32px; height: 32px; font-size: 0.8rem; line-height: 24px;">
-                    <i class="fa-solid fa-user"></i>
+            <div class="em-bell" onclick="switchOdTab('tab-approvals')" title="Yêu cầu chờ phê duyệt HITL">
+                <i class="fa-regular fa-bell"></i>
+                <span class="em-bell-badge" id="pendingCountBadge">0</span>
+            </div>
+            <div class="em-user-profile">
+                <div class="em-avatar-purple" id="adminAvatarInitials">AD</div>
+                <div style="line-height: 1.15;">
+                    <div class="fw-bold text-dark" style="font-size: 0.82rem;" id="adminName">Admin</div>
+                    <div class="text-secondary text-uppercase" style="font-size: 0.65rem; font-weight: 600; letter-spacing: 0.3px;" id="adminRole">TENANT ADMIN</div>
                 </div>
-                <div class="d-none d-lg-block" style="line-height: 1.1;">
-                    <div class="fw-bold text-dark" style="font-size: 0.8rem;" id="adminName">Admin</div>
-                    <small class="text-secondary" style="font-size: 0.68rem;" id="adminRole">TENANT_ADMIN</small>
-                </div>
-                <button class="btn btn-sm btn-outline-danger ms-1 py-1 px-2" onclick="logout()" title="Đăng xuất">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </button>
             </div>
         </div>
     </header>
 
-    <!-- 2. MAIN WORKSPACE -->
-    <main class="od-workspace">
+    <!-- 2. APP SHELL: LEFT SIDEBAR + RIGHT WORKSPACE -->
+    <div class="em-app-shell">
+        <!-- LEFT SIDEBAR NAVIGATION -->
+        <aside class="em-sidebar" id="emSidebar">
+            <div class="em-side-menu">
+                <button class="em-side-item" data-tab="tab-analytics" onclick="switchOdTab('tab-analytics', this)">
+                    <i class="fa-solid fa-border-all"></i> Tổng quan
+                </button>
+                <button class="em-side-item" data-tab="tab-employees" onclick="switchOdTab('tab-employees', this)">
+                    <i class="fa-regular fa-user"></i> Quản lý Người dùng
+                </button>
+                <button class="em-side-item" data-tab="tab-builder" onclick="switchOdTab('tab-builder', this)">
+                    <i class="fa-regular fa-building"></i> Quản lý Tổ chức & Agent
+                </button>
+                <button class="em-side-item" data-tab="tab-agents" onclick="switchOdTab('tab-agents', this)">
+                    <i class="fa-solid fa-shield-halved"></i> Vai trò & Phân quyền
+                </button>
+                <button class="em-side-item" data-tab="tab-builder" onclick="switchOdTab('tab-builder', this); setTimeout(()=>document.getElementById('docSelect')?.scrollIntoView({behavior:'smooth'}), 100);">
+                    <i class="fa-solid fa-book-open"></i> Tri thức & Tài liệu RAG
+                </button>
+                <button class="em-side-item active" data-tab="tab-employees" onclick="switchOdTab('tab-employees', this)">
+                    <i class="fa-solid fa-layer-group"></i> Quản lý Phòng ban / Lớp
+                </button>
+                <button class="em-side-item" data-tab="tab-approvals" onclick="switchOdTab('tab-approvals', this)">
+                    <i class="fa-regular fa-calendar-check"></i> Phê duyệt HITL
+                </button>
+                <button class="em-side-item" data-tab="tab-analytics" onclick="switchOdTab('tab-analytics', this)">
+                    <i class="fa-regular fa-comment-dots"></i> Thống kê AI Chat
+                </button>
+            </div>
+
+            <div class="em-side-footer">
+                <a href="database_viewer.html" target="_blank" class="em-side-item">
+                    <i class="fa-solid fa-gear"></i> Cài đặt & SQLite DB
+                </a>
+                <button class="em-side-item text-danger" onclick="logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-danger"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <main class="em-main">
+            <!-- TOP CONTEXT SUMMARY CARD (Giống thanh thông tin phía trên trong ảnh) -->
+            <div class="em-context-card">
+                <div class="em-stat-grid">
+                    <div class="em-stat-box">
+                        <div class="text-secondary" style="font-size: 0.72rem;">Mã Tổ chức / Tenant</div>
+                        <div class="fw-bold text-dark mt-1" style="font-size: 0.9rem;" id="tenantCode">TENANT: VINFAST</div>
+                    </div>
+                    <div class="em-stat-box">
+                        <div class="text-secondary" style="font-size: 0.72rem;">Gói Bản quyền & Phân quyền</div>
+                        <div class="mt-1"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle" id="tenantPlanBadge">ENTERPRISE</span></div>
+                    </div>
+                    <div class="em-stat-box">
+                        <div class="text-secondary" style="font-size: 0.72rem;">Số Trợ lý AI (Agents)</div>
+                        <div class="fw-bold text-primary mt-1" style="font-size: 0.9rem;" id="statTotalAgents">Đang hoạt động</div>
+                    </div>
+                    <div class="em-stat-box">
+                        <div class="text-secondary" style="font-size: 0.72rem;">Tổng số Thành viên & Đơn vị</div>
+                        <div class="fw-bold text-success mt-1" style="font-size: 0.9rem;" id="statTotalMembers">-- thành viên</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-secondary" style="font-size: 0.8rem;">Quản trị viên phụ trách:</span>
+                        <span class="em-avatar-purple" style="width: 26px; height: 26px; font-size: 0.7rem;" id="managerMiniInitial">A</span>
+                        <span class="fw-semibold text-dark" style="font-size: 0.82rem;" id="managerMiniName">Admin</span>
+                    </div>
+                    <div class="text-secondary" style="font-size: 0.76rem;">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i>Phân tách đa đơn vị: Phòng ban Doanh nghiệp • Khoa/Lớp Giáo dục • Chuyên khoa Y tế
+                    </div>
+                </div>
+            </div>
+
+            <!-- HORIZONTAL SUB-TAB BAR (Thanh tab ngang với nút đang chọn màu Đen/Navy đậm như ảnh mẫu) -->
+            <nav class="em-subtabs">
+                <button class="od-nav-item" data-tab="tab-analytics" onclick="switchOdTab('tab-analytics', this)">
+                    <i class="fa-solid fa-table-columns"></i> Tổng quan
+                </button>
+                <button class="od-nav-item active" data-tab="tab-employees" onclick="switchOdTab('tab-employees', this)">
+                    <i class="fa-solid fa-user-group"></i> Thành viên & Đơn vị
+                </button>
+                <button class="od-nav-item" data-tab="tab-builder" onclick="switchOdTab('tab-builder', this)">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Thiết kế Agent (Studio)
+                </button>
+                <button class="od-nav-item" data-tab="tab-agents" onclick="switchOdTab('tab-agents', this)">
+                    <i class="fa-solid fa-robot"></i> Danh sách Agent
+                </button>
+                <button class="od-nav-item" data-tab="tab-approvals" onclick="switchOdTab('tab-approvals', this)">
+                    <i class="fa-regular fa-clipboard"></i> Lịch sử & Duyệt HITL
+                </button>
+                <button class="od-nav-item" data-tab="tab-analytics" onclick="switchOdTab('tab-analytics', this)">
+                    <i class="fa-regular fa-file-lines"></i> Nhật ký Langfuse
+                </button>
+            </nav>
+
         <!-- TAB A: STUDIO BUILDER (CANVAS + LIVE PLAYGROUND COPILOT) -->
-        <div id="tab-builder">
+        <div id="tab-builder" style="display: none;">
             <div class="row g-4">
                 <!-- CỘT TRÁI & GIỮA: DESIGN & LOGIC CANVAS (7 COLS) -->
                 <div class="col-xl-8 col-lg-7">
@@ -746,92 +1067,125 @@
         </div>
 
         <!-- TAB D: QUẢN LÝ THÀNH VIÊN & ĐƠN VỊ (PHÒNG BAN / KHOA / LỚP) -->
-        <div id="tab-employees" style="display: none;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-users text-primary me-2"></i>Quản Lý Thành Viên & Phân Quyền Đơn Vị</h4>
-                    <p class="text-secondary small mb-0">Thêm thành viên (nhân viên / giảng viên / sinh viên) hàng loạt, gán Đơn vị (Phòng ban / Khoa / Lớp học) để phân quyền truy cập Agent</p>
+        <div id="tab-employees" style="display: block;">
+            <!-- DANH SÁCH THÀNH VIÊN (Giống bố cục bảng Danh sách học viên / thành viên trong ảnh mẫu) -->
+            <div class="od-card">
+                <div class="mb-3">
+                    <h5 class="fw-bold text-dark mb-1" style="font-size: 1.05rem;">Danh sách thành viên & Đơn vị</h5>
+                    <p class="text-secondary small mb-0">Danh sách thành viên của tổ chức, phân quyền theo Phòng ban (Doanh nghiệp), Khoa / Lớp học (Giáo dục) hoặc Chuyên khoa (Y tế)</p>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary" onclick="loadUsers()"><i class="fa-solid fa-rotate me-1"></i> Làm mới</button>
-            </div>
 
-            <!-- BULK IMPORT BOX -->
-            <div class="od-card border-primary border-opacity-25" style="background-color: #fafcff;">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-file-csv me-1"></i>Thêm Thành Viên Hàng Loạt (Bulk Provisioning)</h6>
-                    <div>
-                        <input type="file" id="bulkCsvInput" accept=".csv,.txt" style="display: none;" onchange="handleBulkFileSelect(event)">
-                        <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="document.getElementById('bulkCsvInput').click()">
-                            <i class="fa-solid fa-folder-open me-1"></i> Chọn File CSV / TXT
+                <!-- THANH TÌM KIẾM, BỘ LỌC & NÚT + THÊM THÀNH VIÊN -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="position-relative" style="min-width: 240px;">
+                            <input type="text" id="memberSearchInput" class="form-control form-control-sm ps-3" placeholder="Tìm kiếm thành viên, email..." oninput="filterMemberTable()">
+                        </div>
+                        <select id="memberUnitFilter" class="form-select form-select-sm" style="width: auto; min-width: 165px;" onchange="filterMemberTable()">
+                            <option value="ALL">Tất cả đơn vị / lớp / phòng</option>
+                            <option value="Marketing">Phòng Marketing</option>
+                            <option value="Accounting">Phòng Kế Toán</option>
+                            <option value="HR">Phòng Nhân Sự (HR)</option>
+                            <option value="IT">Phòng Kỹ thuật & IT</option>
+                            <option value="Sales">Phòng Kinh Doanh</option>
+                            <option value="Production">Phòng Sản xuất</option>
+                            <option value="Lop_AI_CNTT">Lớp AI / Khoa CNTT</option>
+                            <option value="Phong_Dao_Tao">Phòng Đào Tạo</option>
+                            <option value="Khoa_Kinh_Te">Khoa Kinh Tế</option>
+                        </select>
+                        <select class="form-select form-select-sm" style="width: auto;">
+                            <option>Tất cả trạng thái</option>
+                            <option>Đang hoạt động</option>
+                        </select>
+                        <select class="form-select form-select-sm" style="width: auto;">
+                            <option>2026</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary fw-semibold" onclick="document.getElementById('bulkProvisionDrawer').classList.toggle('d-none')">
+                            <i class="fa-solid fa-file-csv me-1"></i> Nhập CSV hàng loạt
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillSampleBulkUser()">
-                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Điền mẫu nhanh
+                        <button class="btn btn-sm btn-primary fw-semibold px-3 py-2" style="background: #2563eb; border-radius: 8px;" onclick="document.getElementById('singleProvisionDrawer').classList.toggle('d-none')">
+                            <i class="fa-solid fa-plus me-1"></i> Thêm thành viên
                         </button>
                     </div>
                 </div>
-                <p class="text-secondary small mb-2">Dán hoặc tải file danh sách thành viên (Mỗi dòng một người: <code>Họ và Tên, Email, Đơn vị (Phòng ban / Lớp / Khoa)</code>)</p>
-                <textarea id="bulkUserText" class="form-control mb-3" rows="3" placeholder="Đỗ Lý Hoàng Nam, dolyhoangnam13072005@gmail.com, Marketing"></textarea>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="text-secondary small" style="font-size: 11px;">
-                        <i class="fa-solid fa-shield-halved text-success me-1"></i>Mỗi tài khoản sẽ được sinh mật khẩu ngẫu nhiên riêng biệt, đồng bộ lên Keycloak SSO và gửi email bàn giao.
-                    </span>
-                    <button class="btn btn-dark fw-bold" onclick="handleBulkImport()"><i class="fa-solid fa-bolt me-1"></i> Tạo Toàn Bộ Tài Khoản Hàng Loạt</button>
-                </div>
-            </div>
 
-            <!-- TẠO ĐƠN LẺ -->
-            <div class="od-card">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-plus text-success me-2"></i>Thêm Thành Viên Đơn Lẻ:</h6>
-                <form id="createSingleUserForm" onsubmit="handleCreateSingleUser(event)">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Họ và Tên</label>
-                            <input type="text" id="singleName" class="form-control" placeholder="Trần Đức Nam" required>
+                <!-- KHUNG THÊM THÀNH VIÊN ĐƠN LẺ (MỞ KHI BẤM + THÊM THÀNH VIÊN) -->
+                <div id="singleProvisionDrawer" class="p-3 mb-3 rounded-3 border bg-light d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-user-plus text-primary me-2"></i>Thêm Thành Viên Mới Vào Đơn Vị / Lớp / Phòng Ban</h6>
+                        <button type="button" class="btn-close btn-sm" onclick="document.getElementById('singleProvisionDrawer').classList.add('d-none')"></button>
+                    </div>
+                    <form id="createSingleUserForm" onsubmit="handleCreateSingleUser(event)">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Họ và Tên</label>
+                                <input type="text" id="singleName" class="form-control" placeholder="VD: Nam Anh / Quang Trung" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Email đăng nhập SSO</label>
+                                <input type="email" id="singleEmail" class="form-control" placeholder="namanh@organization.vn" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Đơn Vị (Phòng / Lớp / Khoa)</label>
+                                <input type="text" id="singleDept" list="unitOptionsDatalist" class="form-control" value="Marketing" placeholder="Chọn hoặc tự nhập..." required>
+                                <datalist id="unitOptionsDatalist">
+                                    <option value="Marketing">🏢 Phòng Marketing</option>
+                                    <option value="Accounting">🏢 Phòng Kế Toán</option>
+                                    <option value="HR">🏢 Phòng Nhân Sự (HR)</option>
+                                    <option value="IT">🏢 Phòng Kỹ thuật & IT</option>
+                                    <option value="Sales">🏢 Phòng Kinh Doanh</option>
+                                    <option value="Production">🏢 Phòng Sản xuất</option>
+                                    <option value="Lop_AI_CNTT">🎓 Lớp AI / Khoa CNTT</option>
+                                    <option value="Phong_Dao_Tao">🎓 Phòng Đào Tạo & Học Vụ</option>
+                                    <option value="Khoa_Kinh_Te">🎓 Khoa Kinh Tế & Quản Trị</option>
+                                    <option value="CTSV">🎓 Phòng Công Tác Sinh Viên</option>
+                                    <option value="Khoa_Kham_Benh">🏥 Khoa Khám Bệnh</option>
+                                    <option value="Khoa_Duoc">🏥 Khoa Dược</option>
+                                </datalist>
+                                <input type="hidden" id="singleLeave" value="12">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu Thành Viên</button>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Email đăng nhập SSO</label>
-                            <input type="email" id="singleEmail" class="form-control" placeholder="nam.td@organization.vn" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Đơn Vị (Phòng / Lớp / Khoa)</label>
-                            <input type="text" id="singleDept" list="unitOptionsDatalist" class="form-control" value="Marketing" placeholder="Chọn hoặc tự nhập..." required>
-                            <datalist id="unitOptionsDatalist">
-                                <option value="Marketing">🏢 Phòng Marketing</option>
-                                <option value="Accounting">🏢 Phòng Kế Toán</option>
-                                <option value="HR">🏢 Phòng Nhân Sự (HR)</option>
-                                <option value="IT">🏢 Phòng Kỹ thuật & IT</option>
-                                <option value="Sales">🏢 Phòng Kinh Doanh</option>
-                                <option value="Production">🏢 Phòng Sản xuất</option>
-                                <option value="Lop_AI_CNTT">🎓 Lớp AI / Khoa CNTT</option>
-                                <option value="Phong_Dao_Tao">🎓 Phòng Đào Tạo & Học Vụ</option>
-                                <option value="Khoa_Kinh_Te">🎓 Khoa Kinh Tế & Quản Trị</option>
-                                <option value="CTSV">🎓 Phòng Công Tác Sinh Viên</option>
-                                <option value="Khoa_Kham_Benh">🏥 Khoa Khám Bệnh</option>
-                                <option value="Khoa_Duoc">🏥 Khoa Dược</option>
-                            </datalist>
-                            <input type="hidden" id="singleLeave" value="12">
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-success fw-bold w-100 py-2"><i class="fa-solid fa-check me-1"></i> Lưu Thành Viên</button>
+                    </form>
+                </div>
+
+                <!-- KHUNG BULK IMPORT CSV -->
+                <div id="bulkProvisionDrawer" class="p-3 mb-3 rounded-3 border d-none" style="background-color: #fafcff;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-primary mb-0"><i class="fa-solid fa-file-csv me-1"></i>Thêm Thành Viên Hàng Loạt (Bulk Provisioning)</h6>
+                        <div>
+                            <input type="file" id="bulkCsvInput" accept=".csv,.txt" style="display: none;" onchange="handleBulkFileSelect(event)">
+                            <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="document.getElementById('bulkCsvInput').click()">
+                                <i class="fa-solid fa-folder-open me-1"></i> Chọn File CSV / TXT
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillSampleBulkUser()">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Điền mẫu nhanh
+                            </button>
                         </div>
                     </div>
-                </form>
-            </div>
+                    <p class="text-secondary small mb-2">Dán hoặc tải file danh sách thành viên (Mỗi dòng một người: <code>Họ và Tên, Email, Đơn vị (Phòng ban / Lớp / Khoa)</code>)</p>
+                    <textarea id="bulkUserText" class="form-control mb-3" rows="3" placeholder="Đỗ Lý Hoàng Nam, dolyhoangnam13072005@gmail.com, Marketing"></textarea>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small" style="font-size: 11px;">
+                            <i class="fa-solid fa-shield-halved text-success me-1"></i>Mỗi tài khoản sẽ được sinh mật khẩu ngẫu nhiên riêng biệt, đồng bộ lên Keycloak SSO và gửi email bàn giao.
+                        </span>
+                        <button class="btn btn-dark btn-sm fw-bold px-3 py-2" onclick="handleBulkImport()"><i class="fa-solid fa-bolt me-1"></i> Tạo Toàn Bộ Tài Khoản Hàng Loạt</button>
+                    </div>
+                </div>
 
-            <!-- DANH SÁCH THÀNH VIÊN -->
-            <div class="od-card">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-address-book text-primary me-2"></i>Danh Sách Thành Viên & Đơn Vị Phân Quyền</h6>
+                <!-- BẢNG DANH SÁCH THÀNH VIÊN (CHUẨN FORM ẢNH MẪU) -->
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
-                                <th>MÃ ĐỊNH DANH</th>
-                                <th>HỌ VÀ TÊN</th>
-                                <th>EMAIL</th>
-                                <th>ĐƠN VỊ (PHÒNG / LỚP / KHOA)</th>
-                                <th>VAI TRÒ</th>
-                                <th>QUYỀN TRUY CẬP ACL</th>
-                                <th>THAO TÁC</th>
+                                <th style="width: 38%;">Thành viên</th>
+                                <th style="width: 22%;">Đơn vị (Phòng / Lớp / Khoa)</th>
+                                <th style="width: 25%;">Trạng thái & Phân quyền ACL</th>
+                                <th style="width: 15%; text-align: right;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="employeeTableBody"></tbody>
@@ -916,7 +1270,13 @@
                 </div>
             </div>
         </div>
-    </main>
+        </main>
+    </div>
+
+    <!-- FLOATING ACTION BUTTON (Góc phải dưới giống ảnh mẫu) -->
+    <a href="employee_portal.html" class="em-fab" title="Mở Cổng Trợ Lý Ảo AI">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+    </a>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -930,18 +1290,32 @@
         };
 
         const myTenant = currentAdmin.tenant_id || 'VINFAST';
-        document.getElementById('tenantTitle').innerText = currentAdmin.tenant_name || `${myTenant} Studio`;
+        document.getElementById('tenantTitle').innerText = currentAdmin.tenant_name || `${myTenant} Manage`;
+        document.getElementById('brandLogoLetter').innerText = (myTenant || 'M').charAt(0).toUpperCase();
         document.getElementById('tenantCode').innerText = `TENANT: ${myTenant}`;
         document.getElementById('adminName').innerText = currentAdmin.full_name;
-        document.getElementById('adminRole').innerText = currentAdmin.role;
+        document.getElementById('adminRole').innerText = (currentAdmin.role || 'TENANT_ADMIN').replace('_', ' ');
 
-        // TAB SWITCHER
+        const nameParts = (currentAdmin.full_name || 'Admin').trim().split(/\s+/);
+        const initials = nameParts.length >= 2
+            ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+            : (nameParts[0].slice(0, 2)).toUpperCase();
+        if (document.getElementById('adminAvatarInitials')) document.getElementById('adminAvatarInitials').innerText = initials;
+        if (document.getElementById('managerMiniInitial')) document.getElementById('managerMiniInitial').innerText = initials.charAt(0);
+        if (document.getElementById('managerMiniName')) document.getElementById('managerMiniName').innerText = currentAdmin.full_name;
+
+        // TAB SWITCHER (Đồng bộ cả Sidebar bên trái & Thanh Sub-tab ngang)
         function switchOdTab(tabId, el) {
             ['tab-builder', 'tab-agents', 'tab-approvals', 'tab-employees', 'tab-analytics'].forEach(id => {
                 const dom = document.getElementById(id);
                 if (dom) dom.style.display = (id === tabId) ? 'block' : 'none';
             });
-            document.querySelectorAll('.od-nav-item').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.od-nav-item').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+            });
+            document.querySelectorAll('.em-side-item[data-tab]').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+            });
             if (el) el.classList.add('active');
 
             if (tabId === 'tab-agents') loadAgents();
@@ -1097,6 +1471,8 @@
             try {
                 const res = await fetch(`/api/agents?tenant_id=${myTenant}`);
                 const agents = await res.json();
+                const statAg = document.getElementById('statTotalAgents');
+                if (statAg) statAg.innerText = `${agents.length} Trợ lý AI`;
                 const container = document.getElementById('agentListContainer');
                 container.innerHTML = '';
 
@@ -1110,15 +1486,21 @@
                             <div class="od-card h-100 d-flex flex-column justify-content-between">
                                 <div>
                                     <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h5 class="fw-bold text-dark mb-0">${ag.name}</h5>
-                                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold">${ag.tenant_id}</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="em-avatar-blue">${(ag.name || 'A').charAt(0).toUpperCase()}</div>
+                                            <div>
+                                                <h6 class="fw-bold text-dark mb-0">${ag.name}</h6>
+                                                <small class="text-secondary" style="font-size: 0.72rem;">Tenant: ${ag.tenant_id}</small>
+                                            </div>
+                                        </div>
+                                        <span class="em-status-active">Đang chạy</span>
                                     </div>
-                                    <div class="mb-3">${deptBadge}</div>
+                                    <div class="mb-3 mt-2">${deptBadge}</div>
                                     <p class="text-secondary small mb-3">${ag.description || 'Trợ lý AI chuyên biệt hỗ trợ quy trình đơn vị.'}</p>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center border-top border-light-subtle pt-3 mt-2">
-                                    <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động</small>
-                                    <a href="employee_portal.html" class="btn btn-sm btn-outline-primary fw-semibold"><i class="fa-solid fa-comments me-1"></i>Chat thử</a>
+                                    <small class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Sẵn sàng phục vụ</small>
+                                    <a href="employee_portal.html" class="btn btn-sm btn-primary fw-semibold" style="background:#2563eb;"><i class="fa-solid fa-comments me-1"></i>Chat thử</a>
                                 </div>
                             </div>
                         </div>
@@ -1193,39 +1575,79 @@
         }
 
         // 3. LOAD EMPLOYEES / MEMBERS
+        let cachedTenantUsers = [];
         async function loadUsers() {
             try {
                 const res = await fetch(`/api/users?tenant_id=${myTenant}`);
-                const users = await res.json();
-                const tbody = document.getElementById('employeeTableBody');
-                tbody.innerHTML = '';
-
-                users.forEach(u => {
-                    const roleBadge = u.role === 'TENANT_ADMIN'
-                        ? '<span class="badge bg-warning bg-opacity-20 text-dark fw-bold border border-warning">ADMIN</span>'
-                        : '<span class="badge bg-secondary bg-opacity-10 text-secondary fw-bold">MEMBER / USER</span>';
-
-                    const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
-                    const actionBtns = u.role !== 'TENANT_ADMIN'
-                        ? `<button class="btn btn-sm btn-outline-primary py-0 px-2 me-1" onclick="openEditEmployeeModal(${userJson})" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square me-1"></i>Sửa</button>
-                           <button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="deleteUser(${u.id}, '${u.full_name}')" title="Xóa"><i class="fa-solid fa-trash me-1"></i>Xóa</button>`
-                        : `<button class="btn btn-sm btn-outline-primary py-0 px-2" onclick="openEditEmployeeModal(${userJson})" title="Sửa hồ sơ"><i class="fa-solid fa-pen-to-square me-1"></i>Sửa hồ sơ</button>`;
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><code>ID-${String(u.id).padStart(3, '0')}</code></td>
-                            <td class="fw-bold text-dark">${u.full_name}</td>
-                            <td class="text-secondary">${u.email}</td>
-                            <td><span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-2 py-1">${u.department || 'ALL'}</span></td>
-                            <td>${roleBadge}</td>
-                            <td><span class="badge bg-success bg-opacity-10 text-success border border-success-subtle"><i class="fa-solid fa-shield-halved me-1"></i>Agent đơn vị: ${u.department || 'ALL'}</span></td>
-                            <td>${actionBtns}</td>
-                        </tr>
-                    `;
-                });
+                cachedTenantUsers = await res.json();
+                const statMem = document.getElementById('statTotalMembers');
+                if (statMem) statMem.innerText = `${cachedTenantUsers.length} thành viên`;
+                renderMemberTable(cachedTenantUsers);
             } catch (err) {
                 console.error(err);
             }
+        }
+
+        function filterMemberTable() {
+            const q = (document.getElementById('memberSearchInput')?.value || '').trim().toLowerCase();
+            const unit = document.getElementById('memberUnitFilter')?.value || 'ALL';
+            const filtered = cachedTenantUsers.filter(u => {
+                const matchText = !q || (u.full_name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q) || (u.department || '').toLowerCase().includes(q);
+                const matchUnit = unit === 'ALL' || (u.department || '').toLowerCase() === unit.toLowerCase();
+                return matchText && matchUnit;
+            });
+            renderMemberTable(filtered);
+        }
+
+        function renderMemberTable(users) {
+            const tbody = document.getElementById('employeeTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-secondary">Không tìm thấy thành viên nào phù hợp.</td></tr>';
+                return;
+            }
+
+            users.forEach(u => {
+                const initial = ((u.full_name || 'U').trim().charAt(0) || 'U').toUpperCase();
+                const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
+                const roleTag = u.role === 'TENANT_ADMIN'
+                    ? '<span class="badge bg-warning bg-opacity-20 text-dark border border-warning-subtle ms-2" style="font-size:0.65rem;">ADMIN</span>'
+                    : '';
+
+                const actionBtns = u.role !== 'TENANT_ADMIN'
+                    ? `<button class="btn btn-sm btn-light border py-1 px-2 me-1 text-secondary" onclick="openEditEmployeeModal(${userJson})" title="Chỉnh sửa hồ sơ & đơn vị"><i class="fa-solid fa-pen"></i></button>
+                       <button class="btn btn-sm btn-light border py-1 px-2 text-danger" onclick="deleteUser(${u.id}, '${u.full_name}')" title="Xóa thành viên"><i class="fa-solid fa-ellipsis"></i></button>`
+                    : `<button class="btn btn-sm btn-light border py-1 px-2 text-secondary" onclick="openEditEmployeeModal(${userJson})" title="Sửa hồ sơ"><i class="fa-solid fa-ellipsis"></i></button>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="em-avatar-blue">${initial}</div>
+                                <div style="line-height: 1.25;">
+                                    <div class="fw-bold text-dark" style="font-size: 0.88rem;">${u.full_name} ${roleTag}</div>
+                                    <div class="text-secondary" style="font-size: 0.76rem;">${u.email}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border px-2 py-1 fw-semibold" style="font-size: 0.76rem;">
+                                <i class="fa-solid fa-layer-group text-primary me-1"></i>${u.department || 'ALL'}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="em-status-active">Đang hoạt động</span>
+                                <i class="fa-solid fa-pen text-secondary" style="font-size: 0.72rem; cursor: pointer;" onclick="openEditEmployeeModal(${userJson})" title="Đổi đơn vị / trạng thái"></i>
+                                <span class="text-muted" style="font-size: 0.72rem;">• Agent: ${u.department || 'ALL'}</span>
+                            </div>
+                        </td>
+                        <td style="text-align: right;">${actionBtns}</td>
+                    </tr>
+                `;
+            });
         }
 
         let editModalInstance = null;

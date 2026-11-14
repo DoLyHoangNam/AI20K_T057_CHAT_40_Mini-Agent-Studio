@@ -34,7 +34,7 @@
 
         *, *::before, *::after { box-sizing: border-box; }
         body {
-            background-color: var(--bg);
+            background-color: #f8fafc;
             color: var(--fg);
             font-family: var(--font-sans);
             font-size: 14px;
@@ -44,32 +44,147 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 1. MINIMAL HEADER (OpenDesign Standard) */
-        .od-nav {
-            border-bottom: 1px solid var(--border);
-            padding: 12px 28px;
+        /* 1. EDUMANAGE TOPBAR */
+        .em-topbar {
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #ffffff;
+            padding: 0 24px 0 0;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
-
-        .od-logo-mark {
-            width: 24px;
-            height: 24px;
-            background: var(--fg);
-            color: #fff;
-            border-radius: 6px;
+        .em-brand-box {
+            width: 250px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .em-logo-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
         }
-
+        .em-avatar-purple {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #7c3aed;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .em-avatar-blue {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .em-app-shell {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+        .em-sidebar {
+            width: 250px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
+            transition: width 0.2s ease;
+        }
+        .em-sidebar.collapsed { width: 0; overflow: hidden; border-right: none; }
+        .em-side-menu { padding: 14px 10px; display: flex; flex-direction: column; gap: 3px; }
+        .em-side-item {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #475569;
+            background: transparent;
+            border: none;
+            border-left: 3px solid transparent;
+            width: 100%;
+            text-align: left;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .em-side-item:hover { background: #f8fafc; color: #0f172a; }
+        .em-side-item.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+            border-left: 3px solid #2563eb;
+        }
+        .em-subtabs {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 6px 10px;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .em-subtab {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.83rem;
+            font-weight: 500;
+            color: #475569;
+            border: none;
+            background: transparent;
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            cursor: pointer;
+        }
+        .em-subtab.active {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .em-status-active {
+            background: #dcfce7;
+            color: #16a34a;
+            font-size: 0.74rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+        }
         .eyebrow {
             font-family: var(--font-mono);
             font-size: 11px;
@@ -249,38 +364,78 @@
     </style>
 </head>
 <body>
-    <!-- TOP NAVIGATION (OpenDesign Minimalist App Bar) -->
-    <header class="od-nav">
-        <div class="d-flex align-items-center gap-3">
-            <div class="od-logo-mark"><i class="fa-solid fa-layer-group"></i></div>
-            <div class="d-flex align-items-baseline gap-2">
-                <span class="fw-bold" style="letter-spacing: -0.02em;">OpenDesign Platform</span>
-                <span class="badge-mono">SUPER_ADMIN</span>
+    <!-- TOPBAR (EduManage / SaaS Portal Style) -->
+    <header class="em-topbar">
+        <div class="d-flex align-items-center">
+            <div class="em-brand-box">
+                <div class="em-logo-circle">E</div>
+                <span class="fw-bold text-dark" style="font-size: 1rem;">MiniAgent Manage</span>
             </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <a href="database_viewer.html" target="_blank" class="btn-shadcn btn-shadcn-secondary">
-                <i class="fa-solid fa-database"></i> SQLite Explorer
-            </a>
-            <a href="admin_studio.html" class="btn-shadcn btn-shadcn-secondary">
-                <i class="fa-solid fa-sliders"></i> Tenant Studio
-            </a>
-            <button class="btn-shadcn btn-shadcn-ghost" onclick="logout()">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+            <button class="btn btn-sm btn-light border-0 text-secondary" onclick="document.getElementById('saSidebar').classList.toggle('collapsed')">
+                <i class="fa-solid fa-bars"></i>
             </button>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="fw-semibold text-secondary" style="font-size: 0.8rem;">VN</span>
+            <a href="employee_portal.html" class="btn btn-sm text-white fw-semibold px-3 py-2" style="background: #2563eb; border-radius: 8px;">
+                <i class="fa-solid fa-robot me-1"></i> Trợ lý ảo
+            </a>
+            <a href="admin_studio.html" class="btn btn-sm btn-outline-secondary fw-semibold">
+                <i class="fa-solid fa-sliders me-1"></i> Tenant Studio
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <div class="em-avatar-purple">SA</div>
+                <div style="line-height: 1.15;">
+                    <div class="fw-bold text-dark" style="font-size: 0.82rem;">Super Admin</div>
+                    <div class="text-secondary text-uppercase" style="font-size: 0.65rem; font-weight: 600;">SUPER ADMIN</div>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div class="od-container">
-        <!-- HEADER TITLE -->
-        <div class="mb-4">
-            <div class="eyebrow mb-1">Platform Control Plane</div>
-            <h2 class="fw-bold mb-1" style="font-size: 24px; letter-spacing: -0.03em;">Quản Trị Bản Quyền & Hệ Thống Đa Khách Hàng</h2>
-            <p class="text-secondary" style="font-size: 13px;">Phát hành giấy phép doanh nghiệp (Tenants), tạo tài khoản Admin và giám sát cơ sở dữ liệu SQLite.</p>
+    <div class="em-app-shell">
+        <aside class="em-sidebar" id="saSidebar">
+            <div class="em-side-menu">
+                <a href="#sectionTenants" class="em-side-item">
+                    <i class="fa-solid fa-border-all"></i> Tổng quan
+                </a>
+                <a href="#sectionUsers" class="em-side-item active">
+                    <i class="fa-regular fa-user"></i> Quản lý Người dùng
+                </a>
+                <a href="#sectionProvision" class="em-side-item">
+                    <i class="fa-regular fa-building"></i> Quản lý Tổ chức (Tenants)
+                </a>
+                <a href="admin_studio.html" class="em-side-item">
+                    <i class="fa-solid fa-shield-halved"></i> Vai trò & Phân quyền
+                </a>
+                <a href="admin_studio.html" class="em-side-item">
+                    <i class="fa-solid fa-layer-group"></i> Quản lý Phòng ban / Lớp
+                </a>
+                <a href="employee_portal.html" class="em-side-item">
+                    <i class="fa-regular fa-comment-dots"></i> Cổng AI Chat
+                </a>
+            </div>
+            <div class="p-2 border-top">
+                <a href="database_viewer.html" target="_blank" class="em-side-item">
+                    <i class="fa-solid fa-gear"></i> Cài đặt & SQLite DB
+                </a>
+                <button class="em-side-item text-danger" onclick="logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-danger"></i> Đăng xuất
+                </button>
+            </div>
+        </aside>
+
+    <div class="od-container" style="flex: 1; max-width: 100%; padding: 20px 28px;">
+        <!-- HORIZONTAL SUBTABS -->
+        <div class="em-subtabs">
+            <a href="#sectionProvision" class="em-subtab text-decoration-none"><i class="fa-solid fa-plus-circle"></i> Cấp bản quyền Tổ chức</a>
+            <a href="#sectionTenants" class="em-subtab text-decoration-none"><i class="fa-regular fa-building"></i> Danh sách Tổ chức (Tenants)</a>
+            <a href="#sectionUsers" class="em-subtab active text-decoration-none"><i class="fa-solid fa-user-group"></i> Tài khoản & Đơn vị</a>
+            <a href="admin_studio.html" class="em-subtab text-decoration-none"><i class="fa-solid fa-robot"></i> Studio & Agents</a>
         </div>
 
         <!-- 1. FORM PROVISION TENANT (Clean Shadcn Card) -->
-        <div class="od-card">
+        <div class="od-card" id="sectionProvision">
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <div>
                     <h5 class="od-card-title">Cấp Bản Quyền & Khởi Tạo Doanh Nghiệp Mới</h5>
@@ -333,7 +488,7 @@
         </div>
 
         <!-- 2. DANH SÁCH DOANH NGHIỆP ĐANG HOẠT ĐỘNG -->
-        <div class="od-card">
+        <div class="od-card" id="sectionTenants">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h5 class="od-card-title">Danh Sách Doanh Nghiệp Đang Hoạt Động</h5>
@@ -364,7 +519,7 @@
         </div>
 
         <!-- 3. QUẢN LÝ TOÀN BỘ TÀI KHOẢN -->
-        <div class="od-card">
+        <div class="od-card" id="sectionUsers">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h5 class="od-card-title">Quản Lý Toàn Bộ Tài Khoản Trên Nền Tảng</h5>
@@ -383,13 +538,11 @@
                 <table class="table-shadcn">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>THÀNH VIÊN</th>
                             <th>TENANT</th>
-                            <th>HỌ VÀ TÊN</th>
-                            <th>EMAIL</th>
                             <th>ĐƠN VỊ / LỚP / PHÒNG</th>
                             <th>VAI TRÒ</th>
-                            <th>PHẠM VI AGENT ACL</th>
+                            <th>TRẠNG THÁI & ACL</th>
                             <th style="text-align: right;">THAO TÁC</th>
                         </tr>
                     </thead>
@@ -397,6 +550,7 @@
                 </table>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- MODAL SỬA TÀI KHOẢN (Shadcn Dialog) -->
@@ -590,15 +744,26 @@
                     ? `<button class="btn-shadcn btn-shadcn-danger" onclick="deleteUser(${u.id}, '${u.full_name}')" title="Xóa"><i class="fa-regular fa-trash-can"></i></button>`
                     : '<span class="text-secondary" style="font-size: 11px;">Root</span>';
 
+                const initial = ((u.full_name || 'U').trim().charAt(0) || 'U').toUpperCase();
                 tbody.innerHTML += `
                     <tr>
-                        <td><code style="font-family: var(--font-mono); font-size: 12px; color: var(--muted);">#${u.id}</code></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="em-avatar-blue">${initial}</div>
+                                <div style="line-height: 1.25;">
+                                    <div class="fw-semibold text-dark">${u.full_name}</div>
+                                    <div class="text-secondary" style="font-size: 12px;">${u.email}</div>
+                                </div>
+                            </div>
+                        </td>
                         <td><span class="badge-mono">${u.tenant_id}</span></td>
-                        <td class="fw-semibold">${u.full_name}</td>
-                        <td class="text-secondary">${u.email}</td>
                         <td>${u.department || '—'}</td>
                         <td>${roleBadge}</td>
-                        <td><span class="badge-mono">ACL: ${u.department || 'ALL'}</span></td>
+                        <td>
+                            <span class="em-status-active">Đang hoạt động</span>
+                            <i class="fa-solid fa-pen text-secondary ms-1" style="font-size:11px;cursor:pointer;" onclick="openSaEditModal(${userJson})"></i>
+                            <span class="text-muted ms-1" style="font-size:11px;">(ACL: ${u.department || 'ALL'})</span>
+                        </td>
                         <td style="text-align: right;">${editBtn} ${deleteBtn}</td>
                     </tr>
                 `;
