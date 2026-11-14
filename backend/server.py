@@ -41,11 +41,82 @@ DATA_DIR = os.path.abspath(os.path.join(BACKEND_DIR, "..", "data"))
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
+MYSQL_BIN = r"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe"
+MYSQL_USER = os.environ.get("MYSQL_USER", "root")
+MYSQL_PASS = os.environ.get("MYSQL_PASS", "root")
+
+def _mysql_esc(v):
+    if v is None:
+        return "NULL"
+    if isinstance(v, (int, float)):
+        return str(v)
+    s = str(v).replace("\\", "\\\\").replace("'", "''").replace("\r", "\\r").replace("\n", "\\n")
+    return f"'{s}'"
+
+def sync_sqlite_to_mysql():
+    """Đồng bộ tức thì toàn bộ 5 bảng từ SQLite sang MySQL 8.0 (MySQL Workbench)"""
+    if not os.path.exists(MYSQL_BIN):
+        return
+    try:
+        import subprocess
+        s_conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        s_conn.row_factory = sqlite3.Row
+        cur = s_conn.cursor()
+
+        lines = [
+            "CREATE DATABASE IF NOT EXISTS mini_agent_studio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
+            "USE mini_agent_studio;",
+            "DROP TABLE IF EXISTS leave_requests;",
+            "DROP TABLE IF EXISTS agents;",
+            "DROP TABLE IF EXISTS documents;",
+            "DROP TABLE IF EXISTS users;",
+            "DROP TABLE IF EXISTS tenants;",
+            "CREATE TABLE tenants (id VARCHAR(50) PRIMARY KEY, name VARCHAR(255) NOT NULL, contact_email VARCHAR(255), plan_type VARCHAR(50) DEFAULT 'ENTERPRISE', max_agents INT DEFAULT 10, max_employees INT DEFAULT 100, is_active INT DEFAULT 1, created_at VARCHAR(100), domain_type VARCHAR(50) DEFAULT 'ENTERPRISE', ui_schema LONGTEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+            "CREATE TABLE users (id INT PRIMARY KEY AUTO_INCREMENT, tenant_id VARCHAR(50) DEFAULT 'VINFAST', email VARCHAR(255) UNIQUE NOT NULL, hashed_password VARCHAR(255) NOT NULL, full_name VARCHAR(255) NOT NULL, department VARCHAR(100), role VARCHAR(50) NOT NULL, tenure_months INT DEFAULT 12, total_leave_days INT DEFAULT 12, used_leave_days INT DEFAULT 0, is_active INT DEFAULT 1, created_at VARCHAR(100), attributes LONGTEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+            "CREATE TABLE documents (id INT PRIMARY KEY AUTO_INCREMENT, agent_id INT, file_name VARCHAR(255) NOT NULL, file_path VARCHAR(500) NOT NULL, file_size_kb INT DEFAULT 4, uploaded_at VARCHAR(100), tenant_id VARCHAR(50) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+            "CREATE TABLE agents (id INT PRIMARY KEY AUTO_INCREMENT, tenant_id VARCHAR(50) DEFAULT 'VINFAST', name VARCHAR(255) NOT NULL, description TEXT, instruction LONGTEXT, department_access VARCHAR(100) DEFAULT 'ALL', is_published INT DEFAULT 1, creator_id INT, created_at VARCHAR(100)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+            "CREATE TABLE leave_requests (id INT PRIMARY KEY AUTO_INCREMENT, tenant_id VARCHAR(50) DEFAULT 'VINFAST', user_id VARCHAR(100), user_name VARCHAR(255), days_requested VARCHAR(50), date_details TEXT, status VARCHAR(50) DEFAULT 'PENDING', notified_to_user INT DEFAULT 0, created_at VARCHAR(100)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+        ]
+
+        for tbl in ["tenants", "users", "documents", "agents", "leave_requests"]:
+            cur.execute(f"SELECT * FROM {tbl}")
+            rows = cur.fetchall()
+            if rows:
+                cols = rows[0].keys()
+                col_str = ", ".join(cols)
+                for r in rows:
+                    vals = ", ".join(_mysql_esc(r[c]) for c in cols)
+                    lines.append(f"INSERT INTO {tbl} ({col_str}) VALUES ({vals});")
+
+        s_conn.close()
+        sql_text = "\n".join(lines)
+
+        out_path = os.path.join(BACKEND_DIR, "mini_agent_studio_mysql.sql")
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(sql_text)
+
+        subprocess.run(
+            [MYSQL_BIN, "-u", MYSQL_USER, f"-p{MYSQL_PASS}", "--default-character-set=utf8mb4"],
+            input=sql_text.encode("utf-8"),
+            capture_output=True,
+            timeout=10
+        )
+    except Exception as e:
+        print(f"MySQL Auto-Sync Warning: {e}")
+
+class AutoSyncSQLiteConnection(sqlite3.Connection):
+    def commit(self):
+        super().commit()
+        sync_sqlite_to_mysql()
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False)
+    conn = sqlite3.connect(DB_PATH, timeout=30.0, check_same_thread=False, factory=AutoSyncSQLiteConnection)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA busy_timeout=30000;")
     return conn
+
+# Đồng bộ ngay khi khởi động Server
+sync_sqlite_to_mysql()
 
 KEYCLOAK_URL = "http://localhost:8080"
 
