@@ -65,3 +65,7 @@ SLIDE_DECK_OUTLINE.md
 danh_sach_nhan_vien*
 *.csv
 
+
+*.docx
+~$*
+backend/mini_agent_studio_mysql.sql
