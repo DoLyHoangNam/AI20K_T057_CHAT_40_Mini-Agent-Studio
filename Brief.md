@@ -1,66 +1,112 @@
 # PROJECT BRIEF: MINI AGENT STUDIO (CHAT-40)
 
-* **Tên dự án:** Nền tảng No-Code tạo AI Agent đa lĩnh vực, xử lý đan xen hội thoại & phân quyền theo đơn vị (Mini Agent Studio)
+* **Tên đề tài:** Mini Agent Studio — Nền tảng No-Code khởi tạo AI Agent đa lĩnh vực, xử lý đan xen hội thoại & phân quyền theo đơn vị (Phòng ban / Khoa / Lớp học)
 * **Mã đề tài:** CHAT-40
-* **Đơn vị phát triển:** AI20K - Team CHAT-40
+* **Nhóm thực hiện:** AI20K - Team T057 (CHAT-40)
+* **Phiên bản:** v2.0 (Chuẩn hóa theo cấu trúc Product Discovery Brief)
 
 ---
 
-## 1. Bối Cảnh & Vấn Đề (The Problem)
+## 1. Background — Bối cảnh & Thực trạng
 
-Nhu cầu triển khai AI Agent để tự động hóa quy trình, tra cứu tri thức nội bộ và hỗ trợ cộng tác nhóm đang bùng nổ ở **mọi ngành nghề** — từ **Doanh nghiệp** (chia theo các phòng ban: Marketing, Kế toán, Nhân sự, IT, Sales...), **Giáo dục / Trường học** (chia theo Khoa, Viện, Lớp học, Phòng Đào tạo...), đến **Y tế, Tổ chức & Cộng đồng**. Tuy nhiên, việc đưa AI Agent vào vận hành thực tế đang vấp phải hai rào cản lớn:
+Trong kỷ nguyên chuyển đổi số, nhu cầu triển khai Trợ lý ảo AI (AI Agent) để tự động hóa quy trình, giải đáp quy chế và hỗ trợ tác vụ chuyên môn đang bùng nổ ở **mọi lĩnh vực và mô hình tổ chức**:
+* **Khối Doanh nghiệp (Enterprise):** Cần các Agent chuyên trách cho từng **Phòng ban** (*Phòng Marketing, Phòng Kế toán - Tài chính, Phòng Nhân sự - HR, Phòng Kỹ thuật - IT, Phòng Kinh doanh - Sales...*).
+* **Khối Giáo dục & Đào tạo (Education):** Cần các Agent chuyên trách cho từng **Khoa / Viện / Lớp học / Phòng chức năng** (*Trợ giảng Lớp AI/CNTT, Cố vấn Khoa Kinh tế, Agent Phòng Đào tạo & Học vụ, Phòng Công tác Sinh viên, Thư viện...*).
+* **Khối Y tế & Tổ chức (Healthcare & Organizations):** Cần các Agent hỗ trợ theo từng **Chuyên khoa / Bộ phận** (*Khoa Khám bệnh, Khoa Dược, Hành chính tổng hợp...*).
 
-1. **Rào cản Kỹ thuật & Tính đóng cứng (Technical & Domain Barrier):**
-   * Các Quản lý bộ phận (Trưởng phòng Marketing/Kế toán, Giáo vụ, Chủ nhiệm lớp, Admin tổ chức) nắm rõ quy trình chuyên môn nhưng **không có kỹ năng lập trình (Coding)** để tự cấu hình công cụ (Tools), nạp kho tri thức (RAG) và thiết lập luồng nghiệp vụ (Workflow) riêng cho từng đơn vị.
-   * Các giải pháp chatbot truyền thống thường bị bó hẹp vào một kịch bản cố định (như chỉ hỏi đáp FAQ hoặc chỉ làm một tác vụ đơn lẻ), không thể linh hoạt mở rộng cho nhiều phòng ban hay nhiều lĩnh vực khác nhau.
-2. **Sự hỗn loạn của Môi trường Thực tế (Context Chaos trong Group Chat):**
-   * Khác với chat 1-1 tuyến tính, khi đưa AI Agent vào không gian làm việc chung hoặc Group Chat của phòng ban / lớp học, AI thường bị tê liệt hoặc sinh ra ảo giác (*Hallucination*) do:
-     * **Hàng loạt chủ đề đan xen cùng lúc (Interleaved Threads):** Nhiều thành viên trao đổi song song các chủ đề khác nhau.
-     * **Ngôn ngữ đặc thù theo ngành:** Thuật ngữ chuyên ngành (Marketing, Kế toán, Học vụ, Kỹ thuật), từ viết tắt, tiếng lóng nội bộ.
-     * **Quyết định bị ghi đè liên tục theo thời gian thực (Temporal Overridden State):** Tin nhắn sau phủ định hoặc cập nhật lại quyết định của tin nhắn trước.
-     * **Rủi ro rò rỉ dữ liệu chéo & thực thi lệnh nhầm:** Thiếu cơ chế cô lập dữ liệu giữa các đơn vị (ví dụ: nhân viên Marketing truy cập nhầm tài liệu mật của phòng Kế toán, hoặc sinh viên lớp này sửa dữ liệu lớp khác) và thiếu vòng lặp phê duyệt của con người (*Human-in-the-Loop - HITL*).
+Tuy nhiên, quá trình đưa AI Agent từ thử nghiệm vào vận hành thực tế tại các tổ chức đang vấp phải **3 nhóm khó khăn cốt lõi**:
 
----
+### A. Khó khăn trong tiếp cận & khởi tạo AI Agent theo đơn vị (Technical & Domain Barrier)
+* **Rào cản kỹ thuật đối với người nắm nghiệp vụ:** Các Trưởng phòng ban (Marketing, Kế toán, HR), Giáo vụ khoa hay Giảng viên chủ nhiệm lớp là những người hiểu rõ nhất quy trình, tài liệu và nhu cầu của đơn vị mình nhưng **không có kỹ năng lập trình (Coding)** để tự cấu hình Prompt, gắn kho tài liệu (Vector RAG) hay thiết lập công cụ (Tools) cho AI.
+* **Sự đóng cứng và manh mún của các chatbot truyền thống:** Các giải pháp chatbot hiện hữu thường bị khóa cứng vào một kịch bản đơn lẻ (ví dụ: chỉ trả lời FAQ tĩnh hoặc chỉ tính ngày nghỉ phép), đòi hỏi đội ngũ IT phải viết code lại từ đầu mỗi khi muốn triển khai thêm Agent cho một phòng ban mới, một lớp học mới hay một lĩnh vực mới.
 
-## 2. Giải Pháp Đề Xuất (The Solution)
+### B. Khó khăn trong quản lý, phân quyền dữ liệu & kiểm soát rủi ro (Governance & Security)
+* **Nguy cơ rò rỉ dữ liệu chéo giữa các đơn vị (Lack of Unit Isolation):** Trong một tổ chức, mỗi đơn vị sở hữu kho tài liệu nhạy cảm riêng (ví dụ: báo cáo ngân sách của *Phòng Kế toán*, chiến lược chiến dịch của *Phòng Marketing*, hay đề cương/hồ sơ học vụ của *Phòng Đào tạo*). Các công cụ AI dùng chung hiện nay thiếu cơ chế phân quyền đa tầng (`Tenant -> Đơn vị/Phòng ban/Lớp học`), dẫn đến rủi ro nhân viên phòng này hoặc sinh viên lớp khác truy xuất trái phép dữ liệu mật.
+* **Thiếu cơ chế kiểm soát của con người đối với tác vụ nhạy cảm (Lack of Human-in-the-Loop - HITL):** Khi thành viên yêu cầu AI thực hiện các tác vụ có tính cam kết (như trình duyệt ngân sách Marketing, nộp đơn học vụ/hoãn thi, yêu cầu cấp phát thiết bị), việc để AI tự động thực thi 100% mà không qua trạm phê duyệt của Quản lý / Ban chủ nhiệm đơn vị tiềm ẩn rủi ro vận hành rất lớn.
 
-**Mini Agent Studio** là nền tảng SaaS Multi-Tenant & Multi-Domain gồm 2 cấu phần cốt lõi:
-* **Giao diện No-Code Builder đa lĩnh vực (Dành cho Creator/Admin):** Thiết kế trực quan luồng Agent Graph, khởi tạo nhanh các Agent chuyên trách theo từng **Đơn vị / Phòng ban / Lớp học / Chuyên khoa** chỉ với vài thao tác.
-* **AI Context Core (Động cơ xử lý ngôn ngữ & phân quyền):** Giải quyết triệt để sự hỗn loạn ngữ cảnh trong hội thoại và kiểm soát phân quyền đa tầng theo đơn vị.
-
-### 2.1. Năng Lực Kỹ Thuật Cốt Lõi (Core Capabilities)
-* **Tách luồng hội thoại đan xen (Thread Disentanglement):** Kết hợp thuật toán gom cụm ngữ nghĩa với LLM để phân lập các luồng chủ đề độc lập trong cùng một dòng tin nhắn liên tục.
-* **Theo dõi Trạng thái Thời gian (Temporal State Tracking):** Tự động phát hiện và đánh dấu các *"Quyết định đã bị thay đổi/hủy bỏ"* (Overridden State), ngăn chặn việc Agent sử dụng thông tin cũ đã bị sửa đổi.
-* **Kiểm soát Phân quyền 3 Tầng đa ngành nghề (3-Layer RBAC & Unit ACL):**
-  * **Tầng 1 - Identity:** 3 vai trò chuẩn (`SUPER_ADMIN` / `TENANT_ADMIN` / `EMPLOYEE` — đại diện cho Thành viên / Nhân sự / Sinh viên của tổ chức) kèm thuộc tính `tenant_id`, `department` (Đơn vị: Phòng ban / Khoa / Lớp học), `is_approver`, xác thực qua Keycloak OIDC SSO.
-  * **Tầng 2 - Vector DB (Metadata Filter theo Đơn vị):** Lọc cứng theo `tenant_id` + `department` (Đơn vị/Lớp/Phòng ban) ngay tại tầng truy vấn vector **trước** khi xếp hạng; đảm bảo Agent và người dùng của đơn vị nào chỉ truy xuất được tri thức của đơn vị đó (hoặc tri thức chung `ALL` của tổ chức).
-  * **Tầng 3 - LangGraph Execution & HITL:** Quản lý Tool qua Permission Manifest; tự động tạm dừng luồng và gửi yêu cầu phê duyệt cho cấp quản lý (Human-in-the-Loop) đối với các tác vụ nhạy cảm (phê duyệt đề xuất/đơn từ, gửi thông báo diện rộng, cập nhật dữ liệu).
-
-### 2.2. Trải Nghiệm Người Dùng (Split-Screen Architecture)
-* **Khu vực Studio (Nửa trái):** Trực quan hóa quy trình 3–5 node. Creator chọn mẫu lĩnh vực (Doanh nghiệp: Marketing, Kế toán, HR, IT, Sales; Giáo dục: Lớp học, Khoa/Viện, Phòng Đào tạo; Y tế: Chuyên khoa; hoặc Tự định nghĩa đơn vị), cấu hình prompt, tải tài liệu RAG theo đơn vị và bật/tắt Tool.
-* **Khu vực Sandbox (Nửa phải):** Giả lập hội thoại thực tế với **Role & Unit Switcher** linh hoạt (chuyển đổi tức thì giữa Admin / Thành viên Đơn vị A như Phòng Marketing hoặc Lớp AI-01 / Thành viên Đơn vị B như Phòng Kế toán hoặc Lớp KT-02) để kiểm thử ngay ranh giới phân quyền ACL, cách Agent phản ứng và cơ chế HITL.
+### C. Khó khăn trong vận hành thực tế & xử lý ngữ cảnh hội thoại (Operational & Context Chaos)
+* **Hội thoại đan xen đa chủ đề (Interleaved Multi-Thread Chaos):** Khác với môi trường chat 1-1 đơn tuyến, trong không gian làm việc thực tế của phòng ban hoặc lớp học, các thành viên thường trao đổi đan xen nhiều chủ đề cùng lúc (vừa hỏi quy trình thanh toán, vừa bàn kế hoạch tuần, vừa xin phê duyệt đề xuất). Các LLM thông thường dễ bị "nhiễu ngữ cảnh" (*Context Pollution*), ghép nhầm thông tin của luồng này sang luồng khác.
+* **Trạng thái thông tin thay đổi liên tục theo thời gian (Temporal Overridden State):** Các quyết định trong cuộc họp hoặc nhóm làm việc thường xuyên bị cập nhật, đính chính hoặc hủy bỏ bởi các tin nhắn sau đó (ví dụ: thay đổi lịch học, điều chỉnh hạn nộp báo cáo). AI truyền thống không phân biệt được thông tin nào còn hiệu lực và thông tin nào đã bị ghi đè.
+* **Hiện tượng ảo giác & thiếu bằng chứng đối chiếu (Hallucination & Lack of Citation):** AI thường tự suy diễn quy chế hoặc trả lời chung chung mà không trích dẫn rõ nguồn văn bản nội bộ hay tin nhắn gốc, khiến người dùng không dám tin tưởng để ra quyết định.
 
 ---
 
-## 3. Lợi Thế Cạnh Tranh & Kiến Trúc (Technical Highlights)
+## 2. Current Alternatives & Limitations — Giải pháp hiện tại & Hạn chế
 
-Hệ thống áp dụng tư duy **"Chia để trị" (Divide & Conquer)** thay vì nhồi nhét vào một Prompt cồng kềnh:
-
-* **Thích ứng Đa Ngành Nghề (Domain-Agnostic Unit Isolation):** Cùng một lõi kiến trúc nhưng tự động đáp ứng mô hình Doanh nghiệp (theo Phòng ban), Trường học (theo Khoa/Lớp), Bệnh viện (theo Chuyên khoa) mà không bị khóa cứng vào một nghiệp vụ đơn lẻ.
-* **LLM Gateway Đa Tầng:** Hỗ trợ linh hoạt chuyển đổi giữa Local LLM (Ollama/Groq) trong quá trình dev và API của BTC / Gemini khi nghiệm thu mà không cần sửa code lõi.
-* **Graph-based Workflow (LangGraph):** Chia nhỏ luồng suy luận thành các Node chuyên biệt:  
-  $$\text{Node Tách luồng} \longrightarrow \text{Node Kiểm tra quyền (ACL)} \longrightarrow \text{Node RAG / Tool} \longrightarrow \text{Node Trả lời}$$
-* **Truy vết Bằng chứng (Citation Grounding):** Mọi tóm tắt, trích dẫn hay câu trả lời của Agent bắt buộc phải gắn kèm ID tin nhắn nguồn hoặc tên văn bản gốc của đơn vị.
-* **Kiểm định Định lượng (Evaluation Pipeline):** Tích hợp Langfuse để đo lường tự động độ chính xác phân luồng, độ trung thực (Faithfulness) dựa trên các bộ benchmark tiêu chuẩn: *Ubuntu Chat Disentanglement, SAMSum, MultiWOZ*.
+| Giải pháp hiện tại | Ưu điểm | Hạn chế lớn đối với bài toán Tổ chức Đa đơn vị |
+| :--- | :--- | :--- |
+| **ChatGPT / Claude / Gemini (Bản tiêu chuẩn)** | Khả năng ngôn ngữ mạnh, dễ dùng cho cá nhân. | Không có quản trị Multi-Tenant tập trung, không có phân quyền cứng theo Phòng ban / Lớp học (Unit ACL), không có luồng duyệt đơn HITL nội bộ. |
+| **Chatbot kịch bản (Rule-based / Decision Tree)** | Kiểm soát câu trả lời cố định, không bị ảo giác. | Cứng nhắc, không hiểu ngôn ngữ tự nhiên phức tạp, không thể đọc hiểu tài liệu PDF/quy chế dài hoặc tách luồng hội thoại đan xen. |
+| **Các nền tảng Agent kỹ thuật (LangChain / Dify tự dựng)** | Linh hoạt cho lập trình viên. | Giao diện quá phức tạp với Quản lý bộ phận / Giáo vụ không chuyên IT; thiếu sẵn cơ chế tiền lọc Vector theo đơn vị (Pre-filtering ACL) và đánh giá định lượng tách luồng hội thoại. |
 
 ---
 
-## 4. Mục Tiêu Đầu Ra (Deliverables)
+## 3. Target Users — Người dùng mục tiêu
 
-1. **Sản phẩm Web hoàn chỉnh:**
-   * **Backend:** FastAPI / Python Server, LangGraph Core, Vector DB (Qdrant / JSON Index có lọc ACL theo đơn vị), Keycloak OIDC SSO.
-   * **Frontend:** OpenDesign Minimalist, Split-Screen Studio Builder (hỗ trợ đa lĩnh vực & phân quyền theo đơn vị/phòng ban/lớp học) & Chat Portal/Sandbox.
-2. **Dữ liệu đánh giá (Eval Dataset):** Bộ kịch bản hội thoại đan xen thực tế đa lĩnh vực, tích hợp dashboard theo dõi điểm số định lượng trên Langfuse.
-3. **Bộ tài liệu bàn giao:** Product Requirements Document (PRD), Wireframe UI/UX, Báo cáo kỹ thuật định lượng và mã nguồn hoàn chỉnh trên GitHub.
+Hệ thống **Mini Agent Studio (CHAT-40)** phục vụ 3 nhóm người dùng mục tiêu rõ rệt tương ứng với mô hình phân quyền 3 tầng:
 
-> **Cam kết:** Mini Agent Studio không dừng lại ở một chatbot đơn nhiệm, mà là nền tảng khởi tạo AI Agent đa lĩnh vực — chứng minh bằng số liệu định lượng khả năng hiểu đúng ngữ cảnh hội thoại và cô lập quyền truy cập dữ liệu tuyệt đối giữa các phòng ban, lớp học và tổ chức.
+### 3.1. Nhóm 1: Quản trị viên Tổ chức / Trưởng bộ phận / Giáo vụ (Tenant Admin & Unit Creator)
+* **Đại diện:** Giám đốc vận hành, Trưởng phòng Nhân sự/Marketing/Kế toán tại Doanh nghiệp; Cán bộ Phòng Đào tạo, Chủ nhiệm Khoa, Giảng viên phụ trách lớp tại Trường học.
+* **Nhu cầu (Needs):**
+  * Tự khởi tạo nhanh các AI Agent chuyên trách cho từng **Phòng ban / Khoa / Lớp học** bằng giao diện kéo-thả / chọn mẫu (No-Code) chỉ trong vài phút.
+  * Tải lên tài liệu quy chế, giáo trình, hướng dẫn nghiệp vụ (PDF, TXT, MD) để AI tự động vector hóa và đóng khung phạm vi truy cập theo đúng đơn vị.
+  * Quản lý danh sách thành viên (thêm lẻ hoặc nhập hàng loạt qua CSV), phân bổ thành viên vào từng Đơn vị/Lớp/Phòng ban và phê duyệt các đề xuất phát sinh từ luồng **HITL**.
+
+### 3.2. Nhóm 2: Thành viên / Nhân viên / Giảng viên / Sinh viên (End-Users / Unit Members)
+* **Đại diện:** Nhân viên các phòng ban (Marketing, Kế toán, IT, Sales...), Sinh viên các lớp học, Bác sĩ/Nhân viên y tế tại các chuyên khoa.
+* **Nhu cầu (Needs):**
+  * Truy cập đúng Trợ lý AI thuộc đơn vị của mình để hỏi đáp quy trình, tra cứu tài liệu chuyên môn hoặc bài giảng 24/7 với **trích dẫn nguồn chính xác**.
+  * Khởi tạo nhanh các yêu cầu/đề xuất nghiệp vụ (đề xuất chiến dịch, đơn xin học vụ, phiếu yêu cầu hỗ trợ...) ngay trong khung chat để trình Quản lý duyệt và nhận thông báo kết quả theo thời gian thực.
+
+### 3.3. Nhóm 3: Quản trị viên Nền tảng (Platform Super Admin)
+* **Đại diện:** Đội ngũ vận hành nền tảng SaaS B2B (Mini Agent Studio).
+* **Nhu cầu (Needs):**
+  * Cấp phát bản quyền và khởi tạo không gian làm việc độc lập (Tenant Provisioning) cho các Doanh nghiệp, Trường học, Bệnh viện mới.
+  * Giám sát tài nguyên, quản lý đồng bộ định danh SSO (Keycloak) và theo dõi chỉ số chất lượng suy luận AI (Latency, Token, Accuracy) trên toàn hệ thống.
+
+---
+
+## 4. Initial Problem Statement — Phát biểu bài toán
+
+> **"Làm thế nào để chúng ta (How Might We)** xây dựng một nền tảng **No-Code AI Agent Studio đa lĩnh vực** giúp Quản trị viên của bất kỳ tổ chức nào (Doanh nghiệp, Trường học, Y tế) có thể tự khởi tạo và phân quyền các Trợ lý AI chuyên biệt theo từng **Đơn vị (Phòng ban / Khoa / Lớp học)** chỉ trong vài phút — đồng thời đảm bảo AI có khả năng **phân tách đúng các luồng hội thoại đan xen**, **loại bỏ thông tin cũ đã bị ghi đè theo thời gian**, **trích dẫn chính xác nguồn tri thức nội bộ** và **tuân thủ tuyệt đối ranh giới bảo mật dữ liệu (RBAC/ACL & Human-in-the-Loop)**?"
+
+---
+
+## 5. Desired Outcomes — Kết quả kỳ vọng (Mục tiêu định lượng & định tính)
+
+### 5.1. Kết quả kỳ vọng về Trải nghiệm & Nghiệp vụ (Business & UX Outcomes)
+1. **Khởi tạo Agent Đa ngành nghề siêu tốc (Time-to-Value < 3 phút):**
+   * Admin không biết lập trình có thể sử dụng bộ **13+ Mẫu Agent Đa lĩnh vực (1-Click Templates)** (Phòng Marketing, Kế toán, HR, IT, Sales; Lớp AI/CNTT, Phòng Đào tạo, Khoa Kinh tế, CTSV, Thư viện; Khoa Khám bệnh, Khoa Dược...) hoặc tự định nghĩa tên Lớp / Phòng ban mới để xuất bản Agent ngay lập tức.
+2. **Cô lập dữ liệu tuyệt đối giữa các Tổ chức & Đơn vị (100% Isolation):**
+   * Thành viên thuộc đơn vị nào (ví dụ: `Marketing` hoặc `Lớp AI - K68`) chỉ được phép tương tác và truy xuất tri thức của đơn vị đó (cùng các Agent toàn tổ chức `ALL`). Mọi truy cập trái phép sang đơn vị khác đều bị chặn tự động bởi lớp bảo vệ **RBAC & Unit ACL Guardrail**.
+3. **Chuẩn hóa quy trình Trình ký & Phê duyệt (100% HITL Governance):**
+   * Mọi yêu cầu tạo đề xuất/đơn từ trong hội thoại đều tự động kích hoạt trạm dừng **HITL**, lưu vào CSDL và đẩy thông báo hai chiều thời gian thực giữa Thành viên và Quản trị viên.
+
+### 5.2. Kết quả kỳ vọng về Kỹ thuật & Chất lượng AI (Technical & Evaluation KPIs)
+* **Độ chính xác tách luồng hội thoại (Thread Disentanglement):** Đạt $\text{Micro-F1} \ge 0.72$ trên bộ dữ liệu kiểm thử hội thoại đan xen.
+* **Theo dõi trạng thái thời gian (Temporal State Tracking):** Phát hiện chính xác $\ge 80\%$ các quyết định/thông tin đã bị thay đổi hoặc hủy bỏ (`OVERRIDDEN`), không đưa thông tin cũ vào bản tóm tắt cuối.
+* **Độ trung thực & Trích dẫn nguồn (Citation Faithfulness):** $\ge 90\%$ câu trả lời của Agent gắn kèm trích dẫn chính xác tên tài liệu quy chế/giáo trình và độ tương đồng ngữ nghĩa (Cosine Similarity).
+* **Hiệu năng phản hồi (System Latency):** Thời gian phản hồi trung bình (P95) từ lúc gửi tin nhắn đến khi nhận câu trả lời đạt $< 3\text{ giây}$.
+
+---
+
+## 6. Product Opportunity — Cơ hội sản phẩm & Giải pháp (Mini Agent Studio)
+
+Để hiện thực hóa các kết quả kỳ vọng trên, **Mini Agent Studio (CHAT-40)** được thiết kế theo kiến trúc **"Chia để trị" (Divide & Conquer)** với 4 trụ cột sản phẩm:
+
+### 6.1. Giao diện Quản trị & No-Code Studio Đa Lĩnh Vực (SaaS Dashboard UI)
+* **Thiết kế trực quan, hiện đại:** Bố cục chuẩn SaaS Portal gồm Thanh điều hướng dọc (Sidebar), Thẻ tổng quan tổ chức, Thanh chuyển đổi Sub-tab và Cổng kiểm thử trực tiếp (**Agent Live Playground**).
+* **Quản lý Thành viên & Đơn vị linh hoạt:** Hỗ trợ thêm thành viên đơn lẻ hoặc nhập hàng loạt từ file CSV/TXT, tự động đồng bộ tài khoản lên **Keycloak OIDC SSO** và cấp quyền theo từng Phòng ban / Khoa / Lớp học.
+
+### 6.2. Kiến trúc Bảo mật & Phân quyền 3 Tầng (3-Layer RBAC & Unit ACL)
+* **Tầng 1 — Định danh & Vai trò (Keycloak OIDC SSO):** Quản lý 3 vai trò (`SUPER_ADMIN`, `TENANT_ADMIN`, `EMPLOYEE/MEMBER`) gắn liền với `tenant_id` và `department` (Đơn vị trực thuộc).
+* **Tầng 2 — Tiền lọc Tri thức Vector (Vector RAG Pre-filtering):** Tài liệu PDF/TXT/MD được trích xuất tự động và vector hóa (3072 chiều với `gemini-embedding-001`), gắn nhãn metadata `tenant_id` và `department_access` để cô lập tri thức ngay từ bước truy vấn.
+* **Tầng 3 — Trạm Kiểm soát Con người (LangGraph HITL Interrupt):** Tự động nhận diện ý định tạo đề xuất/đơn từ (`CREATE_REQUEST`), tạm dừng luồng thực thi để người dùng xác nhận và chuyển vào hộp thư phê duyệt của Quản lý.
+
+### 6.3. Động cơ Suy luận LangGraph & Xử lý Ngữ cảnh (AI Context Core)
+* Tách biệt luồng xử lý thành các Node chuyên biệt trên đồ thị trạng thái (**LangGraph StateGraph**):
+  $$\text{Start Node} \longrightarrow \text{Intent & Thread Router} \longrightarrow \text{Unit ACL Guardrail} \longrightarrow \text{Vector RAG / HITL Engine} \longrightarrow \text{Grounded Response Generator}$$
+* Mọi câu trả lời đều đi kèm hộp **Nguồn trích dẫn (Citation Box)** hiển thị rõ tên văn bản gốc, tên tổ chức và điểm tương đồng Cosine.
+
+### 6.4. Giám sát & Kiểm định Định lượng (Langfuse Observability & Eval Pipeline)
+* Tích hợp **Trace Log thời gian thực** ngay trên Studio Playground và bảng điều khiển **Langfuse Metrics** giúp Quản trị viên theo dõi độ trễ (P95 Latency), lượng Token tiêu thụ và tỷ lệ trích dẫn chuẩn xác trên từng phiên hội thoại.
