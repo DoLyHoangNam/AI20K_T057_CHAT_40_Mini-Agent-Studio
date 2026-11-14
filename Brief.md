@@ -49,14 +49,15 @@ Hệ thống Mini Agent Studio (CHAT-40) phục vụ 3 nhóm người dùng mụ
 - **Nhóm 3 — Quản trị viên Nền tảng (Platform Super Admin):** Đội ngũ vận hành nền tảng SaaS B2B. Nhu cầu: Cấp phát bản quyền và khởi tạo không gian làm việc độc lập (Tenant Provisioning) cho các Doanh nghiệp, Trường học, Bệnh viện mới; giám sát đồng bộ định danh SSO (Keycloak) và chỉ số chất lượng suy luận AI (Langfuse).
 
 ### 3.2 Phạm vi sản phẩm (In-Scope MVP vs. Out-of-Scope)
-- **Trong phạm vi MVP (In-Scope — Cốt lõi):**
-  - **No-Code Studio:** Giao diện trực quan cấu hình Instruction, Upload Knowledge RAG gán ACL theo đơn vị, cấu hình ≥ 3 Tools chuẩn MCP-like (`leave_balance`, `leave_request_create`, `send_email`), thiết kế Workflow 3–5 node kéo thả (React Flow).
-  - **Group Chat Sandbox & Role Switcher:** Giả lập môi trường Group Chat nhiều thành viên, tích hợp bộ chuyển đổi vai nhanh (Admin / Nhân viên các phòng ban) để kiểm chứng ngay khả năng chặn ACL và cơ chế duyệt HITL.
-  - **AI Context Core:** Tách luồng hội thoại đan xen (Thread Disentanglement), theo dõi quyết định bị ghi đè theo thời gian (Temporal State Tracking), và trích dẫn ngược về tin nhắn nguồn (`#msg_id`) hoặc văn bản gốc.
-  - **Vòng đời & Giám sát:** Xuất bản (Publish) Agent thành phiên bản bất biến, kiểm thử trong Sandbox và ghi Trace chi tiết từng node qua Langfuse.
+- **Trong phạm vi MVP (In-Scope — Cốt lõi & Triển khai thực tế 100%):**
+  - **No-Code Studio:** Giao diện trực quan cấu hình Instruction, Upload Knowledge RAG gán ACL theo đơn vị (PDF/TXT), cấu hình ≥ 3 Tools chuẩn MCP-like (`leave_balance`, `leave_request_create`, `send_email`), thiết kế Workflow 3–5 node kéo thả (React Flow).
+  - **Bảo mật & Định danh Enterprise:** Đăng nhập xác thực tập trung duy nhất qua máy chủ Keycloak OIDC/OAuth2 SSO (`http://localhost:8080`), tự động cấp phát tài khoản và gửi mật khẩu ngẫu nhiên an toàn qua Google Gmail SMTP (`backend/mailer.py`).
+  - **Hệ cơ sở dữ liệu đồng bộ kép:** Lưu trữ cục bộ SQLite tốc độ cao và tự động ánh xạ thời gian thực (`AutoSyncSQLiteConnection`) sang **MySQL 8.0 Server** phục vụ quan sát trực quan trên **MySQL Workbench 8.0 CE**.
+  - **AI Context Core:** Tách luồng hội thoại đan xen (Thread Disentanglement), theo dõi quyết định bị ghi đè theo thời gian (Temporal State Tracking), và trích dẫn ngược về tin nhắn nguồn (`#msg_id`) hoặc văn bản gốc có chỉ số Cosine Similarity.
+  - **Vòng đời & Giám sát:** Xuất bản (Publish) Agent thành phiên bản bất biến, kiểm thử trong Sandbox và ghi Trace chi tiết từng bước qua X-Ray Telemetry Trace.
 - **Ngoài phạm vi (Out-of-Scope — Tránh dàn trải):**
   - Không xây dựng cổng thanh toán trực tuyến (Billing/Invoicing) hay sàn giao dịch Agent (Marketplace).
-  - Không tích hợp webhook sâu vào Zalo/Slack/Teams thật trong giai đoạn MVP (tập trung tối ưu trải nghiệm Group Chat Sandbox nội bộ).
+  - Không tích hợp webhook sâu vào Zalo/Slack/Teams thật trong giai đoạn MVP (tập trung tối ưu trải nghiệm cổng thông tin Employee Portal và Studio nội bộ).
   - Không tự huấn luyện hoặc fine-tune mô hình LLM nền tảng; không xử lý audio/video phức tạp (chỉ tập trung vào văn bản, bảng biểu và đính kèm có chú thích).
 
 ---
@@ -99,15 +100,15 @@ Hệ thống áp dụng tư duy **"Chia để trị" (Divide & Conquer)** thay v
 
 | Thành phần kỹ thuật | Công nghệ lựa chọn | Vai trò & Nhiệm vụ cụ thể trong luồng xử lý |
 |---|---|---|
-| **Frontend UI/UX** | OpenDesign Minimalist, HTML5/CSS3/JS, React Flow | Giao diện SaaS Studio chia đôi: Bên trái thiết kế Graph 3–5 node, bên phải Group Chat Sandbox với Role Switcher. |
-| **Backend API Engine** | FastAPI / Python 3.10+, Uvicorn | Xử lý RESTful API tốc độ cao, quản lý phiên làm việc, điều phối dữ liệu và bất đồng bộ hóa tác vụ. |
+| **Frontend UI/UX** | OpenDesign Minimalist, HTML5/CSS3/JS, React Flow | Giao diện SaaS Portal chuẩn Shadcn UI gồm: Studio Builder (Graph 5 node), Kho tri thức RAG, Hộp thư duyệt đơn HITL, Quản lý tài khoản và Employee Chat Portal. |
+| **Backend API Engine** | Python 3.10+, Native Threading HTTP Server / FastAPI compatible | Xử lý RESTful API tốc độ cao, quản lý phiên làm việc, điều phối dữ liệu và bất đồng bộ hóa tác vụ. |
 | **Orchestration Core** | LangGraph (StateGraph Engine) | Chia nhỏ quy trình thành đồ thị các Node chuyên biệt; quản lý State Checkpoint và cơ chế Interrupt cho HITL. |
-| **LLM Gateway Đa tầng** | Google Gemini Flash / Pro, Groq, Ollama | Hỗ trợ chuyển đổi linh hoạt giữa Local LLM (khi dev) và API BTC (khi nghiệm thu), kiểm soát timeout, fallback và đo token. |
-| **Vector Database & RAG** | Gemini-Embeddings (3072-dim) / Qdrant | Vector hóa tri thức quy chế nội bộ; thực thi lọc cứng quyền truy xuất (Pre-filtering ACL) ngay tại tầng CSDL Vector. |
-| **Relational Database** | SQLite / PostgreSQL | Lưu trữ có cấu trúc: Users, Tenants, Agents, Permissions, Documents, Đơn từ (Leave Requests) và Chat Threads. |
-| **Identity & Access (IAM)** | Keycloak OIDC SSO (OAuth2 / JWT) | Xác thực danh tính tập trung; gắn kèm metadata `tenant_id`, `department`, `role` trực tiếp vào JWT token. |
+| **LLM Gateway Đa tầng** | Google Gemini Flash / Pro, Groq, Ollama | Hỗ trợ chuyển đổi linh hoạt giữa Local LLM (khi dev) và API Gemini 2.5 Flash, kiểm soát timeout, fallback và đo token. |
+| **Vector Database & RAG** | Gemini-Embeddings (3072-dim) / Cosine Index | Vector hóa tri thức quy chế nội bộ; thực thi lọc cứng quyền truy xuất (Pre-filtering ACL) ngay tại tầng CSDL Vector. |
+| **Relational Database** | SQLite (Embedded) + MySQL 8.0 Server | Kiến trúc CSDL kép: SQLite cục bộ chịu tải nhanh và tự động đồng bộ thời gian thực (`AutoSyncSQLiteConnection`) sang MySQL 8.0 phục vụ quản trị qua **MySQL Workbench 8.0 CE**. |
+| **Identity & Access (IAM)** | Keycloak OIDC SSO (OAuth2 / JWT) + Gmail SMTP | Xác thực danh tính tập trung OIDC chuẩn Enterprise (cổng 8080); tích hợp dịch vụ Google Gmail SMTP tự động cấp phát tài khoản và gửi mật khẩu ngẫu nhiên an toàn. |
 | **Tool Execution Layer** | MCP-like Tool Registry & Manifest | Chuẩn hóa giao tiếp công cụ (`leave_balance`, `leave_request_create`, `send_email`), kiểm soát qua Permission Manifest. |
-| **Observability & Tracing** | Langfuse Platform | Giám sát toàn diện Trace Log từng node, đo lường độ trễ P95, tính toán chi phí token và chấm điểm tự động. |
+| **Observability & Tracing** | Langfuse & X-Ray Telemetry Trace | Giám sát toàn diện Trace Log từng node, đo lường độ trễ P95, tính toán chi phí token và chấm điểm tự động. |
 
 ### 6.2 Kiến trúc Bảo mật & Phân quyền 3 Tầng (3-Layer RBAC & Unit ACL)
 1. **Tầng 1 — Identity (Định danh người dùng):** Xác thực qua Keycloak OIDC SSO. Toàn bộ request vào API đều được trích xuất `tenant_id`, `department` và `role` trực tiếp từ JWT Token đã ký số (không tin dữ liệu client gửi lên).
@@ -116,7 +117,7 @@ Hệ thống áp dụng tư duy **"Chia để trị" (Divide & Conquer)** thay v
 
 ### 6.3 Giải quyết Nút thắt Kỹ thuật Khó trong Group Chat (AI Context Core)
 - **Thuật toán Tách luồng hội thoại đan xen (Thread Disentanglement):**
-  $$	ext{Tin nhắn mới} \longrightarrow 	ext{Trích xuất Metadata (Reply-to, @Mention, Timestamp)} \longrightarrow 	ext{Gom cụm ngữ nghĩa Cosine Similarity} \longrightarrow 	ext{LLM phân xử biên} \longrightarrow 	ext{Gán Thread ID}$$
+  $$\text{Tin nhắn mới} \longrightarrow \text{Trích xuất Metadata (Reply-to, @Mention, Timestamp)} \longrightarrow \text{Gom cụm ngữ nghĩa Cosine Similarity} \longrightarrow \text{LLM phân xử biên} \longrightarrow \text{Gán Thread ID}$$
   Hệ thống kết hợp tín hiệu cấu trúc (quan hệ phản hồi trực tiếp, thời gian gửi) với embedding ngữ nghĩa để nhóm các tin nhắn liên quan vào cùng một `thread_id`, giải quyết triệt để tình trạng nhiễu ngữ cảnh giữa các chủ đề đang bàn song song.
 - **Cơ chế Theo dõi Trạng thái Thời gian (Temporal State Tracking):**
   Mỗi quyết định, lịch hẹn hay cam kết công việc được quản lý dưới dạng một bản ghi trạng thái có vòng đời (`ACTIVE`, `OVERRIDDEN`, `CANCELLED`, `DONE`). Khi phát hiện tin nhắn mới có ý định thay đổi/hủy bỏ thông tin trước đó, hệ thống tự động cập nhật trạng thái mục cũ thành `OVERRIDDEN` và liên kết trường `superseded_by` tới tin nhắn mới. Khi người dùng yêu cầu tóm tắt hoặc kiểm tra tiến độ, Agent **chỉ truy xuất các quyết định đang có trạng thái `ACTIVE`**.
@@ -133,12 +134,12 @@ Hệ thống áp dụng tư duy **"Chia để trị" (Divide & Conquer)** thay v
 
 ### 7.1 Danh mục Sản phẩm Bàn giao (Deliverables)
 1. **Ứng dụng Web Full-Stack hoàn chỉnh:**
-   - **Backend:** Máy chủ FastAPI / Python Server, Lõi LangGraph điều phối đồ thị trạng thái, CSDL SQLite/PostgreSQL, Kho Vector Database 3,072 chiều.
-   - **Frontend:** Giao diện OpenDesign Minimalist gồm No-Code Studio Builder (hỗ trợ kéo thả React Flow), Hộp thư duyệt đơn HITL, Quản lý Nhân sự & Phòng ban, và Group Chat Sandbox tích hợp Role Switcher.
-2. **Hệ thống Định danh & Giám sát Tích hợp:** Máy chủ Keycloak OIDC SSO cấu hình sẵn Realm & Roles phân quyền; Bảng điều khiển giám sát Langfuse Tracing theo dõi chi phí, token và latency thời gian thực.
+   - **Backend:** Máy chủ Python Server (`server.py`), Lõi LangGraph điều phối đồ thị trạng thái (`agent_engine.py`), CSDL SQLite đồng bộ trực tiếp sang **MySQL Server 8.0 (`mini_agent_studio`)**, Kho Vector Database 3,072 chiều (`vector_store.py`).
+   - **Frontend:** Giao diện OpenDesign Minimalist gồm No-Code Studio Builder (hỗ trợ kéo thả React Flow), Hộp thư duyệt đơn HITL, Quản lý Nhân sự & Phòng ban, và Employee Chat Portal tích hợp X-Ray Trace & Trích dẫn nguồn.
+2. **Hệ thống Định danh & Giám sát Tích hợp:** Máy chủ Keycloak OIDC SSO (`http://localhost:8080`) cấu hình sẵn Realm `mini-agent-platform` & Roles phân quyền (`SUPER_ADMIN`, `TENANT_ADMIN`, `EMPLOYEE`); Dịch vụ tự động gửi email bàn giao mật khẩu qua Google Gmail SMTP (`mailer.py`); Hệ thống giám sát Telemetry Trace theo dõi latency và token thời gian thực.
 3. **Bộ Dữ liệu Kiểm định & Báo cáo Định lượng (Eval Dataset & Report):** Tập kịch bản hội thoại đan xen mẫu, bộ kịch bản Red-team kiểm tra ACL, và dashboard báo cáo số liệu thực tế đo lường theo chuẩn đề tài CHAT-40.
-4. **Bộ Tài liệu Nghiệp vụ & Kỹ thuật:** Product Requirements Document (PRD v2.0), Tài liệu Kiến trúc Hệ thống, Hướng dẫn Cài đặt & Vận hành (README), và Mã nguồn mở toàn bộ trên GitHub.
+4. **Bộ Tài liệu Nghiệp vụ & Kỹ thuật:** Project Brief (`Brief.md`), Product Requirements Document (`PRD.md`), Sơ đồ giao diện (`Wireframe_UI_Flow.md`), Nhật ký AI (`AI_Log.md`), Hướng dẫn vận hành (`README.md`) và Mã nguồn mở toàn bộ trên GitHub.
 
 ### 7.2 Khả năng Đóng gói & Khởi chạy 1 Lệnh (1-Click Deployment)
-- **Khởi chạy đồng nhất:** Toàn bộ hệ thống được đóng gói sẵn sàng khởi chạy bằng **1 câu lệnh duy nhất** (`python server.py` hoặc `docker-compose up -d`) trên mọi môi trường (Windows / macOS / Linux).
-- **Dữ liệu Mồi Sẵn sàng Kiểm thử (Pre-seeded Data):** Hệ thống tích hợp sẵn dữ liệu mẫu cho nhiều tổ chức: Tập đoàn VinFast (Sản xuất, Marketing, Kế toán), Tập đoàn FPT, VNG Games; cùng hệ thống tài khoản demo đầy đủ vai trò (`admin@vinfast.vn`, `marketing@vinfast.vn`, `ketoan@vinfast.vn`, `nam.dlh@vinfast.vn`), giúp Ban Giám Khảo có thể đăng nhập và trải nghiệm ngay lập tức các luồng RAG, phân quyền ACL, duyệt đơn HITL và gỡ rối Group Chat mà không cần chuẩn bị phức tạp.
+- **Khởi chạy đồng nhất:** Toàn bộ hệ thống được đóng gói sẵn sàng khởi chạy bằng **1 câu lệnh duy nhất** (`python backend/server.py`) trên cổng `http://localhost:8000`.
+- **Vận hành Thực tế với Email thật & Đồng bộ MySQL Workbench:** Hệ thống hỗ trợ cấp phát tổ chức (Tenant) và thành viên bằng địa chỉ Gmail thực tế, tự động đồng bộ tài khoản lên máy chủ Keycloak SSO và gửi mật khẩu về hòm thư người dùng; đồng thời mọi thay đổi dữ liệu đều được ánh xạ tức thì sang **MySQL Workbench 8.0 CE** để Ban Giám Khảo trực tiếp kiểm tra CSDL và trải nghiệm trọn vẹn các luồng RAG, phân quyền ACL, duyệt đơn HITL và gỡ rối hội thoại.
