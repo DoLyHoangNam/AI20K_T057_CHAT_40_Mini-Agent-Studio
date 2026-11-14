@@ -17,16 +17,80 @@
             overflow: hidden;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* TOPBAR (EduManage Style) */
+        .em-topbar {
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px 0 0;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .em-brand-box {
+            width: 280px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .em-logo-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+        }
+        .em-avatar-purple {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #7c3aed;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+        .em-shell {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+            overflow: hidden;
         }
         .sidebar {
+            width: 280px;
             background-color: #ffffff;
             border-right: 1px solid #e2e8f0;
-            height: 100vh;
-            padding: 24px 20px;
+            height: 100%;
+            padding: 16px 14px;
             z-index: 10;
+            flex-shrink: 0;
+            overflow-y: auto;
+            transition: width 0.2s ease, padding 0.2s ease;
+        }
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+            border-right: none;
         }
         .chat-main {
-            height: 100vh;
+            flex: 1;
+            height: 100%;
             display: flex;
             flex-direction: column;
             background-color: #f8fafc;
@@ -34,45 +98,49 @@
         }
         .chat-header {
             background-color: #ffffff;
-            padding: 16px 28px;
+            padding: 14px 24px;
             border-bottom: 1px solid #e2e8f0;
-            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+            margin: 16px 24px 0 24px;
+            border-radius: 12px 12px 0 0;
+            border: 1px solid #e2e8f0;
             z-index: 5;
         }
         .chat-body {
             flex: 1;
             overflow-y: auto;
-            padding: 28px 32px;
+            padding: 24px 28px;
+            margin: 0 24px;
+            background-color: #ffffff;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-            background-size: 20px 20px;
         }
         .chat-footer {
             background-color: #ffffff;
-            padding: 16px 28px;
-            border-top: 1px solid #e2e8f0;
-            box-shadow: 0 -1px 3px rgba(15, 23, 42, 0.03);
+            padding: 14px 24px;
+            margin: 0 24px 20px 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0 0 12px 12px;
         }
         .agent-item {
-            padding: 12px 14px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.15s ease-in-out;
-            margin-bottom: 8px;
-            border: 1px solid #e2e8f0;
-            background-color: #ffffff;
+            margin-bottom: 4px;
+            border: none;
+            border-left: 3px solid transparent;
+            background-color: transparent;
         }
         .agent-item:hover {
-            background-color: #f1f5f9;
-            border-color: #cbd5e1;
+            background-color: #f8fafc;
         }
         .agent-item.active {
             background-color: #eff6ff;
-            border-color: #2563eb;
-            color: #1d4ed8;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.1);
+            border-left: 3px solid #2563eb;
+            color: #2563eb;
         }
         .agent-item.locked {
             opacity: 0.6;
@@ -174,88 +242,102 @@
     </style>
 </head>
 <body>
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            <!-- CỘT TRÁI: DANH SÁCH BOT & HỒ SƠ NHÂN SỰ -->
-            <div class="col-md-4 col-lg-3 sidebar d-flex flex-column justify-content-between">
+    <!-- TOPBAR CHUẨN FORM EDUMANAGE -->
+    <header class="em-topbar">
+        <div class="d-flex align-items-center">
+            <div class="em-brand-box">
+                <div class="em-logo-circle" id="portalBrandLogo">E</div>
                 <div>
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-light-subtle">
-                        <div class="p-2 rounded-3 bg-primary bg-opacity-10 text-primary me-2">
-                            <i class="fa-solid fa-building-user fa-lg"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 fw-bold text-dark" id="portalHeaderTitle">Employee Portal</h6>
-                            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" id="portalTenantBadge" style="font-size: 0.7rem;">Doanh nghiệp: FPT</span>
-                        </div>
-                    </div>
+                    <div class="fw-bold text-dark" style="font-size: 0.96rem;" id="portalHeaderTitle">MiniAgent Portal</div>
+                    <div class="text-secondary" style="font-size: 0.68rem;" id="portalTenantBadge">Tổ chức: FPT</div>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-light border-0 text-secondary" onclick="document.getElementById('portalSidebar').classList.toggle('collapsed')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
 
-                    <!-- HỒ SƠ ĐỊNH DANH & CHỈ SỐ THÍCH ỨNG THEO SCHEMA -->
+        <div class="d-flex align-items-center gap-3">
+            <span class="fw-semibold text-secondary" style="font-size: 0.8rem;">VN</span>
+            <span id="adminStudioBtnSlot"></span>
+            <span class="badge px-3 py-2" style="background: #2563eb; color: #fff; border-radius: 8px; font-size: 0.78rem;">
+                <i class="fa-solid fa-robot me-1"></i>Trợ lý ảo
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <div class="em-avatar-purple" id="empAvatarInitials">NV</div>
+                <div style="line-height: 1.15;">
+                    <div class="fw-bold text-dark" style="font-size: 0.82rem;" id="empName">Đang tải...</div>
+                    <div class="text-secondary text-uppercase" style="font-size: 0.65rem; font-weight: 600;" id="empDept">Đơn vị</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="em-shell">
+            <!-- CỘT TRÁI: DANH SÁCH BOT & HỒ SƠ ĐƠN VỊ -->
+            <div class="sidebar d-flex flex-column justify-content-between" id="portalSidebar">
+                <div>
+                    <!-- HỒ SƠ ĐỊNH DANH ĐƠN VỊ -->
                     <div id="dynamicProfileCardContainer" class="stat-card">
                         <div class="text-center py-2 text-secondary small">
                             <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải thông tin hồ sơ...
                         </div>
                     </div>
 
-                    <label class="form-label small text-secondary fw-bold text-uppercase mt-2 mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Trợ lý AI được phân quyền:</label>
+                    <label class="form-label small text-secondary fw-bold text-uppercase mt-2 mb-2 px-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">Danh mục Trợ lý AI theo Đơn vị:</label>
                     <div id="agentListSidebar"></div>
                 </div>
 
-                <!-- THÔNG TIN NHÂN VIÊN ĐANG ĐĂNG NHẬP -->
+                <!-- FOOTER SIDEBAR: CÀI ĐẶT & ĐĂNG XUẤT -->
                 <div class="pt-3 border-top border-light-subtle">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 me-2" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-user"></i>
-                        </div>
-                        <div style="line-height: 1.2;">
-                            <div class="fw-bold text-dark" style="font-size: 0.875rem;" id="empName">Đang tải...</div>
-                            <small class="text-secondary" id="empDept" style="font-size: 0.72rem;">Phòng ban</small>
-                        </div>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger w-100 fw-bold py-2" onclick="logout()">
-                        <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>Đăng xuất
+                    <button class="btn btn-sm btn-light w-100 text-start text-secondary mb-1 py-2 px-3" onclick="fetchUserData(); loadAgents();">
+                        <i class="fa-solid fa-gear me-2"></i>Làm mới cấu hình
+                    </button>
+                    <button class="btn btn-sm btn-light w-100 text-start text-danger fw-semibold py-2 px-3" onclick="logout()">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất
                     </button>
                 </div>
             </div>
 
             <!-- CỘT PHẢI: MÀN HÌNH CHAT -->
-            <div class="col-md-8 col-lg-9 chat-main">
+            <div class="chat-main">
                 <div id="notificationArea"></div>
 
                 <div class="chat-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2 me-3" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fa-solid fa-robot fa-lg"></i>
+                        <div class="rounded-circle text-primary me-3" style="width: 38px; height: 38px; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                            <i class="fa-solid fa-robot"></i>
                         </div>
                         <div>
-                            <h5 class="mb-0 fw-bold text-dark" id="currentBotName">AI Policy Assistant</h5>
-                            <small class="text-secondary" id="currentBotDesc">Trợ lý nghiệp vụ & quy trình nội bộ</small>
+                            <h6 class="mb-0 fw-bold text-dark" id="currentBotName">AI Policy Assistant</h6>
+                            <small class="text-secondary" id="currentBotDesc" style="font-size: 0.76rem;">Trợ lý nghiệp vụ & quy trình đơn vị</small>
                         </div>
                     </div>
                     <div id="adminNavContainer">
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle me-2 px-2 py-1"><i class="fa-solid fa-circle fa-2xs me-1"></i>Sẵn sàng hỗ trợ</span>
-                        <span id="adminStudioBtnSlot"></span>
+                        <span class="badge" style="background: #dcfce7; color: #16a34a; font-weight: 600; padding: 6px 10px; border-radius: 6px;">
+                            <i class="fa-solid fa-circle fa-2xs me-1"></i>Đang hoạt động
+                        </span>
                     </div>
                 </div>
 
                 <div class="chat-body" id="chatBody">
                     <div class="msg msg-agent" id="welcomeMsg">
-                        👋 Xin chào <b><span id="welcomeEmpName">bạn</span></b>! Tôi là Trợ lý AI chuyên trách của doanh nghiệp. Bạn hãy chọn Trợ lý AI theo phòng ban tương ứng ở danh sách bên trái hoặc đặt câu hỏi ngay để được hỗ trợ chuyên sâu nhé!
+                        👋 Xin chào <b><span id="welcomeEmpName">bạn</span></b>! Tôi là Trợ lý AI chuyên trách của tổ chức. Bạn hãy chọn Trợ lý AI theo Đơn vị (Phòng ban / Khoa / Lớp học) ở thanh menu bên trái hoặc đặt câu hỏi ngay nhé!
                     </div>
                 </div>
 
                 <div class="chat-footer">
-                    <div class="d-flex gap-2 mb-3 overflow-auto" id="quickButtonsContainer">
-                        <button class="quick-btn" onclick="sendQuick('Kế hoạch và nhiệm vụ trọng tâm tuần này của phòng ban?')"><i class="fa-solid fa-list-check me-1 text-primary"></i>Kế hoạch tuần này</button>
-                        <button class="quick-btn" onclick="sendQuick('Quy trình làm việc và hướng dẫn nghiệp vụ chuẩn?')"><i class="fa-solid fa-book-bookmark me-1 text-success"></i>Quy trình nghiệp vụ</button>
-                        <button class="quick-btn" onclick="sendQuick('Quy định và chính sách nội bộ của công ty?')"><i class="fa-solid fa-shield-halved me-1 text-info"></i>Nội quy quy chế</button>
+                    <div class="d-flex gap-2 mb-2 overflow-auto" id="quickButtonsContainer">
+                        <button class="quick-btn" onclick="sendQuick('Kế hoạch và nhiệm vụ trọng tâm tuần này của đơn vị?')"><i class="fa-solid fa-list-check me-1 text-primary"></i>Kế hoạch đơn vị</button>
+                        <button class="quick-btn" onclick="sendQuick('Quy trình làm việc và hướng dẫn nghiệp vụ chuẩn?')"><i class="fa-solid fa-book-bookmark me-1 text-success"></i>Quy trình & Học vụ</button>
+                        <button class="quick-btn" onclick="sendQuick('Tôi muốn tạo đề xuất xin phê duyệt nghiệp vụ')"><i class="fa-solid fa-file-signature me-1 text-warning"></i>Tạo đề xuất HITL</button>
                     </div>
                     <div class="input-group">
-                        <input type="text" id="userInput" class="form-control py-2 px-3" placeholder="Nhập câu hỏi hoặc yêu cầu nghiệp vụ..." onkeypress="if(event.key === 'Enter') sendMessage()">
-                        <button class="btn btn-primary px-4 fw-bold" onclick="sendMessage()"><i class="fa-solid fa-paper-plane me-1"></i> Gửi</button>
+                        <input type="text" id="userInput" class="form-control py-2 px-3" placeholder="Nhập câu hỏi hoặc yêu cầu phê duyệt..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button class="btn btn-primary px-4 fw-bold" style="background: #2563eb;" onclick="sendMessage()"><i class="fa-solid fa-paper-plane me-1"></i> Gửi</button>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <script>
@@ -364,29 +446,37 @@
 
         function updateProfileUI() {
             const tenantTitle = currentUser.tenant_id || 'VINFAST';
-            document.getElementById('portalHeaderTitle').textContent = `Cổng Trợ Lý AI Đa Lĩnh Vực`;
+            document.getElementById('portalHeaderTitle').textContent = `${tenantTitle} Portal`;
+            if (document.getElementById('portalBrandLogo')) {
+                document.getElementById('portalBrandLogo').textContent = tenantTitle.charAt(0).toUpperCase();
+            }
             document.getElementById('portalTenantBadge').textContent = `Tổ chức: ${tenantTitle}`;
             document.getElementById('empName').textContent = currentUser.full_name || 'Thành viên';
             document.getElementById('welcomeEmpName').textContent = currentUser.full_name || 'Thành viên';
-            document.getElementById('empDept').textContent = `Đơn vị: ${currentUser.department || 'Chung'} (${currentUser.role || 'EMPLOYEE'})`;
+            document.getElementById('empDept').textContent = `${currentUser.department || 'Chung'} • ${currentUser.role || 'MEMBER'}`;
+            const parts = (currentUser.full_name || 'NV').trim().split(/\s+/);
+            const init = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : parts[0].slice(0, 2).toUpperCase();
+            if (document.getElementById('empAvatarInitials')) {
+                document.getElementById('empAvatarInitials').textContent = init;
+            }
 
             const cardContainer = document.getElementById('dynamicProfileCardContainer');
             if (cardContainer) {
                 cardContainer.innerHTML = `
                     <div class="d-flex align-items-center mb-2">
-                        <div class="rounded-3 bg-primary bg-opacity-10 text-primary p-2 me-2">
-                            <i class="fa-solid fa-id-badge fa-lg"></i>
+                        <div class="rounded-circle me-2" style="width: 36px; height: 36px; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem;">
+                            ${init.charAt(0)}
                         </div>
                         <div style="line-height: 1.25;">
-                            <div class="fw-bold text-dark" style="font-size: 0.88rem;">${currentUser.full_name || 'Thành viên'}</div>
-                            <div class="small text-secondary" style="font-size: 0.75rem;">Đơn vị / Lớp / Phòng: <b class="text-primary">${currentUser.department || 'Chung'}</b></div>
+                            <div class="fw-bold text-dark" style="font-size: 0.86rem;">${currentUser.full_name || 'Thành viên'}</div>
+                            <div class="small text-secondary" style="font-size: 0.74rem;">Đơn vị / Lớp / Phòng: <b class="text-primary">${currentUser.department || 'Chung'}</b></div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between align-items-center pt-2 border-top border-light-subtle">
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle" style="font-size: 0.7rem;">
-                            <i class="fa-solid fa-circle fa-2xs me-1"></i>Trực tuyến
+                        <span class="badge" style="background: #dcfce7; color: #16a34a; font-size: 0.7rem; font-weight: 600;">
+                            <i class="fa-solid fa-circle fa-2xs me-1"></i>Đang hoạt động
                         </span>
-                        <span class="text-muted small" style="font-size: 0.72rem;">${tenantTitle} Workspace</span>
+                        <span class="text-muted small" style="font-size: 0.72rem;">${tenantTitle}</span>
                     </div>
                 `;
             }
