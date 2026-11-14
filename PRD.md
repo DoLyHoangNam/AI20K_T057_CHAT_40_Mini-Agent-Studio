@@ -1,27 +1,27 @@
 # PRD — Mini Agent Studio (CHAT-40)
 
-> **Sản phẩm:** Mini Agent Studio — tạo AI Agent không cần lập trình cho Chat & Cộng tác doanh nghiệp
-> **Mã đề:** CHAT-40 | **Đội:** AI20K T057 | **Phiên bản tài liệu:** 1.0 (draft) | **Ngày:** 13/11/2026
-> **Nguồn:** Đề bài CHAT-40, `Brief.md`, `README.md` và mã nguồn hiện tại trong repo (nhánh `main`, commit `a9044cc`).
+> **Sản phẩm:** Mini Agent Studio — nền tảng No-Code tạo AI Agent đa lĩnh vực (Doanh nghiệp, Giáo dục, Y tế, Cộng đồng) với xử lý đan xen hội thoại & phân quyền theo đơn vị
+> **Mã đề:** CHAT-40 | **Đội:** AI20K T057 | **Phiên bản tài liệu:** 1.2 | **Ngày:** 14/11/2026
+> **Nguồn:** Đề bài CHAT-40, `Brief.md`, `README.md` và mã nguồn hiện tại trong repo (nhánh `main`).
 
 ---
 
 ## 1. Tóm tắt điều hành
 
-Creator/Admin (PM, HR, admin cộng đồng) có ý tưởng về bot FAQ, bot sinh nội dung hay bot hỗ trợ group, nhưng không có kỹ năng dựng một AI application hoàn chỉnh. Khi đưa bot vào group chat thật, bot còn gặp ba vấn đề:
+Creator/Admin ở nhiều lĩnh vực khác nhau — từ **Doanh nghiệp** (chia theo Phòng ban: Marketing, Kế toán, Nhân sự, IT, Sales...), **Giáo dục / Trường học** (chia theo Khoa/Viện, Lớp học, Phòng Đào tạo...), đến **Y tế / Tổ chức cộng đồng** (chia theo Chuyên khoa, Ban chuyên môn) — đều có nhu cầu tạo AI Agent hỗ trợ quy trình, giải đáp tài liệu và xử lý yêu cầu nội bộ nhưng không có kỹ năng lập trình. Khi đưa bot vào môi trường chat thực tế của đơn vị, bot còn gặp ba vấn đề lớn:
 
-1. Nhiều chủ đề đan xen cùng lúc.
+1. Nhiều chủ đề đan xen cùng lúc trong cùng một nhóm trao đổi.
 2. Tin nhắn sau có thể phủ định hoặc sửa quyết định ở tin nhắn trước.
-3. Dữ liệu mật dễ bị rò rỉ và hành động nhạy cảm dễ bị thực thi nhầm.
+3. Dữ liệu nội bộ giữa các đơn vị (phòng ban / lớp học / chuyên khoa) dễ bị truy cập chéo vượt quyền và hành động nhạy cảm dễ bị thực thi nhầm.
 
 **Mini Agent Studio** gồm hai phần:
 
 | Cấu phần | Mô tả |
 |---|---|
-| **No-Code Studio** | Creator cấu hình instruction, knowledge, tools và workflow 3–5 node. Creator test trong Sandbox rồi publish, có versioning và trace. |
-| **AI Context Core** | Engine cho group chat: tách luồng hội thoại, theo dõi trạng thái quyết định theo thời gian, truy xuất có kiểm soát quyền (ACL), bắt buộc trích dẫn nguồn và xác nhận của người dùng (HITL) với hành động nhạy cảm. |
+| **No-Code Studio Đa Lĩnh Vực** | Creator chọn lĩnh vực (Doanh nghiệp / Giáo dục / Y tế / Tùy chỉnh), cấu hình instruction, kho tri thức (knowledge), tools và workflow 3–5 node theo từng **Đơn vị (Phòng ban / Lớp học / Khoa)**. Creator test trong Sandbox rồi publish, có versioning và trace. |
+| **AI Context Core** | Engine cho hội thoại nhóm: tách luồng hội thoại, theo dõi trạng thái quyết định theo thời gian, truy xuất có kiểm soát quyền theo đơn vị (Unit ACL), bắt buộc trích dẫn nguồn và xác nhận của người dùng (HITL) với hành động nhạy cảm. |
 
-**Tuyên bố giá trị:** Một Creator không biết code có thể tạo, test và publish một Agent trong vòng **≤ 15 phút**. Agent đó không rò rỉ dữ liệu vượt quyền, mọi câu trả lời đều truy ngược được về tin nhắn hoặc tài liệu nguồn, và có số liệu định lượng chứng minh chất lượng.
+**Tuyên bố giá trị:** Một Creator không biết code ở bất kỳ ngành nghề nào có thể tạo, phân quyền theo đơn vị (phòng ban / lớp học / khoa), test và publish một Agent chuyên trách trong vòng **≤ 15 phút**. Agent đó không rò rỉ dữ liệu sang đơn vị khác, mọi câu trả lời đều truy ngược được về tin nhắn hoặc tài liệu nguồn, và có số liệu định lượng chứng minh chất lượng.
 
 ---
 
@@ -52,28 +52,28 @@ Creator/Admin (PM, HR, admin cộng đồng) có ý tưởng về bot FAQ, bot s
 
 ## 3. Đối tượng người dùng & Phân quyền
 
-### 3.1 Personas
+### 3.1 Personas (Đa ngành nghề)
 
-| Persona | Vai trò hệ thống | Nhu cầu chính |
+| Persona | Vai trò hệ thống | Lĩnh vực & Nhu cầu chính |
 |---|---|---|
-| **Linh — HR Manager** (Creator) | `TENANT_ADMIN` | Tạo bot tra cứu quy chế và duyệt phép mà không cần code. Kiểm soát ai xem được tài liệu nào. |
-| **Nam — Nhân viên sản xuất** | `EMPLOYEE` | Hỏi nhanh về quy chế, phép năm, tạo đơn nghỉ phép ngay trong chat. |
-| **Mai — Nhân viên Kế toán** | `EMPLOYEE` (phòng Accounting) | Truy cập bot tài chính mật mà các phòng khác không thấy. |
-| **Platform Owner** | `SUPER_ADMIN` | Cấp tenant mới, giám sát hệ thống, không đọc dữ liệu nghiệp vụ của tenant. |
+| **Linh — Quản trị viên Tổ chức** (Creator) | `TENANT_ADMIN` | Tạo bot chuyên trách cho từng **Phòng ban** (Doanh nghiệp: Marketing, Kế toán, HR, IT...) hoặc từng **Khoa / Lớp học** (Giáo dục: Lớp AI-K5, Khoa CNTT, Phòng Đào tạo...) mà không cần code. Kiểm soát đơn vị nào xem được tài liệu nào, duyệt yêu cầu HITL. |
+| **Nam — Nhân viên Marketing / Sinh viên Lớp AI** | `EMPLOYEE` (Đơn vị A) | Hỏi nhanh quy chế, kế hoạch, tài liệu học tập/nghiệp vụ của đơn vị mình; gửi phiếu đề xuất / đơn học vụ cần duyệt ngay trong chat. |
+| **Mai — Nhân viên Kế toán / Giảng viên Khoa Kinh tế** | `EMPLOYEE` (Đơn vị B) | Truy cập bot và kho tài liệu chuyên môn của đơn vị mình mà các phòng ban / lớp học khác không được phép xem. |
+| **Platform Owner** | `SUPER_ADMIN` | Cấp tenant mới theo lĩnh vực (`ENTERPRISE`, `EDUCATION`, `HEALTHCARE`, `CUSTOM`), giám sát hệ thống, không đọc dữ liệu nghiệp vụ của tenant. |
 
-> **Quyết định thiết kế:** MVP dùng **3 role** (`SUPER_ADMIN`, `TENANT_ADMIN`, `EMPLOYEE`), khớp với Keycloak hiện có. Không tạo role `INTERN` riêng vì quyền của role này chỉ là `EMPLOYEE` trừ đi vài thứ. ACL theo **phòng ban** đã đủ để chứng minh việc chặn dữ liệu. Nếu sau này cần, Intern được thêm bằng thuộc tính `clearance_level` của user (xem mục 3.3), không thêm role mới.
+> **Quyết định thiết kế:** Hệ thống dùng **3 role** (`SUPER_ADMIN`, `TENANT_ADMIN`, `EMPLOYEE` — đại diện cho Thành viên / Nhân sự / Sinh viên của tổ chức), khớp với Keycloak hiện có. Phân quyền dữ liệu dựa trên thuộc tính **Đơn vị (`department` / `unit_scope`)** linh hoạt theo ngành nghề: là *Phòng ban* đối với Doanh nghiệp, là *Khoa / Lớp học* đối với Trường học, hoặc *Chuyên khoa* đối với Y tế.
 
 ### 3.2 Ma trận quyền (RBAC)
 
-| Chức năng | SUPER_ADMIN | TENANT_ADMIN | EMPLOYEE |
+| Chức năng | SUPER_ADMIN | TENANT_ADMIN | EMPLOYEE (Thành viên/NV/SV) |
 |---|:-:|:-:|:-:|
-| Tạo/xoá tenant | ✅ | ❌ | ❌ |
-| Quản lý user trong tenant | ❌ | ✅ | ❌ |
-| Tạo/sửa Agent, workflow, permission manifest | ❌ | ✅ | ❌ |
-| Upload knowledge và gán ACL | ❌ | ✅ | ❌ |
+| Tạo/xoá tenant (chọn lĩnh vực) | ✅ | ❌ | ❌ |
+| Quản lý thành viên & gán Đơn vị (Phòng/Lớp/Khoa) | ❌ | ✅ | ❌ |
+| Tạo/sửa Agent theo Đơn vị, workflow, permission manifest | ❌ | ✅ | ❌ |
+| Upload knowledge và gán ACL theo Đơn vị | ❌ | ✅ | ❌ |
 | Publish / rollback Agent | ❌ | ✅ | ❌ |
 | Xem trace và eval dashboard | Metric tổng hợp | ✅ (tenant mình) | ❌ |
-| Chat với Agent đã publish | ❌ | ✅ | ✅ (theo ACL phòng ban) |
+| Chat với Agent đã publish | ❌ | ✅ | ✅ (theo ACL Đơn vị: Phòng ban / Lớp học) |
 | Xác nhận (HITL) hành động của chính mình | — | ✅ | ✅ |
 | Duyệt hành động cần phê duyệt (approver) | — | ✅ | Nếu `is_approver = true` |
 
@@ -81,12 +81,13 @@ Creator/Admin (PM, HR, admin cộng đồng) có ý tưởng về bot FAQ, bot s
 
 Ngoài `role`, mỗi user có các thuộc tính sau. Các thuộc tính này lấy từ JWT (Keycloak) và là đầu vào cho ACL ở tầng truy xuất và Permission Manifest:
 
-| Thuộc tính | Ý nghĩa | Ví dụ |
+| Thuộc tính | Ý nghĩa | Ví dụ (Doanh nghiệp / Giáo dục / Y tế) |
 |---|---|---|
-| `tenant_id` | Doanh nghiệp của user | `VINFAST` |
-| `department` | Phòng ban, dùng để lọc tài liệu và Agent | `Production`, `Accounting`, `Marketing` |
-| `is_approver` | Có quyền duyệt hành động HITL của người khác | `true` với trưởng phòng |
-| `clearance_level` *(tuỳ chọn, P1)* | Mức truy cập dữ liệu, dùng để mô phỏng Intern mà không thêm role | `PUBLIC` / `INTERNAL` |
+| `tenant_id` | Mã định danh tổ chức của user | `VINFAST`, `VINUNI`, `BACHMAI` |
+| `domain_type` | Lĩnh vực hoạt động của tổ chức | `ENTERPRISE`, `EDUCATION`, `HEALTHCARE`, `CUSTOM` |
+| `department` | Đơn vị trực thuộc (Phòng ban / Lớp học / Khoa), dùng để lọc tài liệu và Agent | Doanh nghiệp: `Marketing`, `Accounting`, `HR`, `IT`<br>Giáo dục: `Lop_AI_K5`, `Khoa_CNTT`, `Phong_Dao_Tao`<br>Y tế: `Khoa_Noi`, `Khoa_Duoc` |
+| `is_approver` | Có quyền duyệt hành động HITL của người khác | `true` với Trưởng phòng / Chủ nhiệm khoa / Giáo vụ |
+| `clearance_level` *(tuỳ chọn, P1)* | Mức truy cập dữ liệu chi tiết trong cùng đơn vị | `PUBLIC` / `INTERNAL` |
 
 > **Cô lập tenant:** mọi truy vấn DB, vector và trace đều bắt buộc có `tenant_id` lấy từ **token đã xác thực**. Không nhận `tenant_id` từ client.
 
@@ -100,21 +101,23 @@ Phần này dựa trên việc đọc mã nguồn hiện tại. PRD này là k�
 
 | Hạng mục | Hiện trạng | File |
 |---|---|---|
-| Multi-tenant | Bảng `tenants`, `users`, `agents`, `documents`, `leave_requests`. Seed VinFast, FPT, VNG. | `init_saas_db.py`, `server.py` |
+| Multi-tenant | Bảng `tenants`, `users`, `agents`, `documents`, `leave_requests` (đang dùng làm bảng yêu cầu HITL chung). | `init_saas_db.py`, `server.py` |
 | Vai trò | `SUPER_ADMIN` / `TENANT_ADMIN` / `EMPLOYEE`, đồng bộ role sang Keycloak. | `server.py`, `init_keycloak.py` |
-| SSO | Keycloak OIDC (realm `mini-agent-platform`), login qua `keycloak-js`. | `login.html` |
-| Agent engine | Graph tuần tự 5 bước: phân loại ý định, tool phép năm, RAG, HITL, sinh câu trả lời. | `agent_engine.py` |
-| RAG | Embedding Gemini 3072 chiều, cosine similarity, lọc theo tenant, lưu `vector_index.json`. | `vector_store.py` |
-| HITL | Luồng xin nghỉ phép: gửi đơn, `PENDING`, admin duyệt hoặc từ chối, thông báo cho nhân viên. | `server.py`, `admin_studio.html` |
+| SSO | Keycloak OIDC (realm `mini-agent-platform`), login qua `keycloak-js`. Đăng nhập trực tiếp `/api/login` đã bị chặn. | `login.html` |
+| Agent engine | Class `LangGraphAgent` tự viết. **Hiện chỉ còn 1 nhánh: RAG → sinh câu trả lời** (đã gỡ phân loại ý định theo từ khoá và nhánh phép năm ở commit `eaf74c8`). | `agent_engine.py` |
+| Agent theo phòng ban | Studio có mẫu 1-click cho Marketing / Kế toán / HR / IT / Sales (điền tên, phòng ban, instruction). Trường `department_access` lưu trong bảng `agents`. | `admin_studio.html` |
+| RAG | Embedding Gemini 3072 chiều, cosine similarity, lọc theo tenant, lưu `vector_index.json`. Upload `.pdf/.txt/.md`. | `vector_store.py` |
+| HITL | Bảng duyệt + API `/api/leave_requests` (tạo, `PENDING`, duyệt/từ chối, thông báo polling) **vẫn còn**, nhưng **agent không còn kích hoạt** luồng này từ chat. | `server.py`, `admin_studio.html` |
 | Studio UI | Tạo Agent, upload tài liệu, playground, quản lý nhân sự (CRUD, bulk import), hộp thư phê duyệt. | `admin_studio.html` |
-| Email | Gửi thông tin đăng nhập cho user mới. | `mailer.py` |
+| Email | Gửi thông tin đăng nhập cho user mới qua SMTP (cấu hình `.env`). | `mailer.py` |
+| Schema-Driven UI | API `/api/tenants/ui_schema`, `/generate_schema` và `schema_engine.py` còn trong backend, **nhưng UI đã gỡ**. Không thuộc phạm vi đề bài → đề xuất xoá hoặc chuyển P2. | `schema_engine.py`, `server.py` |
 
 ### 4.2 Khoảng cách so với đề bài
 
 | # | Yêu cầu đề bài | Hiện trạng | Mức độ |
 |---|---|---|---|
 | 1 | Workflow 3–5 node, kéo thả (React Flow) | Pipeline cố định trong code. Không có editor và không lưu `workflow_config`. | 🔴 Thiếu |
-| 2 | ≥ 3 tools, permission manifest | Chỉ có 1 tool (phép năm) và 1 hành động HITL (đơn nghỉ). Không có manifest. | 🔴 Thiếu |
+| 2 | ≥ 3 tools, permission manifest | **0 tool** được agent gọi (đã gỡ tool phép năm). Không có manifest. | 🔴 Thiếu |
 | 3 | Sandbox test với role switcher | Có playground đơn giản, chưa có group chat giả lập hay chuyển vai trò. | 🟠 Một phần |
 | 4 | Publish, versioning, rollback | `is_published` đặt cứng bằng 1. Không có version. | 🔴 Thiếu |
 | 5 | Trace theo node, Langfuse | Dashboard hiển thị **số cứng** (0.38s, 98.4%…). Không có trace thật. | 🔴 Thiếu |
@@ -122,9 +125,10 @@ Phần này dựa trên việc đọc mã nguồn hiện tại. PRD này là k�
 | 7 | Thread disentanglement | Không có. | 🔴 Thiếu |
 | 8 | Temporal state tracking | Không có. | 🔴 Thiếu |
 | 9 | Truy vết về tin nhắn nguồn | Citation mới ở mức tên file và điểm cosine. Chưa có `message_id` hay đoạn trích. | 🟠 Một phần |
-| 10 | ACL tại tầng truy xuất | Chỉ lọc theo `tenant`. Tham số `department_access` được truyền vào `vector_search` nhưng **chưa được dùng** để lọc. | 🔴 Lỗ hổng |
+| 10 | ACL tại tầng truy xuất | Chỉ lọc theo `tenant`. Tham số `department_access` được truyền vào `vector_search` nhưng **chưa được dùng** để lọc. Chặn Agent theo phòng ban **chỉ ở giao diện** (`employee_portal.html`), `/api/chat` không kiểm tra. | 🔴 Lỗ hổng |
 | 11 | Vector DB (Qdrant) | JSON file và cosine tự viết. Không scale. | 🟠 Thay thế |
-| 12 | Intent routing | Dựa trên từ khoá cứng. | 🟠 Yếu |
+| 12 | Intent routing | **Không còn** (đã gỡ). Cần làm lại bằng LLM router (mục 6.2). | 🔴 Thiếu |
+| 15 | HITL kích hoạt từ hội thoại | API và hộp thư duyệt còn, nhưng agent không còn đưa ra yêu cầu HITL. | 🔴 Thiếu |
 | 13 | Eval dataset và regression test | Không có. | 🔴 Thiếu |
 | 14 | Conditional branch, template, AI sinh workflow | Không có (nâng cao). | ⚪ P1 |
 
@@ -182,25 +186,25 @@ Mỗi yêu cầu có mã `FR-xx`, mức ưu tiên và tiêu chí nghiệm thu (A
 | ID | Yêu cầu | Ưu tiên | Tiêu chí nghiệm thu |
 |---|---|:-:|---|
 | FR-01 | Tạo, sửa, xoá Agent. Gồm tên, mô tả, instruction (system prompt), mô hình LLM, nhiệt độ. | P0 | Lưu và tải lại được cấu hình. Chỉ `TENANT_ADMIN` thao tác được. Agent nằm trong đúng tenant. |
-| FR-02 | **Knowledge:** upload `.txt`, `.md`, `.pdf`. Hệ thống tách chunk, embed, lưu vào Vector DB. Mỗi tài liệu có metadata ACL (phòng ban và vai trò được phép). | P0 | Sau upload có trạng thái *indexed* và số chunk. Xoá tài liệu thì xoá cả vector. |
+| FR-02 | **Knowledge:** upload `.txt`, `.md`, `.pdf`. Hệ thống tách chunk, embed, lưu vào Vector DB. Mỗi tài liệu có metadata ACL theo **Đơn vị** (Phòng ban / Lớp học / Khoa và vai trò được phép). | P0 | Sau upload có trạng thái *indexed* và số chunk. Xoá tài liệu thì xoá cả vector. |
 | FR-03 | **Memory cơ bản:** (a) lịch sử hội thoại gần nhất trong phiên (window N lượt), (b) ghi nhớ sự kiện theo từng user/nhóm (key-value) có thể xem và xoá. | P0 | Agent nhắc lại được thông tin ở lượt trước. User xoá memory thì Agent không còn dùng. |
-| FR-04 | **Tool registry** với ≥ 3 tool mẫu (xem mục 6.3). | P0 | Creator bật/tắt tool cho từng Agent trong UI. |
+| FR-04 | **Tool registry** với ≥ 3 tool mẫu đa ngành nghề (xem mục 6.3). | P0 | Creator bật/tắt tool cho từng Agent trong UI. |
 | FR-05 | **Permission Manifest** cho mỗi Agent (xem mục 6.4). | P0 | Tool không khai báo trong manifest thì không bao giờ được gọi. |
 | FR-06 | **Workflow Builder (React Flow)** 3–5 node, kéo thả, kết nối, cấu hình từng node. Lưu thành JSON (`workflow_config`). | P0 | Validate: có điểm vào, không vòng lặp vô hạn, 3 ≤ số node ≤ 5, mọi node có đầu ra hợp lệ. |
-| FR-07 | **Sandbox:** màn hình chat giả lập group chat nhiều người. Có **Role Switcher** chuyển giữa 3 persona (Admin / Nhân viên Sản xuất / Nhân viên Kế toán) và hiển thị trace tương ứng từng lượt. | P0 | Đổi persona tức thì. Kết quả truy xuất/tool thay đổi đúng theo ACL: nhân viên Sản xuất bị chặn tài liệu Kế toán, nhân viên Kế toán xem được, Admin xem toàn tenant. |
-| FR-08 | **Publish** Agent thành một phiên bản bất biến. Chỉ publish khi workflow hợp lệ và đã chạy sandbox ít nhất 1 lần. | P0 | Sau publish, nhân viên chat với version đã publish, không bị ảnh hưởng bởi bản đang sửa. |
+| FR-07 | **Sandbox:** màn hình chat giả lập group chat nhiều người. Có **Role & Unit Switcher** chuyển giữa các persona thuộc các Đơn vị khác nhau (ví dụ: Admin / Thành viên Đơn vị A như Phòng Marketing hoặc Lớp AI-K5 / Thành viên Đơn vị B như Phòng Kế toán hoặc Khoa Kinh tế) và hiển thị trace tương ứng từng lượt. | P0 | Đổi persona tức thì. Kết quả truy xuất/tool thay đổi đúng theo ACL: thành viên Đơn vị A bị chặn tài liệu Đơn vị B, thành viên Đơn vị B xem được, Admin xem toàn tenant. |
+| FR-08 | **Publish** Agent thành một phiên bản bất biến. Chỉ publish khi workflow hợp lệ và đã chạy sandbox ít nhất 1 lần. | P0 | Sau publish, thành viên chat với version đã publish, không bị ảnh hưởng bởi bản đang sửa. |
 | FR-09 | **Versioning:** mỗi lần publish tạo `version` mới (instruction + workflow + manifest + danh sách tài liệu). Có changelog và diff. | P0 | Xem được lịch sử và so sánh 2 phiên bản. |
 | FR-10 | **Rollback** về phiên bản trước chỉ với một thao tác. | P1 | Rollback ≤ 5 giây. Hội thoại mới dùng version đã chọn. Có ghi audit log. |
 | FR-11 | **Conditional branch:** node điều kiện (theo intent, vai trò, kết quả tool, điểm RAG). | P1 | Workflow có nhánh chạy đúng theo điều kiện. |
-| FR-12 | **Template tái sử dụng:** FAQ Bot, HR Leave Bot, Group Summarizer, Task-Tracker Bot. | P1 | Tạo Agent từ template trong ≤ 3 click. |
-| FR-13 | **AI sinh workflow từ mô tả tự nhiên.** Ví dụ: "Bot trả lời quy chế và tạo đơn nghỉ phép cần quản lý duyệt". | P1 | Sinh JSON hợp lệ theo schema, tuân thủ giới hạn 3–5 node. Creator chỉnh sửa lại được. Tỷ lệ JSON hợp lệ ≥ 90%. |
+| FR-12 | **Template đa lĩnh vực tái sử dụng:**<br>• **Doanh nghiệp (theo Phòng ban):** Marketing, Kế toán, Nhân sự (HR), Kỹ thuật IT, Kinh doanh (Sales).<br>• **Giáo dục (theo Khoa/Lớp):** Trợ giảng Lớp học, Cố vấn Học vụ Khoa, Phòng Đào tạo, Thư viện & Giáo trình.<br>• **Y tế / Dịch vụ (theo Chuyên khoa):** Hướng dẫn Quy trình Khám, Tra cứu Chuyên môn, Hành chính.<br>• **Tùy chỉnh:** Cho phép Admin tự tạo tên Đơn vị / Lớp / Nhóm bất kỳ. | P0/P1 | Chọn lĩnh vực và tạo Agent từ template trong ≤ 3 click. |
+| FR-13 | **AI sinh workflow từ mô tả tự nhiên.** Ví dụ: "Bot trợ giảng cho Lớp AI-K5 trả lời giáo trình và nhận đơn xin phúc khảo cần giảng viên duyệt". | P1 | Sinh JSON hợp lệ theo schema, tuân thủ giới hạn 3–5 node. Creator chỉnh sửa lại được. Tỷ lệ JSON hợp lệ ≥ 90%. |
 
 ### 6.2 Workflow — loại node (MVP)
 
 | Node | Chức năng |
 |---|---|
 | **Intent / Router** | Phân loại ý định bằng LLM (thay cho từ khoá cứng), fallback sang luật. |
-| **Retrieve (RAG)** | Truy xuất tài liệu có ACL filter, trả về chunk kèm `source_id`. |
+| **Retrieve (RAG)** | Truy xuất tài liệu có ACL filter theo Đơn vị (`department`), trả về chunk kèm `source_id`. |
 | **Tool** | Gọi tool qua Permission Manifest. |
 | **HITL Gate** | Tạm dừng, chờ xác nhận của người dùng hoặc approver. |
 | **Respond** | Sinh câu trả lời có trích dẫn bắt buộc. |
@@ -208,20 +212,20 @@ Mỗi yêu cầu có mã `FR-xx`, mức ưu tiên và tiêu chí nghiệm thu (A
 
 Với group chat, hai node tiền xử lý của AI Context Core (**Thread Disentangle** và **Temporal State**) được cấu hình dưới dạng "context step" bật/tắt trong Agent. Hai node này không tính vào giới hạn 3–5 node của Creator.
 
-### 6.3 Tools (≥ 3, MCP-like)
+### 6.3 Tools đa ngành nghề (≥ 3, MCP-like)
 
-Mỗi tool có `name`, `input_schema`, `output_schema`, `risk_level` (`read` | `write` | `sensitive`) và `required_roles`.
+Mỗi tool có `name`, `input_schema`, `output_schema`, `risk_level` (`read` | `write` | `sensitive`) và `required_roles`. Các tool được thiết kế tổng quát để dùng được cho mọi ngành nghề (Doanh nghiệp, Trường học, Y tế, Tổ chức):
 
-| Tool | Mô tả | Rủi ro | HITL |
+| Tool | Mô tả (Đa lĩnh vực) | Rủi ro | HITL |
 |---|---|:-:|:-:|
-| `leave_balance` | Đọc ngày phép còn lại của người dùng (đã có trong code). | read | Không |
-| `leave_request_create` | Tạo đơn nghỉ phép (đã có luồng cơ bản). | sensitive | **Có** (người tạo xác nhận, quản lý duyệt) |
-| `send_email` | Soạn và gửi email nội bộ. | sensitive | **Có** |
-| `calendar_event` | Tạo sự kiện lịch (mock hoặc Google Calendar). | write | Có |
-| `task_create` | Tạo task kiểu Jira (mock) từ cam kết trong chat. | write | Có |
-| `web/doc_lookup` | Tra cứu tài liệu nội bộ. | read | Không |
+| `doc_lookup` | Tra cứu tài liệu / quy chế / giáo trình nội bộ theo phạm vi Đơn vị (Phòng ban / Lớp học / Khoa). | read | Không |
+| `unit_directory_lookup` | Tra cứu thông tin danh bạ đơn vị, lịch trình, thông báo chung của Phòng ban / Lớp học. | read | Không |
+| `approval_request_create` | Tạo phiếu yêu cầu / đề xuất cần phê duyệt (Doanh nghiệp: đề xuất mua sắm, tạm ứng, công tác; Giáo dục: đơn học vụ, đăng ký đề tài; Y tế: phiếu yêu cầu chuyên môn). | sensitive | **Có** (người tạo xác nhận, cấp quản lý duyệt) |
+| `send_email` | Soạn và gửi email / thông báo nội bộ cho cá nhân hoặc đơn vị. | sensitive | **Có** |
+| `calendar_event` | Đặt lịch họp phòng ban / lịch phụ đạo lớp học / lịch hẹn (mock hoặc Google Calendar). | write | Có |
+| `task_create` | Tạo đầu việc (task) cho thành viên trong phòng ban / nhóm học tập từ cam kết trong chat. | write | Có |
 
-MVP bắt buộc tối thiểu 3 tool: `leave_balance`, `leave_request_create`, `send_email`. Các tool còn lại là tuỳ chọn.
+MVP bắt buộc tối thiểu 3 tool: `doc_lookup`, `approval_request_create`, `send_email`. Các tool còn lại là tuỳ chọn.
 
 ### 6.4 Permission Manifest
 
@@ -233,9 +237,9 @@ Mỗi Agent có một manifest khai báo, ví dụ:
   "version": 3,
   "knowledge_scope": { "departments": ["HR", "ALL"], "min_role": "EMPLOYEE" },
   "tools": {
-    "leave_balance":        { "roles": ["EMPLOYEE", "TENANT_ADMIN"], "hitl": false },
-    "leave_request_create": { "roles": ["EMPLOYEE"], "hitl": "requester+approver" },
-    "send_email":           { "roles": ["TENANT_ADMIN"], "hitl": "requester" }
+    "doc_lookup":              { "roles": ["EMPLOYEE", "TENANT_ADMIN"], "hitl": false },
+    "approval_request_create": { "roles": ["EMPLOYEE"], "hitl": "requester+approver" },
+    "send_email":              { "roles": ["TENANT_ADMIN"], "hitl": "requester" }
   },
   "data_access": { "pii": false, "cross_tenant": false },
   "limits": { "max_tool_calls_per_turn": 3, "max_tokens": 1500 }
@@ -340,7 +344,7 @@ flowchart LR
 - Trạng thái: `PENDING → CONFIRMED_BY_REQUESTER → APPROVED/REJECTED → EXECUTED/CANCELLED`.
 - Giao diện xác nhận nêu rõ: tool nào, tham số gì, hậu quả gì.
 - Có thời hạn hiệu lực (timeout) và có thể huỷ trước khi thực thi.
-- Idempotent: duyệt hai lần không trừ phép hai lần. Code hiện tại đã có chặn `old_status != 'APPROVED'`, cần giữ lại.
+- Idempotent: duyệt hai lần không thực thi hai lần. Code hiện tại đã có chặn `old_status != 'APPROVED'`, cần giữ lại.
 - Prompt injection: nội dung tin nhắn hoặc tài liệu **không được** thay đổi manifest hay bỏ qua HITL.
 
 ### 8.2 Audit & Privacy
@@ -496,7 +500,7 @@ flowchart TD
 | Versions | TENANT_ADMIN | Lịch sử phiên bản, diff, rollback. |
 | Eval & Trace | TENANT_ADMIN | Chạy eval/regression, điểm theo version, liên kết Langfuse. |
 | Approvals | TENANT_ADMIN / approver | Hộp thư duyệt HITL. |
-| Employee Portal | EMPLOYEE | Chat với Agent, thông báo, hồ sơ phép, xem nguồn trích dẫn. |
+| Employee Portal | EMPLOYEE | Chat với Agent theo phòng ban, thông báo duyệt, xem nguồn trích dẫn. |
 
 ### 13.2 Nguyên tắc
 

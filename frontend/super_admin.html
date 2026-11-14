@@ -387,9 +387,9 @@
                             <th>TENANT</th>
                             <th>HỌ VÀ TÊN</th>
                             <th>EMAIL</th>
-                            <th>PHÒNG BAN</th>
+                            <th>ĐƠN VỊ / LỚP / PHÒNG</th>
                             <th>VAI TRÒ</th>
-                            <th>QUỸ / ĐỊNH MỨC</th>
+                            <th>PHẠM VI AGENT ACL</th>
                             <th style="text-align: right;">THAO TÁC</th>
                         </tr>
                     </thead>
@@ -430,20 +430,12 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Phòng Ban</label>
-                            <input type="text" id="saEditUserDept" class="form-control" placeholder="HR, Marketing, IT...">
+                            <label class="form-label">Đơn vị / Phòng ban / Lớp học</label>
+                            <input type="text" id="saEditUserDept" class="form-control" placeholder="VD: Marketing, Lớp AI - K68, Khoa Nội...">
                         </div>
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Định mức tiêu chuẩn</label>
-                            <input type="number" id="saEditUserLeave" class="form-control" min="1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Thâm niên (tháng)</label>
-                            <input type="number" id="saEditUserTenure" class="form-control" min="0">
-                        </div>
-                    </div>
+                    <input type="hidden" id="saEditUserLeave" value="12">
+                    <input type="hidden" id="saEditUserTenure" value="12">
                     <div class="mb-3">
                         <label class="form-label">Đặt Lại Mật Khẩu (Để trống nếu giữ nguyên)</label>
                         <input type="text" id="saEditUserPass" class="form-control" placeholder="Nhập mật khẩu mới...">
@@ -606,7 +598,7 @@
                         <td class="text-secondary">${u.email}</td>
                         <td>${u.department || '—'}</td>
                         <td>${roleBadge}</td>
-                        <td>Còn ${remain} / ${u.total_leave_days || 0} ngày</td>
+                        <td><span class="badge-mono">ACL: ${u.department || 'ALL'}</span></td>
                         <td style="text-align: right;">${editBtn} ${deleteBtn}</td>
                     </tr>
                 `;

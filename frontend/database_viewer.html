@@ -109,11 +109,8 @@
                             <th>HỌ VÀ TÊN</th>
                             <th>EMAIL</th>
                             <th>VAI TRÒ</th>
-                            <th>PHÒNG BAN</th>
-                            <th>THÂM NIÊN</th>
-                            <th>TIÊU CHUẨN</th>
-                            <th>ĐÃ NGHỈ</th>
-                            <th>CÒN LẠI</th>
+                            <th>ĐƠN VỊ / LỚP / PHÒNG</th>
+                            <th>PHẠM VI ACL</th>
                         </tr>
                     </thead>
                     <tbody id="usersBody"></tbody>
@@ -165,10 +162,10 @@
             </div>
         </div>
 
-        <!-- 5. BẢNG LEAVE_REQUESTS -->
+        <!-- 5. BẢNG LEAVE_REQUESTS (HITL APPROVALS) -->
         <div class="card-custom">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-calendar-check text-danger me-2"></i>5. Bảng <code>leave_requests</code> (Đơn xin nghỉ & Phê duyệt HITL)</h5>
+                <h5 class="fw-bold text-dark mb-0"><i class="fa-solid fa-file-signature text-danger me-2"></i>5. Bảng <code>leave_requests</code> (Yêu cầu & Đề xuất Phê duyệt HITL)</h5>
                 <span class="badge bg-danger bg-opacity-10 text-danger fw-bold" id="countRequests">-- bản ghi</span>
             </div>
             <div class="table-responsive">
@@ -177,9 +174,9 @@
                         <tr>
                             <th>ID</th>
                             <th>TENANT</th>
-                            <th>NHÂN VIÊN</th>
-                            <th>SỐ NGÀY XIN</th>
-                            <th>CHI TIẾT LÝ DO</th>
+                            <th>THÀNH VIÊN</th>
+                            <th>MỨC ĐỘ / SỐ LƯỢNG</th>
+                            <th>CHI TIẾT ĐỀ XUẤT</th>
                             <th>TRẠNG THÁI</th>
                         </tr>
                     </thead>
@@ -239,10 +236,7 @@
                             <td class="text-secondary">${u.email}</td>
                             <td>${roleBadge}</td>
                             <td><span class="badge bg-light text-dark border">${u.department || 'N/A'}</span></td>
-                            <td>${u.tenure_months || 0} tháng</td>
-                            <td>${u.total_leave_days || 0} ngày</td>
-                            <td class="text-warning text-dark">${u.used_leave_days || 0} ngày</td>
-                            <td><b class="text-success fs-6">${remain} ngày</b></td>
+                            <td><span class="badge bg-success bg-opacity-10 text-success border border-success-subtle">Agent đơn vị: ${u.department || 'ALL'}</span></td>
                         </tr>
                     `;
                 });
@@ -279,12 +273,12 @@
                     `;
                 });
 
-                // 5. Leave Requests
-                document.getElementById('countRequests').innerText = `${data.leave_requests.length} đơn`;
+                // 5. HITL Requests
+                document.getElementById('countRequests').innerText = `${data.leave_requests.length} yêu cầu`;
                 const rBody = document.getElementById('requestsBody');
                 rBody.innerHTML = '';
                 if (data.leave_requests.length === 0) {
-                    rBody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-secondary">Chưa có đơn xin nghỉ nào trong CSDL</td></tr>';
+                    rBody.innerHTML = '<tr><td colspan="6" class="text-center py-3 text-secondary">Chưa có yêu cầu phê duyệt nào trong CSDL</td></tr>';
                 } else {
                     data.leave_requests.forEach(r => {
                         const statusBadge = r.status === 'APPROVED' 
@@ -298,7 +292,7 @@
                                 <td><code>#${r.id}</code></td>
                                 <td>${getTenantBadge(r.tenant_id)}</td>
                                 <td class="fw-bold text-dark">${r.user_name}</td>
-                                <td><b class="text-warning text-dark">${r.days_requested} ngày</b></td>
+                                <td><span class="badge bg-light text-dark border">${r.days_requested || 1} mục</span></td>
                                 <td class="small text-secondary">${r.date_details}</td>
                                 <td>${statusBadge}</td>
                             </tr>
