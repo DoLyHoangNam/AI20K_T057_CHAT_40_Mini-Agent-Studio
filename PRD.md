@@ -50,7 +50,7 @@ Mỗi người dùng được định danh bởi bộ 3 khóa: `tenant_id` (Tổ
 ## 4. Yêu cầu Chức năng (Functional Requirements)
 
 ### 4.1. Phân hệ Quản trị Nền tảng & Định danh SSO (`FR-01` -> `FR-03`)
-* **`FR-01` (Keycloak OIDC SSO & Role Switcher):** Xác thực tập trung qua Keycloak Server (`http://localhost:8080`, Realm `mini-agent-platform`), tự động ánh xạ sang hồ sơ SQLite nội bộ và điều hướng theo `role`. Hỗ trợ thêm chế độ **Role Switcher (Chuyển vai Demo nhanh)** tại `login.html` để kiểm thử nhanh đa vai trò khi không bật Docker.
+* **`FR-01` (Keycloak OIDC SSO):** Xác thực tập trung qua Keycloak Server (`http://localhost:8080`, Realm `mini-agent-platform`), tự động ánh xạ sang hồ sơ SQLite nội bộ và điều hướng theo `role`.
 * **`FR-02` (Multi-Tenant Provisioning):** `SUPER_ADMIN` khởi tạo tổ chức mới theo lĩnh vực (`ENTERPRISE`, `EDUCATION`, `HEALTHCARE`, `CUSTOM`), hệ thống tự động sinh cấu hình `ui_schema`, tạo tài khoản `TENANT_ADMIN` đầu tiên, đồng bộ lên Keycloak và gửi email bàn giao mật khẩu qua Gmail SMTP (`backend/mailer.py`).
 * **`FR-03` (Bulk Member Provisioning):** `TENANT_ADMIN` thêm thành viên đơn lẻ hoặc tải file CSV/TXT hàng loạt (`Họ tên, Email, Đơn vị`), tự động gán quyền truy cập theo đơn vị.
 
@@ -102,5 +102,5 @@ Mỗi người dùng được định danh bởi bộ 3 khóa: `tenant_id` (Tổ
 | **1. Backend & CSDL** | Python `ThreadingHTTPServer` (`backend/server.py`), CSDL `SQLite 3` (`database.db`) & bản xuất `MySQL 8.0`. | Chuyển đổi sang `FastAPI` + `PostgreSQL` bất đồng bộ chịu tải cao. |
 | **2. Điều phối Agent (Orchestration)** | Lớp `LangGraphAgent` tự xây dựng (`backend/agent_engine.py`) gồm **2 Node chính** (Node 1: Intent & HITL Interrupt; Node 2: Pre-filtered Vector RAG & Gemini LLM). | Nâng cấp lên thư viện `langgraph.graph.StateGraph` đa node kèm `MemorySaver` Checkpoint bền vững. |
 | **3. Chiến lược Chunking & Vector DB** | Bóc tách PDF qua `PDF.js`, chia theo đoạn văn `\n\n` (`len > 25`), lưu JSON Vector 3.072 chiều (`gemini-embedding-001`) kèm bộ lọc trước (`Pre-filtering`) theo `tenant_id` và `department`. | Áp dụng **Recursive Character Text Splitter** (`chunk_size = 500`, `overlap = 100`), gắn thẻ cấu trúc Điều/Khoản và lưu trên máy chủ Vector `Qdrant`. |
-| **4. Xác thực & Bảo mật Mật khẩu** | Xác thực OIDC qua **Keycloak SSO** (mật khẩu được băm PBKDF2/Argon2 bên trong Keycloak) + Chế độ **Role Switcher** phục vụ demo nhanh. | Băm `bcrypt` cho toàn bộ cột `hashed_password` trong bảng `users` nội bộ và xác thực chữ ký JWT trực tiếp tại Backend middleware. |
+| **4. Xác thực & Bảo mật Mật khẩu** | Xác thực OIDC tập trung 100% qua **Keycloak SSO** (mật khẩu được băm PBKDF2/Argon2 bên trong Keycloak). | Băm `bcrypt` cho toàn bộ cột `hashed_password` trong bảng `users` nội bộ và xác thực chữ ký JWT trực tiếp tại Backend middleware. |
 | **5. Giám sát (Observability) & Context Core** | Đo lường trực tiếp `latency`, `token_estimate`, `intent`, `citation` trả về Live Playground Trace (`#traceLogContent`) và Dashboard thống kê (`#tab-analytics`). | Tích hợp trực tiếp `langfuse` Python SDK và hoàn thiện module tách luồng hội thoại nhóm đan xen (*Thread Disentanglement* & *Temporal State Tracking*). |

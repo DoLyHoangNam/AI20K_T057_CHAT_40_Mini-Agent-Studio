@@ -60,22 +60,20 @@ sequenceDiagram
 ## 3. Thiết kế Bố cục Wireframe Chi tiết Từng Màn hình
 
 ### 3.1. Màn hình 1: Cổng Đăng nhập SSO (`frontend/login.html`)
-* **Mục đích:** Cổng xác thực tập trung tích hợp `keycloak-js` và danh sách tài khoản kiểm thử nhanh theo vai trò.
+* **Mục đích:** Cổng xác thực tập trung cấp độ Enterprise tích hợp `keycloak-js` (Realm `mini-agent-platform`, cổng `8080`).
 
 ```text
 +-----------------------------------------------------------------------------------+
 |                                                                                   |
 |                        +---------------------------------+                        |
-|                        |           [ Logo M ]            |                        |
-|                        |    Mini Agent Studio Platform   |                        |
-|                        |   ( OIDC Single Sign-On Ready ) |                        |
+|                        |           [ Logo 🛡️ ]           |                        |
+|                        |       OpenDesign Platform       |                        |
+|                        |  ( ● Keycloak OIDC / OAuth2 )   |                        |
 |                        |                                 |                        |
-|                        |  [ 🔐 Đăng nhập với Keycloak ]  |                        |
+|                        |  [ 🔐 Đăng nhập bằng Keycloak ] |                        |
 |                        |                                 |                        |
-|                        |  --- Tài khoản Demo nhanh ---   |                        |
-|                        |  • Super Admin: superadmin@...  |                        |
-|                        |  • Tenant Admin: admin@...      |                        |
-|                        |  • Thành viên: member@...       |                        |
+|                        |  Realm: mini-agent-platform     |                        |
+|                        |  Port: 8080                     |                        |
 |                        +---------------------------------+                        |
 |                                                                                   |
 +-----------------------------------------------------------------------------------+

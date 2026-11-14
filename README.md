@@ -35,7 +35,7 @@ Toàn bộ 4 hạng mục tài liệu chuẩn của khóa học được lưu tr
 
 ```
 [ FRONTEND CLIENT — EDUMANAGE SAAS DASHBOARD UI (frontend/) ]
-  ├── login.html             : Cổng xác thực Keycloak OIDC SSO + Bộ chuyển vai Demo nhanh (Role Switcher)
+  ├── login.html             : Cổng xác thực tập trung Keycloak OIDC SSO (Realm: mini-agent-platform)
   ├── super_admin.html       : Cổng Chủ nền tảng (Cấp phát Tenant mới, Đồng bộ Keycloak & Gửi mail SMTP)
   ├── admin_studio.html      : No-Code Agent Studio (13+ Mẫu Agent), Quản lý Đơn vị/CSV, Kho RAG, Duyệt HITL
   ├── employee_portal.html   : Cổng Chat AI theo Đơn vị, Hồ sơ động (Dynamic Schema), Xác nhận HITL & Toast
@@ -76,9 +76,9 @@ python D:\mini-agent-studio\backend\server.py
 ```
 Truy cập ứng dụng tại: 👉 **`http://localhost:8000/login.html`**
 
-### 3. Hai chế độ Đăng nhập & Trải nghiệm Demo
-- **Chế độ 1 — Chuyển vai Demo Nhanh (Role Switcher - Không cần bật Docker):** Ngay tại màn hình `login.html`, bấm trực tiếp vào một trong các nút dưới mục **⚡ CHUYỂN VAI DEMO NHANH (ROLE SWITCHER)** để vào thẳng giao diện của từng vai trò trong 1 giây.
-- **Chế độ 2 — Xác thực Tập trung qua Keycloak OIDC SSO:** Khi khởi chạy Docker container Keycloak tại `http://localhost:8080` (Realm `mini-agent-platform`, Client `mini-agent-studio-app`), bấm nút **Đăng nhập bằng Keycloak SSO** để xác thực OIDC chuẩn doanh nghiệp.
+### 3. Xác thực Tập trung qua Keycloak OIDC SSO
+- Khởi chạy Docker container Keycloak tại `http://localhost:8080` (Realm `mini-agent-platform`, Client `mini-agent-studio-app`).
+- Tại màn hình `http://localhost:8000/login.html`, bấm nút **Đăng nhập bằng Keycloak SSO** để xác thực OIDC chuẩn doanh nghiệp và tự động điều hướng theo vai trò (`SUPER_ADMIN`, `TENANT_ADMIN`, `EMPLOYEE`).
 
 ---
 

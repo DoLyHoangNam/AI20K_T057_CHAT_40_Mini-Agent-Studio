@@ -134,47 +134,13 @@
             Hệ thống áp dụng chính sách bảo mật cấp độ Enterprise. Toàn bộ người dùng và quản trị viên phải xác thực qua máy chủ tập trung <strong>Keycloak SSO</strong>.
         </p>
 
-        <!-- NÚT ĐĂNG NHẬP KEYCLOAK SSO CHÍNH -->
+        <!-- DUY NHẤT 1 NÚT ĐĂNG NHẬP KEYCLOAK -->
         <button type="button" class="btn-keycloak mb-3" onclick="loginWithKeycloak()">
             <i class="fa-solid fa-key" style="color: #60a5fa; font-size: 16px;"></i>
             <span>Đăng nhập bằng Keycloak SSO</span>
         </button>
 
-        <!-- CHẾ ĐỘ DEMO NHANH / ROLE SWITCHER (Hỗ trợ kiểm thử nhanh đa vai trò & khi chưa bật Docker Keycloak) -->
-        <div class="mt-3 pt-3 border-top text-start">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold text-secondary" style="font-size: 11px; letter-spacing: 0.03em;">⚡ CHUYỂN VAI DEMO NHANH (ROLE SWITCHER)</span>
-                <span class="badge bg-light text-dark border" style="font-size: 10px;">Sandbox Ready</span>
-            </div>
-            <div class="d-grid gap-1">
-                <button type="button" class="btn btn-sm btn-outline-dark text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('dolyhoangnam13072005@gmail.com')">
-                    <span><i class="fa-solid fa-crown text-warning me-1"></i><b>Super Admin</b> (Chủ Nền tảng)</span>
-                    <code style="font-size: 10px;">PLATFORM</code>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-primary text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('admin@vinfast.vn')">
-                    <span><i class="fa-solid fa-building me-1"></i><b>Admin VinFast</b> (Doanh nghiệp)</span>
-                    <code style="font-size: 10px;">VINFAST</code>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('marketing@vinfast.vn')">
-                    <span><i class="fa-solid fa-bullhorn text-primary me-1"></i>NV Phòng Marketing (VinFast)</span>
-                    <code style="font-size: 10px;">Marketing</code>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('nam.dlh@vinfast.vn')">
-                    <span><i class="fa-solid fa-industry text-danger me-1"></i>NV Sản xuất (Test chặn ACL)</span>
-                    <code style="font-size: 10px;">Production</code>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-success text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('phonghoangthe112@gmail.com')">
-                    <span><i class="fa-solid fa-graduation-cap me-1"></i><b>Admin VinUni</b> (Giáo dục)</span>
-                    <code style="font-size: 10px;">VNU</code>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary text-start d-flex justify-content-between align-items-center py-1 px-2" style="font-size: 12px;" onclick="quickDemoLogin('sv.ai@vnu.edu.vn')">
-                    <span><i class="fa-solid fa-user-graduate text-success me-1"></i>SV Lớp AI - K68 (VinUni)</span>
-                    <code style="font-size: 10px;">Lớp AI - K68</code>
-                </button>
-            </div>
-        </div>
-
-        <div class="mt-3 pt-2 border-top" style="font-size: 11px; color: var(--muted); font-family: var(--font-mono);">
+        <div class="mt-4 pt-3 border-top" style="font-size: 11px; color: var(--muted); font-family: var(--font-mono);">
             Realm: mini-agent-platform • Port: 8080
         </div>
     </div>
@@ -198,7 +164,7 @@
                 handleKeycloakSuccess(keycloak);
             }
         }).catch(err => {
-            console.log('Keycloak init (offline/fallback ready):', err);
+            console.log('Keycloak init:', err);
         });
 
         function loginWithKeycloak() {
@@ -215,22 +181,6 @@
             } else {
                 window.location.href = 'employee_portal.html';
             }
-        }
-
-        async function quickDemoLogin(email) {
-            try {
-                const res = await fetch(`/api/users/${encodeURIComponent(email)}`);
-                if (res.ok) {
-                    const dbUser = await res.json();
-                    dbUser.auth_provider = 'DEMO_SWITCHER';
-                    localStorage.setItem('currentUser', JSON.stringify(dbUser));
-                    redirectByRole(dbUser.role);
-                    return;
-                }
-            } catch (e) {
-                console.error('Lỗi tải tài khoản demo:', e);
-            }
-            alert('Không tìm thấy tài khoản demo trong CSDL!');
         }
 
         async function handleKeycloakSuccess(kc) {
