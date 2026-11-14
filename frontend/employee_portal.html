@@ -407,7 +407,8 @@
 
         async function fetchUserData() {
             try {
-                const res = await fetch(`/api/users/${currentUser.id}`);
+                const lookupKey = encodeURIComponent(currentUser.email || currentUser.id);
+                const res = await fetch(`/api/users/${lookupKey}`);
                 if (res.ok) {
                     const freshUser = await res.json();
                     currentUser = freshUser;
@@ -621,6 +622,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user_id: currentUser.id,
+                        email: currentUser.email,
                         agent_name: currentActiveBot.name,
                         message: text
                     })

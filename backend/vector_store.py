@@ -76,6 +76,16 @@ def build_vector_store():
         json.dump(chunks_data, f, ensure_ascii=False)
     print(f"✅ Đã hoàn tất nạp {len(chunks_data)} Vectors cô lập theo Tenant!")
 
+def _infer_chunk_department(source_name: str, explicit_dept: str = "") -> str:
+    if explicit_dept and explicit_dept.upper() != "ALL":
+        return explicit_dept.strip()
+    s_lower = (source_name or "").lower()
+    if "marketing" in s_lower:
+        return "Marketing"
+    if "ke_toan" in s_lower or "tai_chinh" in s_lower or "accounting" in s_lower:
+        return "Accounting"
+    return "ALL"
+
 def vector_search(query: str, tenant_id: str = "VINFAST", department_access: str = "ALL", top_k: int = 2) -> List[Dict[str, Any]]:
     if not os.path.exists(INDEX_FILE):
         build_vector_store()
@@ -90,11 +100,26 @@ def vector_search(query: str, tenant_id: str = "VINFAST", department_access: str
     if not q_vec:
         return []
 
+    dept_norm = (department_access or "ALL").strip().lower()
+    dept_aliases = {
+        "kế toán": ["accounting", "kế toán", "phòng kế toán", "tài chính"],
+        "accounting": ["accounting", "kế toán", "phòng kế toán", "tài chính"],
+        "phòng kế toán": ["accounting", "kế toán", "phòng kế toán", "tài chính"],
+        "marketing": ["marketing", "phòng marketing"],
+        "phòng marketing": ["marketing", "phòng marketing"],
+    }
+    allowed_dept_tokens = dept_aliases.get(dept_norm, [dept_norm])
+
     scored_chunks = []
     for c in chunks:
-        # BẢO MẬT CÔ LẬP TENANT TUYỆT ĐỐI: Chỉ tìm tài liệu thuộc đúng Tenant của công ty đó!
+        # LỚP 1 — BẢO MẬT CÔ LẬP TENANT TUYỆT ĐỐI: Chỉ tìm tài liệu thuộc đúng Tenant của tổ chức đó
         chunk_tenant = c.get("tenant_id", "VINFAST")
         if tenant_id != "PLATFORM" and chunk_tenant != tenant_id:
+            continue
+
+        # LỚP 2 — PRE-RETRIEVAL UNIT ACL FILTER: Tài liệu chuyên biệt của đơn vị nào chỉ Agent đơn vị đó được truy xuất
+        chunk_dept = _infer_chunk_department(c.get("source", ""), c.get("department", "ALL")).lower()
+        if chunk_dept != "all" and chunk_dept not in allowed_dept_tokens:
             continue
 
         sim = cosine_similarity(q_vec, c["vector"])
@@ -102,6 +127,7 @@ def vector_search(query: str, tenant_id: str = "VINFAST", department_access: str
             "text": c["text"],
             "source": c["source"],
             "tenant_id": chunk_tenant,
+            "department": chunk_dept,
             "score": sim
         })
 

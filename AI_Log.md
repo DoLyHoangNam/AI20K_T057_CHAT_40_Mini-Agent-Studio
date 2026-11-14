@@ -3,53 +3,54 @@
 * **Tên dự án:** Mini Agent Studio — Nền tảng No-Code khởi tạo AI Agent đa lĩnh vực & phân quyền theo đơn vị
 * **Mã đề tài:** CHAT-40 | **Đội ngũ thực hiện:** AI20K - Team T057
 * **Mục đích tài liệu:**
-  1. Ghi nhận minh bạch **Nhật ký ứng dụng AI (AI-Assisted Development Log)** của nhóm trong quá trình phân tích, thiết kế kiến trúc và lập trình hệ thống.
-  2. Hướng dẫn **Cấu hình Hệ thống Ghi nhận & Giám sát Suy luận AI (Runtime AI Trace Log & Langfuse Observability Setup)** bên trong sản phẩm.
+  1. Ghi nhận minh bạch **Nhật ký ứng dụng AI (AI-Assisted Development Log)** của nhóm trong quá trình phân tích, thiết kế kiến trúc, lập trình và rà soát lỗi bảo mật.
+  2. Hướng dẫn **Cấu hình Hệ thống Biến môi trường (`backend/.env`) & Giám sát Suy luận AI (Runtime AI Trace Log)** bên trong sản phẩm.
 
 ---
 
 ## Phần 1: Nhật ký Sử dụng AI trong Phát triển Dự án (AI Collaboration Log)
 
-Nhóm áp dụng nguyên tắc **Human-in-the-Loop Development**: Sử dụng AI Coding Assistant để tăng tốc tạo khung code, chuẩn hóa tài liệu và thiết kế giao diện, sau đó các thành viên trong nhóm kiểm định, tinh chỉnh thuật toán phân quyền ACL và kiểm thử thực tế.
+Nhóm áp dụng nguyên tắc **Human-in-the-Loop Engineering**: Sử dụng AI Assistant để tăng tốc tạo khung code, chuẩn hóa tài liệu và thiết kế giao diện, sau đó các thành viên trực tiếp kiểm định chéo với CSDL, phát hiện lỗ hổng logic và tinh chỉnh lại thuật toán phân quyền ACL.
 
-| Giai đoạn | Hạng mục công việc | Mục tiêu & Prompt trọng tâm đã sử dụng | Kết quả AI sinh ra | Kiểm định & Chỉnh sửa của Nhóm (Human Review) |
+| Giai đoạn | Hạng mục công việc | Mục tiêu & Prompt trọng tâm đã sử dụng | Kết quả AI sinh ra | Kiểm định & Chỉnh sửa Thực tế của Nhóm (Human Review & Fixes) |
 | :--- | :--- | :--- | :--- | :--- |
-| **1. Product Discovery (Brief & PRD)** | Chuẩn hóa `Brief.md` và `PRD.md` theo khung Product Discovery | *"Phân tích bài toán CHAT-40 theo 6 mục: Background (A. Khó khăn khởi tạo, B. Khó khăn phân quyền, C. Khó khăn hội thoại đan xen), Target Users, Problem Statement, Desired Outcomes và Product Opportunity."* | Bản thảo `Brief.md` và `PRD.md` có cấu trúc rõ ràng kèm bảng KPIs định lượng. | Nhóm mở rộng phạm vi từ bài toán hẹp (chỉ tính ngày nghỉ phép HR) sang **Nền tảng Đa lĩnh vực (Doanh nghiệp theo Phòng ban, Giáo dục theo Khoa/Lớp học, Y tế theo Chuyên khoa)**. |
-| **2. Kiến trúc Bảo mật & SSO** | Tích hợp Keycloak OIDC SSO & Phân quyền 3 tầng | *"Thiết kế luồng đồng bộ tài khoản tự động từ Python Backend sang Keycloak Admin REST API và gửi mật khẩu qua Gmail SMTP khi tạo Tenant hoặc nhập CSV hàng loạt."* | Module `backend/keycloak_sync.py`, luồng SMTP TLS 587 trong `backend/server.py` và `frontend/login.html`. | Kiểm thử thực tế với Docker container `keycloak-server` (cổng `8080`), bổ sung cơ chế fallback an toàn và chuẩn hóa thuộc tính `department` làm khóa phân quyền đơn vị. |
-| **3. Vector RAG & PDF Processing** | Bóc tách PDF nhiều trang & Nhúng Vector 3.072 chiều | *"Tích hợp Mozilla PDF.js trên trình duyệt để bóc tách văn bản PDF từng trang, sau đó phân mảnh theo đoạn văn ngữ nghĩa và gọi API `gemini-embedding-001` lưu vector cô lập theo `tenant_id`."* | Module `backend/vector_store.py` (Cosine Similarity + Pre-filtering) và vùng kéo-thả PDF trong `admin_studio.html`. | Tinh chỉnh ngưỡng lọc đoạn văn (`len > 25` ký tự) và ngưỡng tin cậy Cosine Similarity (`score > 0.35`) để loại bỏ nhiễu cho tiếng Việt. |
-| **4. Điều phối LangGraph & HITL** | Xây dựng State Engine & Trạm phê duyệt con người | *"Thiết kế `LangGraphAgent` tách biệt các bước: Kiểm tra quyền Unit ACL -> Phân loại ý định (`RAG_SEARCH` vs `CREATE_REQUEST`) -> Dừng chờ xác nhận HITL hoặc Truy xuất RAG kèm Citation."* | Module `backend/agent_engine.py` và endpoint `/api/chat` trong `backend/server.py`. | Bổ sung chốt chặn cứng **Unit ACL Guardrail** ngay tại `server.py` để chặn truy cập chéo đơn vị (`ACL_DENIED`) trước khi gọi LLM, giúp tiết kiệm Token và chống Data Leakage 100%. |
-| **5. Giao diện SaaS Dashboard** | Thiết kế lại toàn bộ UI theo chuẩn EduManage / OpenDesign | *"Thiết kế lại `admin_studio.html`, `employee_portal.html`, `super_admin.html` theo bố cục SaaS Dashboard: Topbar, Collapsible Sidebar, Sub-tab ngang nền tối, bảng danh sách có bộ lọc đơn vị và Avatar chữ cái đầu."* | Bộ giao diện 5 màn hình đồng bộ trong `frontend/`. | Kiểm tra đồng bộ toàn bộ ID DOM, sửa lỗi cú pháp sự kiện và bổ sung 13+ Mẫu Agent 1-Click cho 3 ngành nghề (Doanh nghiệp, Giáo dục, Y tế). |
+| **1. Product Discovery (`Brief.md` & `PRD.md`)** | Chuẩn hóa hồ sơ đề tài theo khung Product Discovery | *"Phân tích bài toán CHAT-40 theo 6 mục: Background (Khó khăn khởi tạo, Phân quyền dữ liệu, Hội thoại đan xen), Target Users, Problem Statement, Desired Outcomes và Architecture."* | Bản thảo `Brief.md` và `PRD.md` có cấu trúc rõ ràng kèm bảng KPIs định lượng. | Nhóm mở rộng phạm vi sang **Nền tảng Đa lĩnh vực (`backend/schema_engine.py`)** gồm Doanh nghiệp (Phòng ban), Giáo dục (Khoa/Lớp học), Y tế (Chuyên khoa) và bổ sung **Mục 7 trong `PRD.md`** phân định rõ tính năng *MVP Demo 1* và *Phase 2 Roadmap*. |
+| **2. Định danh SSO & Đồng bộ Tài khoản** | Tích hợp Keycloak OIDC SSO & Gmail SMTP | *"Thiết kế luồng đồng bộ tài khoản tự động từ `backend/server.py` sang Keycloak Admin REST API (`localhost:8080`) và gửi mật khẩu qua Gmail SMTP (`backend/mailer.py`) khi tạo Tenant hoặc nhập CSV."* | Hàm `sync_user_to_keycloak()` trong `backend/server.py`, module `backend/mailer.py` và trang `frontend/login.html`. | **Phát hiện & sửa lỗi lệch ID:** Token Keycloak trả về `sub` dạng UUID trong khi SQLite dùng `id` số nguyên. Nhóm đã nâng cấp `/api/users/<id_or_email>` và `login.html` để tự động ánh xạ qua `email`, đồng thời thêm bộ **Role Switcher** tại `login.html` để demo mượt ngay cả khi không bật Docker. |
+| **3. Vector RAG & Pre-retrieval ACL** | Bóc tách PDF nhiều trang & Nhúng Vector 3.072 chiều | *"Tích hợp Mozilla PDF.js trên trình duyệt để bóc tách văn bản PDF từng trang, sau đó chia đoạn văn `\n\n` và gọi API `models/gemini-embedding-001` lưu vào `backend/vector_index.json`."* | Module `backend/vector_store.py` (Cosine Similarity) và vùng kéo-thả PDF trong `frontend/admin_studio.html`. | **Phát hiện & vá lỗ hổng Data Leakage:** Bản đầu tiên chỉ lọc Vector theo `tenant_id`. Nhóm đã bổ sung **Lớp lọc thứ 2 (`_infer_chunk_department`)** ngay trong `vector_search()` để chặn nhân viên phòng khác dùng Agent chung (`ALL`) truy xuất lén tài liệu của phòng Marketing/Kế toán. |
+| **4. Điều phối `LangGraphAgent` & HITL** | Xây dựng State Engine 2 Node & Trạm phê duyệt con người | *"Thiết kế `LangGraphAgent` trong `backend/agent_engine.py`: Node 1 phân loại ý định (`CREATE_REQUEST` vs `RAG_SEARCH`) và kích hoạt HITL Interrupt; Node 2 truy xuất Vector RAG và gọi `gemini-flash-latest` kèm Citation."* | Module `backend/agent_engine.py` và endpoint `/api/chat` trong `backend/server.py`. | **Loại bỏ Fallback nguy hiểm:** Sửa `/api/chat` không tự động gán user mặc định sang `VINFAST` khi không tìm thấy user, đồng thời nạp `backend/.env` trước khi import `agent_engine.py` để đảm bảo `GEMINI_API_KEY` luôn sẵn sàng. |
+| **5. Giao diện SaaS Dashboard** | Thiết kế UI theo chuẩn EduManage / Clean SaaS | *"Thiết kế `admin_studio.html`, `employee_portal.html`, `super_admin.html` theo bố cục SaaS Dashboard: Topbar, Collapsible Sidebar, Sub-tab ngang nền tối, bảng danh sách có bộ lọc đơn vị và 13 Mẫu Agent 1-Click."* | Bộ giao diện 5 màn hình đồng bộ trong `frontend/` (`login`, `super_admin`, `admin_studio`, `employee_portal`, `database_viewer`). | Làm sạch dữ liệu mồi (`backend/database.db`) cho 4 tổ chức (`PLATFORM`, `VINFAST`, `VNU`, `BVQT`) và kiểm tra toàn bộ luồng duyệt đơn HITL + thông báo Toast thời gian thực. |
 
 ---
 
-## Phần 2: Cấu hình AI Runtime Logging & Giám sát Suy luận (AI Log Setup)
+## Phần 2: Cấu hình Biến môi trường & Giám sát Suy luận (AI Log Setup)
 
-Hệ thống **Mini Agent Studio** tích hợp sẵn cơ chế theo dõi và ghi nhận nhật ký suy luận AI (AI Trace Logging) ở cả **Backend Runtime** và **Giao diện Quản trị**:
+Hệ thống **Mini Agent Studio** tích hợp cơ chế nạp cấu hình bảo mật từ `backend/.env` và ghi nhận nhật ký suy luận AI (Runtime Trace Logging) trực tiếp trên từng lượt hội thoại:
 
-### 2.1. Cấu hình Biến môi trường (`.env` Setup)
-Tạo file `.env` tại thư mục gốc `D:\mini-agent-studio\.env` (hoặc thiết lập biến môi trường hệ thống):
+### 2.1. Cấu hình Biến môi trường (`backend/.env`)
+Tạo file `backend/.env` (đã được đưa vào `.gitignore` để bảo mật tuyệt đối khóa API, xem mẫu tại `backend/.env.example`):
 
 ```env
 # 1. Khóa API Google Gemini (Dùng cho LLM gemini-flash-latest & Embedding gemini-embedding-001)
-GEMINI_API_KEY="AIzaSyYourGeminiApiKeyHere"
+GEMINI_API_KEY=AIzaSyYourGeminiApiKeyHere
 
-# 2. Cấu hình SMTP Gmail tự động bàn giao tài khoản SSO (Tùy chọn)
-SMTP_EMAIL="your_email@gmail.com"
-SMTP_PASSWORD="your_app_password"
+# 2. Cấu hình Gmail SMTP tự động gửi mật khẩu khi tạo Tenant / Thành viên mới
+SMTP_USER=your_gmail@gmail.com
+SMTP_PASS=your_google_app_password
 
-# 3. Cấu hình Keycloak IAM Server (Mặc định chạy trên Docker cổng 8080)
-KEYCLOAK_URL="http://localhost:8080"
-KEYCLOAK_REALM="mini-agent-platform"
+# 3. Mật khẩu Quản trị Keycloak IAM Server (Mặc định chạy trên cổng 8080)
+KC_ADMIN_PASS=admin123
 ```
 
+> **Lưu ý kỹ thuật:** Hàm `_load_backend_env()` tại đầu file `backend/server.py` tự động nạp `backend/.env` vào `os.environ` trước khi khởi tạo `agent_engine.py` và `vector_store.py`.
+
 ### 2.2. Cấu trúc Dữ liệu AI Trace Log trên từng Lượt Hội thoại (`backend/agent_engine.py`)
-Mỗi khi người dùng gửi tin nhắn tới `/api/chat`, `LangGraphAgent.run()` tự động đo lường và trả về gói **Telemetry & Trace Log** theo cấu trúc chuẩn:
+Mỗi khi người dùng gửi tin nhắn tới `POST /api/chat`, phương thức `LangGraphAgent.run()` tự động đo thời gian xử lý thực tế (`latency`), ước lượng số lượng token (`token_estimate`) và trả về gói **Telemetry & Trace Log**:
 
 ```json
 {
-  "intent": "RAG_SEARCH | CREATE_REQUEST | ACL_DENIED",
+  "intent": "RAG_SEARCH | CREATE_REQUEST | ACL_DENIED | AUTH_REQUIRED",
   "reply": "Nội dung phản hồi định dạng HTML...",
-  "citation": "Vector Database (Gemini-Embed-001): `Noi_quy_Phong_Marketing_VinFast.txt` [Tập đoàn VinFast] (Cosine: 0.82)",
+  "citation": "Vector Database (Gemini-Embed-001): `Noi_quy_Phong_Marketing_VinFast.txt` [Tập đoàn VinFast] (Cosine: 0.87)",
   "require_confirm": false,
   "latency": 0.42,
   "token_estimate": 245
@@ -58,14 +59,10 @@ Mỗi khi người dùng gửi tin nhắn tới `/api/chat`, `LangGraphAgent.run
 
 ### 2.3. Quan sát AI Trace Trực tiếp trên Giao diện (`frontend/admin_studio.html`)
 1. **Cửa sổ Live Playground Trace (`#tab-builder`):**
-   * Khi Admin gõ thử nghiệm câu hỏi vào cột **Agent Live Playground** bên phải, hộp `#traceLogContent` sẽ hiển thị trực tiếp từng bước thực thi của đồ thị trạng thái:
+   * Khi Admin gõ thử nghiệm câu hỏi vào cột **Agent Live Playground** bên phải, hộp `#traceLogContent` hiển thị trực tiếp từng bước thực thi từ phản hồi thực của `/api/chat`:
      * `[1/4] Nhận yêu cầu...`
      * `[2/4] Intent Classifier đang phân loại...`
-     * `[State Graph] Intent: RAG_SEARCH | Latency: 0.38s`
+     * `[State Graph] Intent: RAG_SEARCH | Latency: 0.42s`
      * `Source: Vector Database (Gemini-Embed-001)...`
-2. **Bảng Điều khiển Giám sát Langfuse (`#tab-analytics`):**
-   * Hiển thị 4 chỉ số vận hành quan trọng của hệ thống AI:
-     * **Độ trễ trung bình (P95 Latency):** `0.38s`
-     * **Tổng lượt Trace suy luận:** Theo dõi lưu lượng truy vấn của tổ chức.
-     * **Chi phí Token trung bình:** Ước lượng dựa trên `token_estimate` mỗi lượt gọi.
-     * **Độ chính xác trích dẫn RAG (Citation Faithfulness):** `98.4%`.
+2. **Bảng Điều khiển Giám sát (`#tab-analytics`):**
+   * Giao diện mô phỏng bảng chỉ số vận hành AI (Độ trễ P95, Lưu lượng truy vấn, Ước lượng Token và Độ trung thực trích dẫn RAG), sẵn sàng để kết nối trực tiếp với `langfuse` SDK trong giai đoạn Phase 2.

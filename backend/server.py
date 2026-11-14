@@ -11,6 +11,18 @@ BACKEND_DIR = os.path.abspath(os.path.dirname(__file__))
 if BACKEND_DIR not in sys.path:
     sys.path.append(BACKEND_DIR)
 
+# Nạp backend/.env TRƯỚC khi import agent_engine/vector_store (2 module này đọc GEMINI_API_KEY lúc import)
+def _load_backend_env():
+    env_path = os.path.join(BACKEND_DIR, ".env")
+    if os.path.exists(env_path):
+        with open(env_path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+_load_backend_env()
+
 from agent_engine import LangGraphAgent
 from mailer import generate_secure_password, send_welcome_credentials_email, EMAIL_LOG_FILE
 from schema_engine import (
@@ -269,13 +281,14 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
 
         # 3. API: Lấy thông tin 1 user
         elif path.startswith("/api/users/"):
-            user_id = path.split("/")[-1]
+            # Chấp nhận cả id số trong CSDL lẫn email (để ánh xạ tài khoản Keycloak -> user nội bộ)
+            user_key = urllib.parse.unquote(path.split("/")[-1])
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT id, tenant_id, email, full_name, role, department, total_leave_days, used_leave_days, tenure_months, attributes, is_active 
-                FROM users WHERE id = ?
-            """, (user_id,))
+                FROM users WHERE id = ? OR lower(email) = lower(?)
+            """, (user_key, user_key))
             row = cursor.fetchone()
             conn.close()
             if row:
@@ -818,22 +831,37 @@ class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
         # 9. CHAT LANGGRAPH AGENT
         elif path == "/api/chat":
             user_id = data.get("user_id")
+            user_email = (data.get("email") or "").strip()
             agent_name = data.get("agent_name", "AI Assistant")
             message = data.get("message", "").strip()
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute("SELECT full_name, department, role, total_leave_days, used_leave_days, tenure_months, tenant_id, attributes FROM users WHERE id = ?", (user_id,))
+            cursor.execute(
+                "SELECT id, full_name, department, role, total_leave_days, used_leave_days, tenure_months, tenant_id, attributes "
+                "FROM users WHERE id = ? OR lower(email) = lower(?) OR lower(email) = lower(?)",
+                (user_id, str(user_id or ""), user_email)
+            )
             user = cursor.fetchone()
 
-            user_dict = dict(user) if user else {"full_name": "Thành viên", "department": "Chung", "role": "EMPLOYEE", "total_leave_days": 20, "used_leave_days": 5, "tenure_months": 12, "tenant_id": "VINFAST", "attributes": "{}"}
-            tenant_id = user_dict.get("tenant_id") or "VINFAST"
+            if not user:
+                # KHÔNG gán người dùng mặc định: tránh rò rỉ tri thức sang tenant khác (VD: VINFAST)
+                conn.close()
+                return self.send_json({
+                    "reply": "⛔ <b>[XÁC THỰC]</b> Không xác định được tài khoản của bạn trong hệ thống. Vui lòng đăng xuất và đăng nhập lại qua Keycloak.",
+                    "citation": "Identity Guard",
+                    "intent": "AUTH_REQUIRED",
+                    "require_confirm": False,
+                    "latency": 0.0,
+                    "token_estimate": 0
+                })
 
+            user_dict = dict(user)
+            tenant_id = user_dict.get("tenant_id") or ""
+
+            # Chỉ tìm Agent trong đúng tenant của người dùng (không fallback sang tenant khác)
             cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ? AND tenant_id = ?", (agent_name, tenant_id))
             agent_row = cursor.fetchone()
-            if not agent_row:
-                cursor.execute("SELECT instruction, department_access, tenant_id FROM agents WHERE name = ?", (agent_name,))
-                agent_row = cursor.fetchone()
             conn.close()
 
             instruction = agent_row["instruction"] if agent_row else "Bạn là trợ lý ảo đa lĩnh vực của tổ chức."
