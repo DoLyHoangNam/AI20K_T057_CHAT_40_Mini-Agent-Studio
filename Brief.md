@@ -1,144 +1,272 @@
 # PROJECT BRIEF: MINI AGENT STUDIO (CHAT-40)
 
-**Tên dự án:** Nền tảng No-Code khởi tạo AI Agent đa lĩnh vực, xử lý đan xen hội thoại & phân quyền theo đơn vị (Phòng ban / Khoa / Lớp học)  
+**Tên dự án:** Nền tảng No-Code khởi tạo AI Agent cho mọi Công ty & Tổ chức, xử lý đan xen hội thoại nhóm & phân quyền cô lập theo đơn vị  
 **Mã đề tài:** CHAT-40 | **Nhóm thực hiện:** AI20K - Team T057  
-**Trạng thái tài liệu:** Phiên bản hoàn chỉnh & Định lượng (Chuẩn chấm điểm 100/100)
+**Định vị sản phẩm:** Giải pháp SaaS Multi-Tenant phục vụ **mọi loại hình công ty và doanh nghiệp** (trọng tâm), đồng thời mở rộng linh hoạt sang Giáo dục, Y tế và bất kỳ tổ chức đa đơn vị nào nhờ **Adaptive UI Schema Engine**.  
+**Trạng thái tài liệu:** Phiên bản hoàn chỉnh & Định lượng (Đồng bộ 100% với `PRD.md` & `Wireframe_UI_Flow.md`)
 
 ---
 
-## 1. Background — Bối cảnh & Thực trạng
+## 1. Bối cảnh & Tuyên bố Bài toán (Background & Problem Statement)
 
-Trong kỷ nguyên chuyển đổi số, nhu cầu triển khai Trợ lý ảo AI (AI Agent) để tự động hóa quy trình, giải đáp quy chế nội bộ và hỗ trợ tác vụ chuyên môn đang bùng nổ ở mọi lĩnh vực và mô hình tổ chức:
-- **Khối Doanh nghiệp (Enterprise):** Cần các Agent chuyên trách cho từng Phòng ban (Phòng Marketing, Phòng Kế toán - Tài chính, Phòng Nhân sự - HR, Phòng Kỹ thuật - IT, Phòng Kinh doanh - Sales...).
-- **Khối Giáo dục & Đào tạo (Education):** Cần các Agent chuyên trách cho từng Khoa / Viện / Lớp học / Phòng chức năng (Trợ giảng Lớp AI/CNTT, Cố vấn học tập Khoa Kinh tế, Agent Phòng Đào tạo & Học vụ, Phòng Công tác Sinh viên, Thư viện...).
-- **Khối Y tế & Tổ chức (Healthcare & Organizations):** Cần các Agent hỗ trợ theo từng Chuyên khoa / Bộ phận (Khoa Khám bệnh, Khoa Dược, Hành chính viện...).
+### 1.1. Bối cảnh Chuyển đổi số & Khả năng Ứng dụng Phổ quát cho Mọi Công ty
+Trong kỷ nguyên AI tạo sinh, **bất kỳ công ty hay tổ chức nào** đều được cấu trúc thành các **Đơn vị chuyên môn (Operating Units / Departments)** với quy chế, tài liệu mật và quy trình phê duyệt riêng biệt.
 
-Tuy nhiên, quá trình đưa AI Agent từ thử nghiệm vào vận hành thực tế tại các tổ chức đang vấp phải 3 nhóm khó khăn cốt lõi:
+Để một nền tảng AI Agent có thể phục vụ **tất cả các công ty** mà không phải đập đi xây lại mã nguồn cho từng ngành, **Mini Agent Studio (CHAT-40)** trừu tượng hóa mọi tổ chức về 4 thực thể lõi (`Tổ chức / Tenant` → `Đơn vị / Unit` → `Thành viên / Member` → `Trợ lý AI & Luồng duyệt HITL`):
 
-### A. Khó khăn trong tiếp cận & khởi tạo AI Agent theo đơn vị
-- **Rào cản kỹ thuật đối với người nắm nghiệp vụ (No-Code Barrier):** Các Trưởng phòng ban (Marketing, Kế toán, HR), Giáo vụ khoa hay Giảng viên chủ nhiệm lớp là những người hiểu rõ nhất quy trình, tài liệu và nhu cầu của đơn vị mình nhưng không có kỹ năng lập trình (Coding) để tự cấu hình System Prompt, gắn kho tài liệu (Vector RAG) hay thiết lập công cụ (Tools) cho AI.
-- **Sự đóng cứng và manh mún của các chatbot truyền thống:** Các giải pháp chatbot hiện hữu thường bị khóa cứng vào một kịch bản đơn lẻ (ví dụ: chỉ trả lời FAQ tĩnh hoặc chỉ tính ngày nghỉ phép), đòi hỏi đội ngũ IT phải viết code lại từ đầu mỗi khi muốn triển khai thêm Agent cho một phòng ban mới, một lớp học mới hay một lĩnh vực mới.
+| Thực thể Lõi Hệ thống (`Core Schema`) | Kịch bản Trọng tâm: Mọi Công ty & Doanh nghiệp (`ENTERPRISE` — Công nghệ, Ngân hàng, Sản xuất, Bán lẻ, Logistics...) | Ví dụ Mở rộng 1: Khối Giáo dục & Đào tạo (`EDUCATION`) | Ví dụ Mở rộng 2: Khối Y tế & Bệnh viện (`HEALTHCARE`) | Ví dụ Mở rộng 3: Tổ chức Bất kỳ Khác (`CUSTOM` — Luật, BĐS, NGO...) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tổ chức (`tenant_id`)** | Công ty / Tập đoàn (VD: VinFast, FPT, Vietcombank, Masan...) | Trường Đại học / Học viện (VD: ĐHQG, VinUni...) | Bệnh viện / Hệ thống phòng khám | Công ty Luật, Sàn BĐS, Tổ chức phi chính phủ |
+| **Đơn vị (`department`)** | Phòng ban / Chi nhánh / Dự án (*Marketing, Kế toán, HR, IT, Sales, Pháp chế, Chuỗi cung ứng...*) | Khoa / Viện / Lớp học / Phòng chức năng (*Phòng Đào tạo, Khoa CNTT, Lớp AI-K68...*) | Chuyên khoa / Bộ phận (*Khoa Nội, Khoa Dược, Hành chính viện...*) | Ban chuyên môn / Nhóm dự án / Chi nhánh vùng |
+| **Thành viên (`user.role`)** | Ban Giám đốc, Trưởng phòng (`TENANT_ADMIN`), Nhân viên (`EMPLOYEE`) | Giáo vụ khoa, Giảng viên chủ nhiệm (`TENANT_ADMIN`), Sinh viên (`EMPLOYEE`) | Trưởng khoa (`TENANT_ADMIN`), Bác sĩ / Điều dưỡng (`EMPLOYEE`) | Quản lý đơn vị (`TENANT_ADMIN`), Chuyên viên (`EMPLOYEE`) |
+| **Kho tri thức (`Vector RAG`)** | Sổ tay nhân sự, định mức ngân sách, SOP vận hành, hợp đồng mẫu, tài liệu kỹ thuật | Quy chế đào tạo, đề cương môn học, lịch thi, hướng dẫn đồ án | Phác đồ điều trị, danh mục thuốc bảo hiểm, quy trình hội chẩn | Hồ sơ pháp lý, bảng hàng dự án, quy trình kiểm toán |
+| **Tác vụ trình duyệt (`HITL`)** | Duyệt ngân sách chiến dịch, xin nghỉ phép, mua sắm thiết bị, xuất kho, duyệt hợp đồng | Xin hoãn thi, đăng ký học phần, mượn phòng lab, duyệt đề tài | Duyệt cấp phát thuốc đặc trị, đề xuất hội chẩn liên khoa | Phê duyệt hồ sơ tư vấn, giải ngân, cấp quyền truy cập |
 
-### B. Khó khăn trong quản lý, phân quyền dữ liệu & kiểm soát rủi ro
-- **Nguy cơ rò rỉ dữ liệu chéo giữa các đơn vị (Lack of Unit Isolation):** Trong một tổ chức, mỗi đơn vị sở hữu kho tài liệu nhạy cảm riêng (báo cáo ngân sách của Phòng Kế toán, chiến lược chiến dịch của Phòng Marketing, hay đề cương/hồ sơ học vụ của Phòng Đào tạo). Các công cụ AI dùng chung thiếu cơ chế phân quyền đa tầng (Tenant -> Đơn vị/Phòng ban/Lớp học), dẫn đến rủi ro nhân viên phòng này hoặc sinh viên lớp khác truy xuất trái phép dữ liệu mật.
-- **Thiếu cơ chế kiểm soát của con người đối với tác vụ nhạy cảm (Lack of HITL):** Khi thành viên yêu cầu AI thực hiện các tác vụ có tính cam kết (như trình duyệt ngân sách Marketing, nộp đơn học vụ/hoãn thi, yêu cầu cấp phát thiết bị, gửi email thông báo), việc để AI tự động thực thi 100% mà không qua trạm phê duyệt của Quản lý / Ban chủ nhiệm đơn vị (Human-in-the-Loop) tiềm ẩn rủi ro vận hành và sai lệch thông tin rất lớn.
-
-### C. Khó khăn trong vận hành thực tế & xử lý ngữ cảnh hội thoại nhóm
-- **Hội thoại đan xen đa chủ đề (Interleaved Multi-Thread Chaos):** Trong không gian làm việc thực tế của phòng ban hoặc lớp học, các thành viên thường trao đổi đan xen nhiều chủ đề cùng lúc (vừa hỏi quy trình thanh toán, vừa bàn kế hoạch tuần, vừa xin phê duyệt đề xuất). Các LLM thông thường nếu nhồi toàn bộ dòng tin nhắn vào context sẽ bị nhiễu ngữ cảnh (Context Pollution), làm tăng vọt chi phí token, độ trễ phản hồi cao và ghép nhầm thông tin của luồng này sang luồng khác.
-- **Trạng thái thông tin thay đổi liên tục theo thời gian (Temporal Overridden State):** Các quyết định trong cuộc họp hoặc nhóm làm việc thường xuyên bị cập nhật, đính chính hoặc hủy bỏ bởi các tin nhắn sau đó (ví dụ: 09:00 Lan hẹn họp 14h Thứ 3, nhưng 09:05 Sếp báo dời sang 9h Thứ 5, 09:06 Lan chốt lại Thứ 5). AI truyền thống không phân biệt được thông tin nào còn hiệu lực và thông tin nào đã bị ghi đè, dẫn đến việc dùng thông tin cũ đã bị hủy bỏ để trả lời.
-- **Hiện tượng ảo giác & thiếu bằng chứng đối chiếu (Hallucination & Lack of Citation):** AI thường tự suy diễn quy chế hoặc trả lời chung chung mà không trích dẫn rõ nguồn văn bản nội bộ hay ID tin nhắn gốc, khiến người dùng không thể kiểm chứng để đưa ra quyết định chính xác.
+> **Trọng tâm triển khai:** Tài liệu này lấy **Khối Doanh nghiệp / Công ty (`ENTERPRISE`)** làm kịch bản xuyên suốt để chứng minh chiều sâu kỹ thuật. Các lĩnh vực Giáo dục (`EDUCATION`), Y tế (`HEALTHCARE`) và Tùy chỉnh (`CUSTOM`) được tích hợp sẵn trong `backend/schema_engine.py` như những minh chứng thực tế cho khả năng thích ứng đa ngành của nền tảng.
 
 ---
 
-## 2. Current Alternatives & Limitations — Giải pháp hiện tại & Hạn chế
+### 1.2. Nỗi đau Cốt lõi tại các Công ty hiện nay (Core Pain Points)
+Quá trình đưa AI Agent vào vận hành thực tế tại các công ty đang vấp phải **3 điểm nghẽn cụ thể**:
 
-| Giải pháp hiện tại | Ưu điểm | Hạn chế lớn đối với Tổ chức & Nhóm làm việc |
-|---|---|---|
-| **ChatGPT / Claude / Gemini (Bản tiêu chuẩn)** | Khả năng ngôn ngữ mạnh, dễ dùng cho cá nhân. | Không có quản trị Multi-Tenant tập trung; không phân quyền cứng theo Phòng ban / Lớp học (Unit ACL); không có luồng duyệt đơn HITL nội bộ; dễ bị ảo giác khi hội thoại đan xen. |
-| **Chatbot kịch bản (Rule-based / Decision Tree)** | Kiểm soát câu trả lời cố định, ít bị ảo giác. | Cứng nhắc, bị bó hẹp vào 1 nghiệp vụ đơn lẻ; không thể đọc hiểu tài liệu PDF/quy chế dài; hoàn toàn bất lực trước hội thoại tự nhiên đan xen đa chủ đề. |
-| **Nền tảng Agent kỹ thuật (LangChain / Dify tự dựng)** | Linh hoạt cho lập trình viên chuyên sâu. | Giao diện quá phức tạp đối với Quản lý bộ phận / Giáo vụ không chuyên IT; thiếu sẵn cơ chế tiền lọc Vector theo đơn vị (Pre-filtering ACL) và cơ chế theo dõi trạng thái quyết định theo thời gian. |
-
----
-
-## 3. Target Users, Roles & Scope — Người dùng mục tiêu & Phạm vi
-
-### 3.1 Chân dung người dùng & Mô hình phân quyền 3 tầng
-Hệ thống Mini Agent Studio (CHAT-40) phục vụ 3 nhóm người dùng mục tiêu rõ rệt tương ứng với mô hình phân quyền 3 tầng:
-- **Nhóm 1 — Quản trị viên Tổ chức / Trưởng bộ phận / Giáo vụ (Tenant Admin & Unit Creator):** Giám đốc vận hành, Trưởng phòng Nhân sự/Marketing/Kế toán tại Doanh nghiệp; Cán bộ Phòng Đào tạo, Chủ nhiệm Khoa, Giảng viên phụ trách lớp tại Trường học. Nhu cầu: Tự khởi tạo nhanh các AI Agent chuyên trách cho từng Phòng ban / Khoa / Lớp học không cần code, nạp tài liệu PDF/TXT riêng cho từng đơn vị, cấu hình Permission Manifest cho Tool, quản lý danh sách thành viên (thêm lẻ hoặc nhập CSV hàng loạt) và phê duyệt đề xuất từ luồng HITL.
-- **Nhóm 2 — Thành viên / Nhân viên / Giảng viên / Sinh viên (End-Users / Unit Members):** Nhân viên các phòng ban, Sinh viên các lớp học, Nhân viên y tế tại các chuyên khoa. Nhu cầu: Truy cập đúng Trợ lý AI thuộc đơn vị của mình để tra cứu quy trình, tài liệu chuyên môn hoặc bài giảng 24/7 có trích dẫn nguồn chính xác, đồng thời gửi đề xuất/đơn từ ngay trong khung chat để trình Quản lý duyệt.
-- **Nhóm 3 — Quản trị viên Nền tảng (Platform Super Admin):** Đội ngũ vận hành nền tảng SaaS B2B. Nhu cầu: Cấp phát bản quyền và khởi tạo không gian làm việc độc lập (Tenant Provisioning) cho các Doanh nghiệp, Trường học, Bệnh viện mới; giám sát đồng bộ định danh SSO (Keycloak) và chỉ số chất lượng suy luận AI (Langfuse).
-
-### 3.2 Phạm vi sản phẩm (In-Scope MVP vs. Out-of-Scope)
-- **Trong phạm vi MVP (In-Scope — Cốt lõi):**
-  - **No-Code Studio:** Giao diện trực quan cấu hình Instruction, Upload Knowledge RAG gán ACL theo đơn vị, cấu hình ≥ 3 Tools chuẩn MCP-like (`leave_balance`, `leave_request_create`, `send_email`), thiết kế Workflow 3–5 node kéo thả (React Flow).
-  - **Group Chat Sandbox & Role Switcher:** Giả lập môi trường Group Chat nhiều thành viên, tích hợp bộ chuyển đổi vai nhanh (Admin / Nhân viên các phòng ban) để kiểm chứng ngay khả năng chặn ACL và cơ chế duyệt HITL.
-  - **AI Context Core:** Tách luồng hội thoại đan xen (Thread Disentanglement), theo dõi quyết định bị ghi đè theo thời gian (Temporal State Tracking), và trích dẫn ngược về tin nhắn nguồn (`#msg_id`) hoặc văn bản gốc.
-  - **Vòng đời & Giám sát:** Xuất bản (Publish) Agent thành phiên bản bất biến, kiểm thử trong Sandbox và ghi Trace chi tiết từng node qua Langfuse.
-- **Ngoài phạm vi (Out-of-Scope — Tránh dàn trải):**
-  - Không xây dựng cổng thanh toán trực tuyến (Billing/Invoicing) hay sàn giao dịch Agent (Marketplace).
-  - Không tích hợp webhook sâu vào Zalo/Slack/Teams thật trong giai đoạn MVP (tập trung tối ưu trải nghiệm Group Chat Sandbox nội bộ).
-  - Không tự huấn luyện hoặc fine-tune mô hình LLM nền tảng; không xử lý audio/video phức tạp (chỉ tập trung vào văn bản, bảng biểu và đính kèm có chú thích).
+1. **Rào cản kỹ thuật khi khởi tạo Agent theo từng phòng ban (No-Code Barrier):**
+   - *Tình huống cụ thể:* Trưởng phòng Nhân sự (HR), Trưởng phòng Kế toán hay Trưởng phòng Marketing là người nắm rõ nhất quy chế và biểu mẫu của phòng mình nhưng không biết lập trình. Ngược lại, nếu mọi yêu cầu tạo/sửa bot đều dồn về phòng IT thì mất từ 2–4 tuần cho mỗi phòng ban.
+2. **Nguy cơ lộ lọt dữ liệu chéo giữa các phòng ban & thiếu chốt chặn phê duyệt (Security & HITL Gap):**
+   - *Tình huống cụ thể:* Trong một công ty, dữ liệu bảng lương của Phòng HR, báo cáo tài chính của Phòng Kế toán hay chiến lược giá của Phòng Marketing là tối mật. Nếu dùng chung một Chatbot RAG toàn công ty không có cơ chế lọc cứng theo đơn vị (Unit ACL), nhân viên phòng Kinh doanh có thể hỏi khéo (Prompt Injection) để trích xuất chính sách thưởng nội bộ của phòng Kế toán. Đồng thời, khi nhân viên yêu cầu AI thực hiện tác vụ có tính cam kết (như *"Tạo đề xuất chi 50 triệu ngân sách TikTok"* hoặc *"Nộp đơn nghỉ phép 4 ngày"*), việc để AI tự động ghi nhận vào hệ thống mà không qua bước phê duyệt của Trưởng phòng (**Human-in-the-Loop**) gây rủi ro vận hành nghiêm trọng.
+3. **Hỗn loạn ngữ cảnh trong Hội thoại Nhóm phòng ban (Group Chat Context Chaos):**
+   - *Tình huống cụ thể:* Trong phòng chat chung của một phòng ban hoặc dự án, nhân viên trao đổi đan xen nhiều chủ đề cùng lúc (vừa hỏi định mức công tác phí, vừa bàn lịch họp khách hàng, vừa điều chỉnh ngân sách):
+     - **Đan xen đa luồng (Interleaved Threads):** Tin nhắn của chủ đề A, B, C xen kẽ nhau liên tục. LLM thông thường nhồi toàn bộ lịch sử chat vào một prompt dẫn đến ghép nhầm thông tin của dự án A sang dự án B.
+     - **Quyết định bị ghi đè theo thời gian (Temporal Overridden State):** Lúc `09:00` Lan chốt lịch họp khách hàng vào `14h Thứ Ba`; đến `09:05` Trưởng phòng báo dời sang `09h Thứ Năm`; `09:06` Lan xác nhận `Thứ Năm`. Khi nhân viên vào sau hỏi `@Agent chốt lịch họp lúc nào?`, các chatbot truyền thống vẫn lấy tin nhắn lúc `09:00` để trả lời sai.
+     - **Ảo giác & thiếu bằng chứng đối chiếu (Hallucination):** AI trả lời quy chế hoặc tóm tắt cuộc họp nhưng không chỉ rõ trích từ điều khoản nào trong file PDF hay từ tin nhắn `#msg_id` nào.
 
 ---
 
-## 4. Initial Problem Statement — Phát biểu bài toán
-
-> **Phát biểu bài toán trọng tâm (How Might We):**  
-> Làm thế nào để xây dựng một nền tảng No-Code AI Agent Studio đa lĩnh vực giúp Quản trị viên của bất kỳ tổ chức nào (Doanh nghiệp, Trường học, Y tế) có thể tự khởi tạo và phân quyền các Trợ lý AI chuyên biệt theo từng Đơn vị (Phòng ban / Khoa / Lớp học) chỉ trong vài phút — đồng thời đảm bảo AI có khả năng phân tách đúng các luồng hội thoại đan xen, loại bỏ thông tin cũ đã bị ghi đè theo thời gian, trích dẫn chính xác nguồn tri thức nội bộ và tuân thủ tuyệt đối ranh giới bảo mật dữ liệu (RBAC/ACL & Human-in-the-Loop)?
-
----
-
-## 5. Desired Outcomes & Benchmarks — Kết quả kỳ vọng & Đo lường
-
-### 5.1 Các mục tiêu kết quả định lượng (KPIs)
-1. **Khởi tạo Agent Đa ngành nghề siêu tốc (Time-to-Value < 3 phút):** Admin không biết lập trình có thể sử dụng bộ 13+ Mẫu Agent Đa lĩnh vực (Phòng Marketing, Kế toán, HR, IT, Sales; Lớp AI/CNTT, Phòng Đào tạo, Khoa Kinh tế, CTSV, Thư viện; Khoa Khám bệnh, Khoa Dược...) hoặc tự định nghĩa tên Lớp / Phòng ban mới để xuất bản Agent ngay lập tức.
-2. **Cô lập dữ liệu tuyệt đối giữa các Tổ chức & Đơn vị (100% Unit Isolation):** Thành viên thuộc đơn vị nào (ví dụ: Phòng Marketing hoặc Lớp AI - K68) chỉ được phép tương tác và truy xuất tri thức của đơn vị đó (cùng các Agent toàn tổ chức ALL). Mọi truy cập trái phép sang đơn vị khác đều bị chặn tự động bởi lớp bảo vệ RBAC & Unit ACL Guardrail (tỷ lệ vi phạm ACL = 0% trên $\ge 50$ test cases Red-team).
-3. **Chuẩn hóa quy trình Trình ký & Phê duyệt (100% HITL Governance):** Mọi yêu cầu tạo đề xuất/đơn từ trong hội thoại đều tự động kích hoạt trạm dừng HITL, lưu vào CSDL và đẩy thông báo hai chiều thời gian thực giữa Thành viên và Quản trị viên (0% tác vụ nhạy cảm bị bỏ qua).
-4. **Chỉ số Kỹ thuật & Chất lượng AI:**
-   - Độ chính xác tách luồng hội thoại (Thread Disentanglement Micro-F1 $\ge 0.72$, mục tiêu nâng cao $\ge 0.85$).
-   - Theo dõi trạng thái thời gian (Temporal State Tracking Accuracy $\ge 80\%$, Stale-decision Usage $\le 5\%$).
-   - Độ trung thực trích dẫn nguồn (Citation Faithfulness $\ge 90\%$, Coverage $\ge 95\%$).
-   - Độ trễ phản hồi trung bình (P95 Latency $< 3$ giây cho lượt xử lý thông thường).
-
-### 5.2 Bộ dữ liệu Kiểm chứng & Benchmark Chuẩn
-Hệ thống được đánh giá định lượng trên các bộ benchmark tiêu chuẩn quốc tế và kịch bản thực tế tiếng Việt:
-- **Ubuntu Chat Disentanglement Dataset:** Đo lường độ chính xác thuật toán phân tách luồng hội thoại đan xen (đo F1, Shen-F1 và VI metric).
-- **SAMSum / DialogSum / MeetingBank:** Đánh giá năng lực tóm tắt hội thoại đa người nói và kiểm chứng độ trung thực (Faithfulness) không sinh ảo giác.
-- **MultiWOZ / τ-bench:** Đánh giá độ tin cậy khi thực thi tác vụ đa bước và kích hoạt công cụ (Tool Calling).
-- **FLORES-200 / PhoMT / VIVOS (tiếng Việt):** Kiểm chứng khả năng thấu hiểu tiếng Việt, chuẩn hóa từ viết tắt và tiếng lóng công sở.
-- **PhishTank / ViHSD:** Đánh giá bộ lọc phát hiện nội dung độc hại, đường dẫn giả mạo và bảo vệ an toàn cho group chat.
-- **Bộ dữ liệu Red-team & Temporal State nội bộ ($\ge 100$ kịch bản):** Kịch bản thực tế về quyết định bị thay đổi liên tục theo thời gian và các truy vấn cố tình vượt quyền ACL giữa các phòng ban.
+### 1.3. Hậu quả Hiện hữu nếu không giải quyết (Consequences)
+- **Sai lệch quyết định vận hành:** Nhân viên hành động dựa trên thông tin cũ đã bị hủy bỏ trong group chat hoặc do AI tự suy diễn (hallucination) quy chế tài chính/nhân sự.
+- **Rủi ro bảo mật & tuân thủ (Compliance Breach):** Lộ tài liệu nhạy cảm giữa các phòng ban trong cùng công ty hoặc rò rỉ dữ liệu giữa các công ty khách hàng (Tenants) trên nền tảng đám mây.
+- **Độ trễ cao & lãng phí chi phí Token:** Nhồi toàn bộ lịch sử chat nhóm hỗn độn và toàn bộ kho tài liệu công ty vào prompt khiến chi phí API tăng gấp 3–5 lần và độ trễ vượt quá 10–15 giây/lượt.
 
 ---
 
-## 6. Technical Architecture & Product Solution — Giải pháp Kỹ thuật & Kiến trúc Hệ thống
+### 1.4. Vì sao Công cụ Truyền thống Thất bại & Bắt buộc dùng Kiến trúc Đề xuất?
 
-Hệ thống áp dụng tư duy **"Chia để trị" (Divide & Conquer)** thay vì nhồi nhét toàn bộ logic vào một Prompt cồng kềnh, phân tách rõ ràng thành các trụ cột công nghệ:
+| Giải pháp hiện tại | Ưu điểm | Lý do thất bại trong môi trường Công ty / Tổ chức đa phòng ban |
+| :--- | :--- | :--- |
+| **ChatGPT / Claude / Gemini (Bản tiêu chuẩn)** | Ngôn ngữ tự nhiên tốt, dùng ngay cho cá nhân. | Không có quản trị Multi-Tenant tập trung; **không có Pre-filtering ACL theo phòng ban** ngay tại tầng Vector DB; không có luồng trình ký HITL nội bộ; dễ lấy nhầm quyết định cũ khi tóm tắt hội thoại đan xen. |
+| **Chatbot Kịch bản (Rule-based / Decision Tree)** | Kiểm soát câu trả lời cố định, ít ảo giác. | Đóng cứng vào 1 kịch bản tĩnh; không đọc hiểu được quy chế PDF dài hàng chục trang; **hoàn toàn bất lực trước hội thoại nhóm đan xen tự nhiên**. |
+| **Framework Kỹ thuật thuần (LangChain / Dify tự dựng)** | Linh hoạt cho kỹ sư AI. | Giao diện quá phức tạp với Trưởng phòng nghiệp vụ (HR, Kế toán, Marketing); thiếu sẵn cơ chế **Thread Disentanglement**, **Temporal State Tracking (`ACTIVE` vs `OVERRIDDEN`)** và **Adaptive UI Schema** cho nhiều loại hình công ty. |
 
-### 6.1 Bảng khớp nối Công nghệ (Techstack Mapping)
-
-| Thành phần kỹ thuật | Công nghệ lựa chọn | Vai trò & Nhiệm vụ cụ thể trong luồng xử lý |
-|---|---|---|
-| **Frontend UI/UX** | OpenDesign Minimalist, HTML5/CSS3/JS, React Flow | Giao diện SaaS Studio chia đôi: Bên trái thiết kế Graph 3–5 node, bên phải Group Chat Sandbox với Role Switcher. |
-| **Backend API Engine** | FastAPI / Python 3.10+, Uvicorn | Xử lý RESTful API tốc độ cao, quản lý phiên làm việc, điều phối dữ liệu và bất đồng bộ hóa tác vụ. |
-| **Orchestration Core** | LangGraph (StateGraph Engine) | Chia nhỏ quy trình thành đồ thị các Node chuyên biệt; quản lý State Checkpoint và cơ chế Interrupt cho HITL. |
-| **LLM Gateway Đa tầng** | Google Gemini Flash / Pro, Groq, Ollama | Hỗ trợ chuyển đổi linh hoạt giữa Local LLM (khi dev) và API BTC (khi nghiệm thu), kiểm soát timeout, fallback và đo token. |
-| **Vector Database & RAG** | Gemini-Embeddings (3072-dim) / Qdrant | Vector hóa tri thức quy chế nội bộ; thực thi lọc cứng quyền truy xuất (Pre-filtering ACL) ngay tại tầng CSDL Vector. |
-| **Relational Database** | SQLite / PostgreSQL | Lưu trữ có cấu trúc: Users, Tenants, Agents, Permissions, Documents, Đơn từ (Leave Requests) và Chat Threads. |
-| **Identity & Access (IAM)** | Keycloak OIDC SSO (OAuth2 / JWT) | Xác thực danh tính tập trung; gắn kèm metadata `tenant_id`, `department`, `role` trực tiếp vào JWT token. |
-| **Tool Execution Layer** | MCP-like Tool Registry & Manifest | Chuẩn hóa giao tiếp công cụ (`leave_balance`, `leave_request_create`, `send_email`), kiểm soát qua Permission Manifest. |
-| **Observability & Tracing** | Langfuse Platform | Giám sát toàn diện Trace Log từng node, đo lường độ trễ P95, tính toán chi phí token và chấm điểm tự động. |
-
-### 6.2 Kiến trúc Bảo mật & Phân quyền 3 Tầng (3-Layer RBAC & Unit ACL)
-1. **Tầng 1 — Identity (Định danh người dùng):** Xác thực qua Keycloak OIDC SSO. Toàn bộ request vào API đều được trích xuất `tenant_id`, `department` và `role` trực tiếp từ JWT Token đã ký số (không tin dữ liệu client gửi lên).
-2. **Tầng 2 — Vector DB (Pre-filtering ACL):** Khi Agent thực hiện tra cứu RAG, hệ thống áp dụng bộ lọc cứng (Metadata Filter theo `tenant_id` và `department_access`) ngay trong câu truy vấn Vector DB trước khi tiến hành tính toán độ tương đồng Cosine. Đảm bảo dữ liệu phòng ban khác không bao giờ lọt vào context của LLM.
-3. **Tầng 3 — Execution & HITL Guardrail:** Quản lý Tool thông qua **Permission Manifest**. Các hành động có tính rủi ro cao (*sensitive*) bắt buộc kích hoạt `State Interrupt` của LangGraph, tạm dừng tiến trình để trình người có thẩm quyền phê duyệt trước khi ghi nhận vào CSDL.
-
-### 6.3 Giải quyết Nút thắt Kỹ thuật Khó trong Group Chat (AI Context Core)
-- **Thuật toán Tách luồng hội thoại đan xen (Thread Disentanglement):**
-  $$	ext{Tin nhắn mới} \longrightarrow 	ext{Trích xuất Metadata (Reply-to, @Mention, Timestamp)} \longrightarrow 	ext{Gom cụm ngữ nghĩa Cosine Similarity} \longrightarrow 	ext{LLM phân xử biên} \longrightarrow 	ext{Gán Thread ID}$$
-  Hệ thống kết hợp tín hiệu cấu trúc (quan hệ phản hồi trực tiếp, thời gian gửi) với embedding ngữ nghĩa để nhóm các tin nhắn liên quan vào cùng một `thread_id`, giải quyết triệt để tình trạng nhiễu ngữ cảnh giữa các chủ đề đang bàn song song.
-- **Cơ chế Theo dõi Trạng thái Thời gian (Temporal State Tracking):**
-  Mỗi quyết định, lịch hẹn hay cam kết công việc được quản lý dưới dạng một bản ghi trạng thái có vòng đời (`ACTIVE`, `OVERRIDDEN`, `CANCELLED`, `DONE`). Khi phát hiện tin nhắn mới có ý định thay đổi/hủy bỏ thông tin trước đó, hệ thống tự động cập nhật trạng thái mục cũ thành `OVERRIDDEN` và liên kết trường `superseded_by` tới tin nhắn mới. Khi người dùng yêu cầu tóm tắt hoặc kiểm tra tiến độ, Agent **chỉ truy xuất các quyết định đang có trạng thái `ACTIVE`**.
-- **Truy vết Bằng chứng Nguồn (Citation Grounding 2 Chiều):**
-  Mọi câu trả lời tổng hợp hoặc kết quả RAG đều bắt buộc đính kèm hộp thông tin nguồn: liên kết ngược về mã tin nhắn gốc (`#msg_id`) đối với thảo luận nhóm, hoặc tên tệp văn bản và chỉ số tương đồng đối với tài liệu quy chế. Nếu không tìm thấy bằng chứng thỏa mãn ngưỡng tin cậy, Agent từ chối suy đoán và thông báo "không đủ thông tin".
-
-### 6.4 Lợi thế Kiến trúc
-- **Tối ưu chi phí & độ trễ:** Nhờ tiền lọc Vector ACL và tách luồng trước khi gửi vào LLM, kích thước context giảm đến 70%, giúp độ trễ phản hồi P95 luôn duy trì $< 3$ giây và giảm đáng kể chi phí gọi API.
-- **Khả năng mở rộng không giới hạn:** Thiết kế dạng Node độc lập trên LangGraph và chuẩn hóa công cụ theo MCP-like giúp việc thêm phòng ban mới, tài liệu mới hoặc công cụ nghiệp vụ mới diễn ra trong vài giây mà không cần biên dịch lại mã nguồn lõi.
+**=> Lý do bắt buộc dùng kiến trúc của Mini Agent Studio (CHAT-40):** Kết hợp **No-Code Studio + Adaptive Schema Engine** ở tầng giao diện với **Đồ thị trạng thái LangGraph + Pre-filtered Vector RAG 3.072 chiều + Thread Disentanglement & Temporal State Tracking + Chốt chặn HITL/Keycloak SSO** ở tầng lõi.
 
 ---
 
-## 7. Deliverables & Packaging — Danh mục Bàn giao & Đóng gói Khởi chạy
+## 2. Chân dung Người dùng, Kịch bản Sử dụng & Phạm vi (Users, Scenarios & Scope)
 
-### 7.1 Danh mục Sản phẩm Bàn giao (Deliverables)
-1. **Ứng dụng Web Full-Stack hoàn chỉnh:**
-   - **Backend:** Máy chủ FastAPI / Python Server, Lõi LangGraph điều phối đồ thị trạng thái, CSDL SQLite/PostgreSQL, Kho Vector Database 3,072 chiều.
-   - **Frontend:** Giao diện OpenDesign Minimalist gồm No-Code Studio Builder (hỗ trợ kéo thả React Flow), Hộp thư duyệt đơn HITL, Quản lý Nhân sự & Phòng ban, và Group Chat Sandbox tích hợp Role Switcher.
-2. **Hệ thống Định danh & Giám sát Tích hợp:** Máy chủ Keycloak OIDC SSO cấu hình sẵn Realm & Roles phân quyền; Bảng điều khiển giám sát Langfuse Tracing theo dõi chi phí, token và latency thời gian thực.
-3. **Bộ Dữ liệu Kiểm định & Báo cáo Định lượng (Eval Dataset & Report):** Tập kịch bản hội thoại đan xen mẫu, bộ kịch bản Red-team kiểm tra ACL, và dashboard báo cáo số liệu thực tế đo lường theo chuẩn đề tài CHAT-40.
-4. **Bộ Tài liệu Nghiệp vụ & Kỹ thuật:** Product Requirements Document (PRD v2.0), Tài liệu Kiến trúc Hệ thống, Hướng dẫn Cài đặt & Vận hành (README), và Mã nguồn mở toàn bộ trên GitHub.
+### 2.1. Phân tách 3 Nhóm Vai trò (3-Tier Role Architecture)
+Hệ thống định nghĩa **3 nhóm người dùng** với quyền hạn và điểm chạm giao diện tách biệt hoàn toàn:
 
-### 7.2 Khả năng Đóng gói & Khởi chạy 1 Lệnh (1-Click Deployment)
-- **Khởi chạy đồng nhất:** Toàn bộ hệ thống được đóng gói sẵn sàng khởi chạy bằng **1 câu lệnh duy nhất** (`python server.py` hoặc `docker-compose up -d`) trên mọi môi trường (Windows / macOS / Linux).
-- **Dữ liệu Mồi Sẵn sàng Kiểm thử (Pre-seeded Data):** Hệ thống tích hợp sẵn dữ liệu mẫu cho nhiều tổ chức: Tập đoàn VinFast (Sản xuất, Marketing, Kế toán), Tập đoàn FPT, VNG Games; cùng hệ thống tài khoản demo đầy đủ vai trò (`admin@vinfast.vn`, `marketing@vinfast.vn`, `ketoan@vinfast.vn`, `nam.dlh@vinfast.vn`), giúp Ban Giám Khảo có thể đăng nhập và trải nghiệm ngay lập tức các luồng RAG, phân quyền ACL, duyệt đơn HITL và gỡ rối Group Chat mà không cần chuẩn bị phức tạp.
+1. **Nhóm 1 — Quản trị viên Nền tảng (`SUPER_ADMIN` / Platform Owner):**
+   - *Đối tượng:* Đội ngũ vận hành nền tảng SaaS B2B.
+   - *Quyền hạn & Nhu cầu:* Khởi tạo không gian làm việc độc lập (`Tenant Provisioning`) cho bất kỳ công ty/tổ chức khách hàng mới; chọn mẫu ngành nghề (`ENTERPRISE`, `EDUCATION`, `HEALTHCARE`, `CUSTOM`); tự động đồng bộ định danh lên **Keycloak OIDC SSO** và gửi mật khẩu quản trị qua **Gmail SMTP**; giám sát tài nguyên toàn hệ thống.
+2. **Nhóm 2 — Quản trị viên Công ty / Trưởng Phòng ban (`TENANT_ADMIN` / Unit Manager):**
+   - *Đối tượng:* Giám đốc vận hành (COO), Trưởng phòng HR, Trưởng phòng Marketing, Kế toán trưởng tại công ty (hoặc Chủ nhiệm khoa/Giáo vụ ở kịch bản mở rộng).
+   - *Quyền hạn & Nhu cầu:* Tự khởi tạo AI Agent cho từng phòng ban không cần code (qua mẫu 1-Click hoặc tự định nghĩa đơn vị mới), upload tài liệu PDF/TXT gán quyền ACL theo phòng ban, bật/tắt Tool kèm Permission Manifest, nhập danh sách nhân sự hàng loạt (CSV) và **phê duyệt/từ chối các đề xuất phát sinh từ luồng HITL**.
+3. **Nhóm 3 — Nhân viên / Thành viên Đơn vị (`EMPLOYEE` / Unit Member):**
+   - *Đối tượng:* Nhân viên các phòng ban trong công ty (Marketing, Kế toán, HR, IT, Sales...).
+   - *Quyền hạn & Nhu cầu:* Chỉ nhìn thấy và tương tác với các Agent thuộc đúng phòng ban của mình (`user.department == agent.department_access`) hoặc Agent toàn công ty (`ALL`); tra cứu quy trình có trích dẫn nguồn, thảo luận nhóm có Agent hỗ trợ tách luồng và gửi yêu cầu phê duyệt (nghỉ phép, duyệt ngân sách, cấp phát...) ngay trong khung chat.
+
+---
+
+### 2.2. Kịch bản Người dùng: Khi nào dùng Chat 1-1 vs. Khi nào dùng Chat Nhóm (Group Chat)?
+Hệ thống cung cấp 2 chế độ tương tác bổ trợ chặt chẽ cho nhau trong quy trình làm việc của một công ty:
+
+| Tiêu chí | Kịch bản 1: Chat 1-1 với Agent Đơn vị (`Direct 1-1 Portal`) | Kịch bản 2: Chat Nhóm có Agent điều phối (`Multi-User Group Chat`) |
+| :--- | :--- | :--- |
+| **Khi nào sử dụng?** | Khi nhân viên cần **tra cứu thông tin cá nhân/quy chế riêng tư** hoặc **khởi tạo đề xuất/đơn từ cá nhân** trình Trưởng phòng. | Khi nhiều thành viên trong cùng phòng ban/dự án **thảo luận song song nhiều đầu việc**, chốt lịch họp, bàn ngân sách và cần `@Agent` tổng hợp hoặc kiểm tra quy định ngay trong luồng bàn bạc. |
+| **Ví dụ thực tế tại Công ty** | • Nhân viên Marketing hỏi riêng Agent Marketing về định mức chi phí quảng cáo.<br>• Nhân viên gửi yêu cầu *"Xin nghỉ phép 3 ngày"* hoặc *"Đề xuất duyệt ngân sách chiến dịch TikTok"* qua trạm HITL. | • Nhóm Marketing 4 người vừa bàn kịch bản sự kiện (Luồng 1), vừa đổi lịch họp từ Thứ Ba sang Thứ Năm (Luồng 2), vừa gọi `@Agent tóm tắt các quyết định mới nhất còn hiệu lực và kiểm tra quy định tạm ứng`. |
+| **Cơ chế AI cốt lõi kích hoạt** | • Kiểm tra cứng `Unit ACL` (`tenant_id` + `department`).<br>• `Pre-filtered Vector RAG` + trích dẫn tài liệu gốc.<br>• `Tool Calling` + `HITL Interrupt` trình Quản lý duyệt. | • **Thread Disentanglement:** Tách các luồng chủ đề đan xen (`#thread_1`, `#thread_2`).<br>• **Temporal State Tracking:** Lọc bỏ quyết định cũ (`OVERRIDDEN`), chỉ giữ quyết định mới nhất (`ACTIVE`).<br>• **Citation 2 chiều:** Trích dẫn cả mã tin nhắn (`#msg_id`) lẫn tài liệu PDF. |
+
+---
+
+### 2.3. Giới hạn Phạm vi MVP & Phân lớp Trạng thái Triển khai (Scope & Capability Tiers)
+Để đảm bảo tính minh bạch tuyệt đối giữa **bản dựng thực tế hiện có trong repo** và **mục tiêu hoàn thiện của đề tài CHAT-40**, phạm vi sản phẩm được gắn nhãn theo 3 mức rõ ràng:
+- `✅ Đã có trong bản dựng hiện tại (Implemented in Prototype)`: Đã chạy thực tế end-to-end trong mã nguồn hiện tại.
+- `🛠 Cam kết hoàn thiện trong MVP (MVP Target Scope)`: Nằm trong phạm vi cốt lõi của đề tài CHAT-40, đã có thiết kế kiến trúc/dữ liệu và hoàn thiện trong chu kỳ MVP.
+- `🚀 Lộ trình Nâng cao (Phase 2 / P1)`: Tính năng mở rộng nâng cao sau MVP.
+
+#### **A. Trong phạm vi MVP (In-Scope):**
+1. **Quản trị Multi-Tenant, Adaptive Schema & Định danh SSO:**
+   - `✅` Xác thực tập trung qua **Keycloak OIDC/OAuth2 SSO** (`http://localhost:8080`) và tự động gửi mật khẩu qua **Google Gmail SMTP** (`backend/mailer.py`).
+   - `✅` **Adaptive UI Schema Engine (`backend/schema_engine.py`):** Tự động biến đổi trường dữ liệu và giao diện theo mọi loại hình công ty (`ENTERPRISE` làm trọng tâm; mở rộng sẵn cho `EDUCATION`, `HEALTHCARE` và sinh tự động bằng AI cho ngành nghề bất kỳ `CUSTOM`).
+   - `✅` Quản lý nhân sự theo phòng ban/đơn vị, hỗ trợ thêm lẻ và nhập hàng loạt qua file CSV/TXT.
+2. **No-Code Studio Builder & Kho Tri thức Vector RAG:**
+   - `✅` Tạo Agent không cần code với 13+ mẫu dựng sẵn hoặc tự định nghĩa phòng ban mới (`__CUSTOM__`); trích xuất PDF nhiều trang ngay trên trình duyệt (`Mozilla PDF.js`), phân mảnh đoạn văn và nhúng Vector **3.072 chiều** (`models/gemini-embedding-001`) kèm **Pre-filtering ACL** theo `tenant_id` và `department_access`.
+   - `🛠` Trình kéo thả **Workflow 3–5 Node (React Flow)** (`Input Guard` → `Disentangle/Router` → `RAG/Tool Node` → `HITL Gate` → `Response Synthesis`), cấu hình **≥ 3 MCP-like Tools** (`leave_balance`, `leave_request_create`, `send_email`) kèm **Permission Manifest** và đóng băng phiên bản **Agent Versioning (`v1.0`, `v1.1`)**.
+3. **AI Context Core (Xử lý Hội thoại Nhóm) & Phê duyệt HITL:**
+   - `✅` **Luồng Phê duyệt Con người (HITL Interrupt):** Tự động chặn các yêu cầu trình ký/đề xuất, lưu trạng thái `PENDING` vào CSDL, hiển thị trên hộp thư Quản trị viên và đẩy thông báo Toast thời gian thực khi được `APPROVED` / `REJECTED`.
+   - `🛠` **Group Chat Sandbox (Role Switcher) + Thread Disentanglement + Temporal State Tracking (`ACTIVE` / `OVERRIDDEN` / `CANCELLED` / `DONE`) + Trích dẫn 2 chiều (`#msg_id` & Document Citation Box)**.
+4. **Hạ tầng Lưu trữ Kép & Giám sát (Observability):**
+   - `✅` Lưu trữ `SQLite 3` tốc độ cao đồng bộ thời gian thực (`AutoSyncSQLiteConnection` trong `backend/mysql_sync.py`) sang **MySQL 8.0 Server** để quan sát trực tiếp trên **MySQL Workbench 8.0 CE**; kèm **X-Ray Telemetry Trace** ngay trên giao diện.
+   - `🛠` Tích hợp SDK **Langfuse** thu thập trace phân tán và chạy bộ kiểm thử định lượng tự động (Eval Pipeline).
+
+#### **B. Ngoài phạm vi MVP (Out-of-Scope — Tránh dàn trải):**
+- **Không** xây dựng cổng thanh toán trực tuyến (Billing/Subscription Gateway) hay chợ mua bán Agent (Public Marketplace).
+- **Không** tích hợp webhook hai chiều vào Zalo, Slack, Microsoft Teams hay Discord thật trong giai đoạn MVP (mọi kịch bản chat 1-1 và chat nhóm đều thực hiện trên Web Portal & Sandbox nội bộ).
+- **Không** tự huấn luyện (pre-train) hoặc fine-tune mô hình LLM nền tảng; không xử lý luồng âm thanh/video thời gian thực (chỉ xử lý văn bản, bảng biểu và tài liệu PDF/TXT).
+
+---
+
+### 2.4. Điểm chạm Giao diện Chính (Key UI Touchpoints)
+Người dùng tương tác với hệ thống qua **5 điểm chạm giao diện Web** theo phong cách **Clean SaaS Dashboard (OpenDesign Minimalist)**:
+1. **SSO Login Gate (`frontend/login.html`):** Cổng đăng nhập 1 nút duy nhất qua Keycloak OIDC SSO.
+2. **Super Admin Control Plane (`frontend/super_admin.html`):** Cấp phát công ty/tổ chức mới (`Tenant`), chọn ngành nghề hoặc dùng AI sinh Schema tự động cho bất kỳ lĩnh vực công ty nào.
+3. **Tenant Admin & No-Code Studio (`frontend/admin_studio.html`):** Quản lý nhân sự/phòng ban (nhập CSV), thiết kế Agent Split-Screen (Cấu hình ACL, Upload PDF Vector 3072-dim, Workflow Graph, Live Playground kèm X-Ray Trace) và Hộp thư phê duyệt HITL có chuông báo đỏ thời gian thực.
+4. **Employee Chat & Group Sandbox Portal (`frontend/employee_portal.html`):** Danh mục Agent tự động mở khóa theo phòng ban của nhân viên (khóa cứng `🔒` các phòng ban khác), khung chat hỗ trợ Citation Box, thẻ xác nhận HITL và chế độ giả lập hội thoại nhóm đa thành viên.
+5. **Visual Database Explorer (`frontend/database_viewer.html`):** Trình duyệt trực tiếp 5 bảng CSDL quan hệ phục vụ kiểm tra minh bạch dữ liệu.
+
+---
+
+## 3. Giải pháp Kỹ thuật & Kiến trúc Hệ thống (Technical Solution & System Architecture)
+
+### 3.1. Bảng Khớp nối Công nghệ (Techstack Mapping)
+Mọi công nghệ trong hệ thống đều gắn chặt với một nhiệm vụ cụ thể trong luồng xử lý từ đầu vào đến đầu ra:
+
+| Thành phần kỹ thuật | Công nghệ lựa chọn | Vai trò & Nhiệm vụ cụ thể trong luồng xử lý | Trạng thái |
+| :--- | :--- | :--- | :---: |
+| **1. Frontend UI & Workflow** | HTML5/CSS3/JS (OpenDesign Minimalist), Mozilla `PDF.js`, `React Flow` | Hiển thị SaaS Portal đa vai trò; bóc tách văn bản PDF nhiều trang ngay tại trình duyệt (`PDF.js`); trực quan hóa đồ thị luồng thực thi Agent 3–5 node (`React Flow`). | `✅` UI & PDF.js<br>`🛠` React Flow |
+| **2. Backend API Engine** | Python 3.10+, `ThreadingHTTPServer` (`backend/server.py`, tương thích nâng cấp `FastAPI`) | Xử lý RESTful API đa luồng, kiểm soát phiên làm việc, thực thi chốt chặn Unit ACL tại cổng `/api/chat` và điều phối đồng bộ dữ liệu. | `✅` |
+| **3. Orchestration Core** | `LangGraph` Architecture (`backend/agent_engine.py`) | Điều phối luồng suy luận theo đồ thị trạng thái (`StateGraph`): phân tách rõ Node định tuyến ý định, Node tách luồng/cập nhật trạng thái, Node RAG/Tool và trạm dừng `HITL Interrupt`. | `✅` 2-Node Core<br>`🛠` 5-Node Graph |
+| **4. LLM & Embedding Gateway** | Google `gemini-flash-latest` (`temp=0.2`), `models/gemini-embedding-001` (3072-dim) | Sinh phản hồi bám sát ngữ cảnh (`temp=0.2` chống ảo giác), phân loại ý định/biên hội thoại và nhúng văn bản thành vector 3.072 chiều độ chính xác cao. | `✅` |
+| **5. Vector Store & Pre-filter** | Custom JSON Vector Engine (`backend/vector_store.py` - Cosine Index) | Lưu trữ vector 3.072 chiều và thực thi **Pre-retrieval Metadata Filtering** theo `tenant_id` + `department_access` trước khi tính Cosine Similarity (`> 0.35`). | `✅` |
+| **6. Dual Relational DB** | `SQLite 3` (`database.db`) + `MySQL 8.0 Server` (`backend/mysql_sync.py`) | Lưu trữ giao dịch tốc độ cao trên SQLite và tự động nhân bản tức thì mọi lệnh `INSERT/UPDATE/DELETE` (`AutoSyncSQLiteConnection`) sang MySQL 8.0 để giám sát qua **MySQL Workbench**. | `✅` |
+| **7. Identity & Credential Delivery** | `Keycloak OIDC SSO` (OAuth2/JWT, cổng `8080`) + `Google Gmail SMTP` (`backend/mailer.py`) | Quản lý định danh tập trung chuẩn Enterprise (Realm `mini-agent-platform`); tự động tạo user trên Keycloak và gửi email bàn giao mật khẩu ngẫu nhiên an toàn. | `✅` |
+| **8. Adaptive Domain Engine** | `Schema Engine` (`backend/schema_engine.py`) | Tự động cấu hình trường hồ sơ nhân sự, đơn vị và biểu mẫu HITL cho bất kỳ ngành nghề công ty nào (`ENTERPRISE`, `EDUCATION`, `HEALTHCARE`, `CUSTOM`). | `✅` |
+| **9. Tool Execution Layer** | MCP-like Tool Registry & Permission Manifest | Chuẩn hóa giao tiếp các công cụ nghiệp vụ (`leave_balance`, `leave_request_create`, `send_email`), kiểm tra quyền `read/write/sensitive` trước khi chạy. | `✅` HITL Tool<br>`🛠` ≥ 3 MCP Tools |
+| **10. Observability & Eval** | Built-in `X-Ray Telemetry Trace` + `Langfuse SDK` | Ghi nhận thời gian thực `intent`, `latency_ms`, `token_estimate`, `cosine_score` trên UI và đẩy log chấm điểm tự động lên Langfuse. | `✅` X-Ray UI<br>`🛠` Langfuse SDK |
+
+---
+
+### 3.2. Giải quyết các Nút thắt Kỹ thuật Khó (Core Algorithmic Mechanisms)
+
+#### **A. Cơ chế Tách luồng Hội thoại Đan xen (Hybrid Thread Disentanglement — 3 bước)**
+Để giải quyết bài toán nhiều nhân viên nói chuyện xen kẽ nhiều chủ đề trong một phòng chat chung, hệ thống xử lý theo chuỗi 3 bước:
+```text
+[Tin nhắn mới m_i] 
+   ──► Bước 1: Heuristic & Metadata Anchor (Reply-to, @Mention, Time Window Δt ≤ 5 phút)
+   ──► Bước 2: Semantic Clustering (Cosine Similarity giữa Vector 3072-dim của m_i và Centroid các Thread đang mở)
+   ──► Bước 3: LLM Boundary Adjudicator (Chỉ gọi Gemini Flash khi điểm tương đồng nằm vùng biên 0.45 ≤ sim ≤ 0.65)
+   ──► Gán nhãn thread_id & Cập nhật Context riêng của Thread đó
+```
+- **Bước 1 (Tín hiệu cấu trúc):** Nếu tin nhắn có `reply_to_msg_id` hoặc `@mention` trực tiếp một thành viên trong luồng vừa tương tác dưới 5 phút, gán thẳng vào `thread_id` tương ứng với độ trễ $\approx 0\text{ ms}$.
+- **Bước 2 (Gom cụm ngữ nghĩa):** Tính tích vô hướng Cosine giữa vector nhúng của tin nhắn mới với vector trọng tâm (Centroid) của các luồng đang hoạt động trong cửa sổ trượt. Nếu $\text{sim} > 0.65$, gộp vào luồng có điểm cao nhất; nếu $\text{sim} < 0.45$, khởi tạo luồng chủ đề mới.
+- **Bước 3 (Phân xử vùng biên bằng LLM):** Chỉ những tin nhắn mơ hồ ($0.45 \le \text{sim} \le 0.65$) mới gọi LLM phân xử nhẹ, giúp tiết kiệm tối đa lượt gọi LLM mà vẫn giữ điểm F1 tách luồng cao.
+
+#### **B. Cơ chế Theo dõi Trạng thái Quyết định theo Thời gian (Temporal State Tracking)**
+Mỗi quyết định, lịch hẹn, phân công hoặc chốt số liệu trong hội thoại được trích xuất thành bản ghi `DecisionState` có máy trạng thái hữu hạn (FSM):
+```text
+[NEW DECISION] ──► ACTIVE (Đang có hiệu lực)
+                     ├──► OVERRIDDEN (Bị thay thế bởi quyết định mới hơn: superseded_by = #msg_new)
+                     ├──► CANCELLED  (Bị hủy bỏ明确 bởi người có thẩm quyền)
+                     └──► DONE       (Đã hoàn thành thực thi)
+```
+- Khi phát hiện tin nhắn mới có thực thể cùng chủ đề (`topic_key`, ví dụ: `"Lịch họp khách hàng tuần này"`) nhưng mang giá trị cập nhật hoặc phủ định (ví dụ: *"Dời lịch họp Thứ 3 sang 9h Thứ 5 nhé"*), hệ thống tự động chuyển bản ghi cũ sang `OVERRIDDEN`, lưu con trỏ `superseded_by = msg_id_mới`, và tạo bản ghi mới ở trạng thái `ACTIVE`.
+- **Quy tắc chống dùng thông tin cũ (Zero Stale-Decision Rule):** Khi người dùng hỏi tiến độ hoặc yêu cầu tóm tắt, bộ truy xuất **chỉ nạp các bản ghi có `state == ACTIVE`** (kèm lịch sử thay đổi nếu được hỏi lý do), triệt tiêu hoàn toàn lỗi lấy quyết định cũ đã hủy để trả lời.
+
+#### **C. Tiền lọc Vector Đa tầng (2-Layer Pre-retrieval Vector Filtering)**
+Thay vì tìm kiếm Top-K trên toàn bộ kho vector rồi mới lọc quyền (Post-filtering — dễ dẫn đến rỗng kết quả hoặc lộ thông tin qua điểm số), `backend/vector_store.py` thực thi **Pre-filtering** ngay trước phép nhân ma trận Cosine:
+1. **Lọc cứng Tầng 1 (`tenant_id`):** Chỉ giữ các vector thuộc đúng công ty đang đăng nhập.
+2. **Lọc cứng Tầng 2 (`department_access`):** Chỉ giữ các tài liệu có nhãn `ALL` (toàn công ty) hoặc trùng khớp chính xác với `user.department` của người hỏi.
+3. **Ngưỡng từ chối an toàn (`Cosine Threshold > 0.35`):** Chỉ những đoạn văn vượt ngưỡng tương đồng `0.35` mới được đưa vào Prompt kèm định danh nguồn `[Tài liệu: <file_name> | Độ khớp: <score>]`.
+
+---
+
+### 3.3. Lợi thế Kiến trúc (Architectural Advantages)
+1. **Tối ưu chi phí Token & Độ trễ phản hồi (P95 $< 3.0\text{s}$):** Nhờ tách nhỏ quy trình thành các Node chuyên biệt trên LangGraph, tiền lọc Vector theo đơn vị và chỉ nạp đúng các tin nhắn cùng `thread_id` + trạng thái `ACTIVE` vào Prompt, hệ thống loại bỏ được phần lớn dữ liệu nhiễu không liên quan, giữ độ trễ phản hồi đơn lượt ổn định dưới 3 giây và tiết kiệm chi phí gọi API LLM.
+2. **Mở rộng sang bất kỳ ngành nghề công ty nào trong vài giây (Zero-Code Domain Adaptation):** Kiến trúc tách rời hoàn toàn **Lõi điều phối AI (`agent_engine.py`)** khỏi **Cấu trúc hiển thị ngành nghề (`schema_engine.py`)**. Khi một công ty thuộc lĩnh vực mới (ví dụ: Công ty Logistics, Chuỗi Bán lẻ, Ngân hàng hay Trường học) đăng ký sử dụng, hệ thống tự động sinh bộ thuộc tính (`ui_schema`) phù hợp mà không cần sửa bất kỳ dòng code Backend hay Database nào.
+3. **An toàn cho cả Môi trường Thử nghiệm & Quản trị Doanh nghiệp:** Kiến trúc CSDL kép (`SQLite` nội bộ + đồng bộ tự động `MySQL 8.0`) giúp ứng dụng khởi chạy nhẹ nhàng ngay lập tức nhưng vẫn cho phép đội ngũ IT/Ban Giám Khảo dùng công cụ chuẩn doanh nghiệp (**MySQL Workbench 8.0 CE** & **Keycloak Admin Console**) để kiểm tra trực tiếp.
+
+---
+
+## 4. Dữ liệu, Bảo mật & Ràng buộc Thực thi (Data, Security & Governance)
+
+### 4.1. Kiểm soát Truy cập 3 Tầng (3-Layer Access Control)
+1. **Tầng Định danh (Identity Layer — Keycloak OIDC SSO):** Mọi người dùng bắt buộc đăng nhập qua máy chủ Keycloak (`Realm: mini-agent-platform`). Hệ thống đối chiếu email/token đã xác thực với hồ sơ nội bộ để lấy đúng bộ khóa `(tenant_id, role, department)`, tuyệt đối không cho phép client tự giả mạo quyền ở giao diện.
+2. **Tầng Cổng API (API Route Guardrail):** Tại endpoint `/api/chat`, trước khi khởi tạo LLM, hệ thống kiểm tra điều kiện cứng: nếu `agent.department_access != 'ALL'` và `user.department != agent.department_access` (đối với `EMPLOYEE`), hệ thống lập tức chặn truy cập và trả về mã lỗi `ACL_DENIED` trong $< 0.05\text{ giây}$.
+3. **Tầng Lưu trữ Vector & Quan hệ (Storage Layer Pre-filtering):** Mọi truy vấn SQL và Vector Search đều bắt buộc gắn mệnh đề lọc `WHERE tenant_id = ?` và `department_access IN ('ALL', ?)`, đảm bảo cô lập dữ liệu 100% giữa các công ty và giữa các phòng ban.
+
+### 4.2. Kiểm soát Rủi ro Thực thi & Chốt chặn Con người (HITL & Tool Manifest)
+- **Phân loại rủi ro công cụ (Permission Manifest):** Mỗi Tool gắn vào Agent được khai báo mức độ rủi ro:
+  - `read-only` (An toàn — thực thi tự động): Ví dụ `leave_balance` (tra cứu số ngày phép/định mức còn lại).
+  - `sensitive-write` (Nhạy cảm — bắt buộc qua HITL): Ví dụ `leave_request_create` (tạo đơn nghỉ phép/đề xuất ngân sách/yêu cầu mua sắm), `send_email` (gửi thông báo chính thức).
+- **Trạm dừng phê duyệt (`HITL Interrupt`):** Khi Agent phát hiện yêu cầu thuộc nhóm `sensitive-write`, `LangGraphAgent` kích hoạt cờ `interrupt_hitl = True`, dừng việc thực thi tự động và trả về **Thẻ Xác nhận Phê duyệt** trên giao diện chat. Chỉ khi người dùng xác nhận và Quản trị viên đơn vị (`TENANT_ADMIN`) bấm **`[Duyệt (Approve)]`** trên hộp thư quản trị, trạng thái mới chuyển từ `PENDING` sang `APPROVED` và bắn thông báo Toast thời gian thực về cho nhân viên.
+
+### 4.3. Khả năng Truy vết Toàn diện (End-to-End Traceability & Citation)
+- **Trích dẫn nguồn 2 chiều (Dual Citation Grounding):**
+  - *Với tài liệu quy chế (RAG):* Hiển thị rõ tên file PDF/TXT gốc, đoạn văn bản trích xuất và điểm số tương đồng Cosine Similarity.
+  - *Với thảo luận nhóm (Chat Context):* Liên kết ngược về mã định danh tin nhắn gốc (`#msg_id`), người gửi và mốc thời gian đưa ra quyết định.
+- **Nhật ký thực thi X-Ray & Audit Log:** Mọi lượt hội thoại đều trả về đối tượng `trace` ghi rõ: `intent` đã nhận diện, trạng thái kiểm tra `ACL`, danh sách `chunks` hoặc `tool` đã gọi, thời gian xử lý (`latency_ms`), lượng `token_estimate` và lưu lịch sử duyệt đơn vào bảng `leave_requests` trên cả SQLite và MySQL 8.0.
+
+---
+
+## 5. Chỉ số Thành công & Bộ Đo lường (Success Metrics & Evaluation Benchmarks)
+
+### 5.1. Bảng Chỉ số Định lượng Mục tiêu (Quantitative KPIs)
+
+| Nhóm chỉ số | Tên thước đo (Metric) | Ngưỡng mục tiêu MVP (Target) | Phương pháp đo lường |
+| :--- | :--- | :--- | :--- |
+| **1. Bảo mật & Phân quyền** | **Unit ACL & Tenant Isolation Rate** | **100%** (0% rò rỉ dữ liệu chéo) | Chạy bộ $\ge 50$ kịch bản Red-team truy vấn vượt quyền giữa các phòng ban/công ty. |
+| **2. Kiểm soát Rủi ro** | **HITL Interception Accuracy** | **100%** tác vụ nhạy cảm bị chặn chờ duyệt | Kiểm thử các lệnh tạo đề xuất/đơn từ/gửi email; 0% lệnh tự ý thực thi ngầm. |
+| **3. Xử lý Hội thoại Nhóm** | **Thread Disentanglement Micro-F1** | **$\ge 0.72$** (Cơ sở) / **$\ge 0.85$** (Mục tiêu) | Đánh giá F1 phân cụm chủ đề trên tập hội thoại nhóm đan xen 3–5 luồng song song. |
+| **4. Trạng thái Thời gian** | **Temporal State Accuracy & Stale Rate** | Accuracy **$\ge 80\%$**, Stale Usage **$\le 5\%$** | Đo tỷ lệ Agent trả lời đúng quyết định `ACTIVE` mới nhất và không dùng lại tin nhắn `OVERRIDDEN`. |
+| **5. Độ trung thực RAG** | **Citation Faithfulness & Coverage** | Faithfulness **$\ge 90\%$**, Coverage **$\ge 95\%$** | Đối chiếu câu trả lời của Agent với đoạn trích trong PDF/tin nhắn nguồn (`#msg_id`). |
+| **6. Hiệu năng & Vận hành** | **End-to-End Response Latency** | **P50 $\le 1.5\text{s}$, P95 $< 3.0\text{s}$** (đơn lượt)<br>**P95 $< 8.0\text{s}$** (tóm tắt đa luồng) | Đo trực tiếp qua bộ đếm `latency` của X-Ray Telemetry Trace và Langfuse. |
+| **7. Trải nghiệm No-Code** | **Time-to-Publish New Unit Agent** | **$< 3\text{ phút}$** cho mỗi phòng ban mới | Đo thời gian từ lúc Admin chọn mẫu/tạo phòng ban, nạp file PDF đến khi Publish xong Agent. |
+
+---
+
+### 5.2. Tập Dữ liệu Kiểm chứng Chuẩn (Evaluation Benchmark Datasets)
+Hệ thống kết hợp các bộ dữ liệu chuẩn quốc tế và bộ kịch bản tiếng Việt chuyên biệt cho môi trường công ty:
+1. **Ubuntu Chat Disentanglement Dataset (Kummerfeld et al.):** Dùng để chuẩn hóa và đo kiểm thuật toán tách luồng hội thoại đan xen (chỉ số Micro-F1, Shen-F1).
+2. **SAMSum / DialogSum & MeetingBank:** Dùng để kiểm chứng khả năng tóm tắt hội thoại nhiều người tham gia và trích xuất quyết định cuộc họp không sinh ảo giác.
+3. **MultiWOZ / $\tau$-bench (Tool-Agent-User Interaction Benchmark):** Dùng để đánh giá độ chính xác khi lựa chọn công cụ (Tool Calling) và tuân thủ chính sách phê duyệt nhiều bước.
+4. **Bộ dữ liệu Nội bộ Đa ngành Tiếng Việt (`CHAT40-VN-Enterprise-Eval` — $\ge 100$ kịch bản):**
+   - **50 kịch bản Red-team ACL & Multi-Tenant:** Nhân viên phòng Marketing cố tình hỏi dữ liệu Kế toán/HR, hoặc người dùng công ty A truy vấn dữ liệu công ty B.
+   - **30 kịch bản Hội thoại Nhóm Đan xen & Ghi đè Thời gian (Temporal Override):** Các cuộc thảo luận phòng ban có 3–4 chủ đề xen kẽ, trong đó lịch họp, ngân sách và người phụ trách bị thay đổi 2–3 lần liên tiếp.
+   - **20 kịch bản Quy chế PDF & Trình duyệt HITL đa ngành:** Bao phủ kịch bản trọng tâm Doanh nghiệp (`VinFast`, `FPT`) và các kịch bản mở rộng Giáo dục (`ĐHQG`), Y tế (`BVQT`).
+
+---
+
+### 5.3. Công cụ Giám sát & Đánh giá Tự động (Observability & Monitoring Stack)
+- **X-Ray Telemetry Trace (Tích hợp sẵn trên UI):** Hiển thị trực tiếp ở cột phải của Studio Playground và bảng Thống kê AI Chat (`#tab-analytics`), cho phép theo dõi tức thì: `Intent Classification`, `ACL Check Status`, `Retrieved Vector Chunks & Cosine Score`, `Latency (ms)` và `Estimated Tokens`.
+- **Langfuse Observability Platform:** Ghi nhận toàn bộ chuỗi thực thi (Trace/Span) của từng Node trong LangGraph, thống kê chi phí token theo từng Công ty (`tenant_id`) / Phòng ban (`department`), và chạy hàm chấm điểm tự động (*LLM-as-a-Judge* cho Faithfulness & Relevancy).
+
+---
+
+## 6. Sản phẩm Đầu ra & Tính Khả thi (Deliverables & Packaging)
+
+### 6.1. Danh mục Sản phẩm Bàn giao (Deliverables Checklist)
+1. **Mã nguồn Ứng dụng Full-Stack (`backend/` & `frontend/`):**
+   - **Backend (`backend/`):** Máy chủ API đa luồng (`server.py`), Lõi điều phối `LangGraphAgent` (`agent_engine.py`), Kho Vector 3.072 chiều có Pre-filtering ACL (`vector_store.py`), Động cơ giao diện thích ứng mọi loại hình công ty (`schema_engine.py`), Bộ đồng bộ thời gian thực SQLite → MySQL 8.0 (`mysql_sync.py`), Dịch vụ gửi email mật khẩu tự động (`mailer.py`), và Bộ khởi tạo dữ liệu mẫu đa ngành (`database.py`, `seed_multi_tenant.py`).
+   - **Frontend (`frontend/`):** 5 phân hệ giao diện hoàn chỉnh (`login.html`, `super_admin.html`, `admin_studio.html`, `employee_portal.html`, `database_viewer.html`).
+2. **Cơ sở Dữ liệu & Kho Tri thức Mẫu:**
+   - File CSDL `backend/database.db` (SQLite) và bản dump `backend/mysql_workbench_export.sql` (chuẩn MySQL 8.0) chứa sẵn 4 tổ chức mẫu (`VINFAST`, `FPT`, `VNU`, `BVQT`), 15+ tài khoản phân quyền, 12+ Agent chuyên biệt và các tài liệu quy chế đã nhúng sẵn vector 3.072 chiều trong `backend/vector_store.json`.
+3. **Bộ Tài liệu Thiết kế & Nghiệm thu Chuẩn hóa:**
+   - Bản Tuyên bố Bài toán & Kiến trúc (`Brief.md` & `Brief_CHAT_40_Mini_Agent_Studio.docx`).
+   - Tài liệu Yêu cầu Sản phẩm 7 phần (`PRD.md` & `PRD_Mini_Agent_Studio_CHAT40.docx`).
+   - Tài liệu Thiết kế Giao diện & Luồng Màn hình (`Wireframe_UI_Flow.md`).
+   - Nhật ký Ứng dụng AI & Thực nghiệm (`AI_Log.md`) và Hướng dẫn Cài đặt & Kiểm thử (`README.md`).
+
+---
+
+### 6.2. Khả năng Đóng gói & Khởi chạy Đồng nhất (Reproducible Deployment)
+Hệ thống được thiết kế theo cơ chế **Graceful Degradation (Tự động thích ứng môi trường)** để Ban Giám Khảo hoặc Khách hàng có thể khởi chạy kiểm thử ngay lập tức ở cả **2 chế độ**:
+
+1. **Chế độ Khởi chạy Nhanh 1 Lệnh (Standalone Quick-Start — Không cần cài đặt dịch vụ ngoài):**
+   - Chỉ cần Python 3.10+ và chạy lệnh duy nhất:
+     ```bash
+     python backend/server.py
+     ```
+   - Hệ thống tự động nạp CSDL `SQLite` nội bộ và kho `vector_store.json` đã nhúng sẵn vector 3.072 chiều, mở cổng `http://localhost:8000` để kiểm thử ngay lập tức các luồng phân quyền Unit ACL, RAG Citation và duyệt đơn HITL.
+2. **Chế độ Full Enterprise Production (Keycloak SSO + Gmail SMTP + MySQL 8.0 Workbench):**
+   - Khởi chạy máy chủ định danh **Keycloak OIDC** qua Docker (`docker run -p 8080:8080 ...` kèm lệnh `python setup_keycloak.py` tự động tạo Realm `mini-agent-platform` và đồng bộ toàn bộ tài khoản).
+   - Cấu hình biến môi trường `.env` (`GEMINI_API_KEY`, `SMTP_USER`, `SMTP_PASSWORD`, `MYSQL_PASSWORD`) để trải nghiệm trọn vẹn luồng: **Tạo công ty mới bằng Gmail thật → Tự động nhận email mật khẩu → Đăng nhập SSO → Đồng bộ tức thì sang MySQL Workbench 8.0 CE**.
