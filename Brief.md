@@ -10,7 +10,7 @@
 ## 1. Bối cảnh & Tuyên bố Bài toán (Background & Problem Statement)
 
 ### 1.1. Bối cảnh Chuyển đổi số & Khả năng Ứng dụng Phổ quát cho Mọi Công ty
-Trong kỷ nguyên AI tạo sinh, **bất kỳ công ty hay tổ chức nào** — từ Công nghệ, Tài chính - Ngân hàng, Sản xuất, Bán lẻ, Logistics cho đến Dịch vụ, Giáo dục hay Y tế — đều được cấu trúc thành các **Đơn vị chuyên môn (Operating Units / Departments)** với quy chế, tài liệu mật và quy trình phê duyệt riêng biệt.
+Trong kỷ nguyên AI tạo sinh, **bất kỳ công ty hay tổ chức nào** đều được cấu trúc thành các **Đơn vị chuyên môn (Operating Units / Departments)** với quy chế, tài liệu mật và quy trình phê duyệt riêng biệt.
 
 Để một nền tảng AI Agent có thể phục vụ **tất cả các công ty** mà không phải đập đi xây lại mã nguồn cho từng ngành, **Mini Agent Studio (CHAT-40)** trừu tượng hóa mọi tổ chức về 4 thực thể lõi (`Tổ chức / Tenant` → `Đơn vị / Unit` → `Thành viên / Member` → `Trợ lý AI & Luồng duyệt HITL`):
 
@@ -30,7 +30,7 @@ Trong kỷ nguyên AI tạo sinh, **bất kỳ công ty hay tổ chức nào** �
 Quá trình đưa AI Agent vào vận hành thực tế tại các công ty đang vấp phải **3 điểm nghẽn cụ thể**:
 
 1. **Rào cản kỹ thuật khi khởi tạo Agent theo từng phòng ban (No-Code Barrier):**
-   - *Tình huống cụ thể:* Trưởng phòng Nhân sự (HR), Trưởng phòng Kế toán hay Trưởng phòng Marketing là người nắm rõ nhất quy chế và biểu mẫu của phòng mình nhưng không biết lập trình Python/LangChain để tự viết System Prompt, cắt nhỏ (chunking) tài liệu PDF hay kết nối Tool. Ngược lại, nếu mọi yêu cầu tạo/sửa bot đều dồn về phòng IT thì mất từ 2–4 tuần cho mỗi phòng ban.
+   - *Tình huống cụ thể:* Trưởng phòng Nhân sự (HR), Trưởng phòng Kế toán hay Trưởng phòng Marketing là người nắm rõ nhất quy chế và biểu mẫu của phòng mình nhưng không biết lập trình. Ngược lại, nếu mọi yêu cầu tạo/sửa bot đều dồn về phòng IT thì mất từ 2–4 tuần cho mỗi phòng ban.
 2. **Nguy cơ lộ lọt dữ liệu chéo giữa các phòng ban & thiếu chốt chặn phê duyệt (Security & HITL Gap):**
    - *Tình huống cụ thể:* Trong một công ty, dữ liệu bảng lương của Phòng HR, báo cáo tài chính của Phòng Kế toán hay chiến lược giá của Phòng Marketing là tối mật. Nếu dùng chung một Chatbot RAG toàn công ty không có cơ chế lọc cứng theo đơn vị (Unit ACL), nhân viên phòng Kinh doanh có thể hỏi khéo (Prompt Injection) để trích xuất chính sách thưởng nội bộ của phòng Kế toán. Đồng thời, khi nhân viên yêu cầu AI thực hiện tác vụ có tính cam kết (như *"Tạo đề xuất chi 50 triệu ngân sách TikTok"* hoặc *"Nộp đơn nghỉ phép 4 ngày"*), việc để AI tự động ghi nhận vào hệ thống mà không qua bước phê duyệt của Trưởng phòng (**Human-in-the-Loop**) gây rủi ro vận hành nghiêm trọng.
 3. **Hỗn loạn ngữ cảnh trong Hội thoại Nhóm phòng ban (Group Chat Context Chaos):**
